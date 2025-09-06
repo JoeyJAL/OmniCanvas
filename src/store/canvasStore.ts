@@ -191,12 +191,14 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       case 'png':
         return canvas.toDataURL({
           format: 'png',
-          quality: 1
+          quality: 1,
+          multiplier: 2  // Export at 2x resolution
         })
       case 'jpg':
         return canvas.toDataURL({
           format: 'jpeg',
-          quality: 0.9
+          quality: 0.9,
+          multiplier: 2  // Export at 2x resolution
         })
       case 'pdf':
         // TODO: Implement PDF export
@@ -222,19 +224,22 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
               if (img && img.width && img.height) {
                 console.log('✅ Image loaded successfully:', img.width, 'x', img.height)
                 
-                // Scale image to fit canvas while maintaining aspect ratio
-                const canvasWidth = canvas.width || 800
-                const canvasHeight = canvas.height || 600
+                // Keep original resolution - no scaling unless image is extremely large
+                const maxDimension = 2000 // Only scale down if larger than this
+                const needsScaling = (img.width || 0) > maxDimension || (img.height || 0) > maxDimension
                 
-                const scale = Math.min(
-                  canvasWidth / (img.width || 1),
-                  canvasHeight / (img.height || 1)
-                )
+                if (needsScaling) {
+                  const scale = Math.min(
+                    maxDimension / (img.width || 1),
+                    maxDimension / (img.height || 1)
+                  )
+                  img.scale(scale)
+                  console.log('🔍 Scaled large image:', scale)
+                } else {
+                  // Keep original size
+                  console.log('✅ Using original resolution:', img.width, 'x', img.height)
+                }
                 
-                // Don't make it too small if the image is very large
-                const finalScale = Math.max(scale * 0.8, 0.1)
-                
-                img.scale(finalScale)
                 img.center()
                 
                 // Add a unique identifier for AI-generated images

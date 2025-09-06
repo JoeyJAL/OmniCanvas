@@ -357,27 +357,90 @@ export const Canvas: React.FC = () => {
     }
   }
 
-  const handleExportSelected = () => {
+  const handleExportSelected = async () => {
     if (!canvas || contextMenu.selectedObjects.length === 0) return
     
-    // 創建臨時畫布只包含選中的物件
-    const tempCanvas = new fabric.Canvas(document.createElement('canvas'))
+    console.log('🖼️ Exporting selected objects:', contextMenu.selectedObjects.length)
     
-    contextMenu.selectedObjects.forEach(obj => {
-      obj.clone((cloned: fabric.Object) => {
-        tempCanvas.add(cloned)
-      })
-    })
-    
-    setTimeout(() => {
-      const dataUrl = tempCanvas.toDataURL({ format: 'png', quality: 1 })
-      const link = document.createElement('a')
-      link.download = `selected-objects-${Date.now()}.png`
-      link.href = dataUrl
-      link.click()
+    try {
+      // 計算所有選中物件的邊界
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
       
-      tempCanvas.dispose()
-    }, 100)
+      contextMenu.selectedObjects.forEach(obj => {
+        const boundingRect = obj.getBoundingRect()
+        minX = Math.min(minX, boundingRect.left)
+        minY = Math.min(minY, boundingRect.top)
+        maxX = Math.max(maxX, boundingRect.left + boundingRect.width)
+        maxY = Math.max(maxY, boundingRect.top + boundingRect.height)
+      })
+      
+      const padding = 20
+      const exportWidth = maxX - minX + padding * 2
+      const exportHeight = maxY - minY + padding * 2
+      
+      console.log('📐 Export bounds:', { minX, minY, maxX, maxY, exportWidth, exportHeight })
+      
+      // 創建臨時畫布
+      const tempCanvasEl = document.createElement('canvas')
+      tempCanvasEl.width = exportWidth
+      tempCanvasEl.height = exportHeight
+      const tempCanvas = new fabric.Canvas(tempCanvasEl)
+      
+      tempCanvas.setWidth(exportWidth)
+      tempCanvas.setHeight(exportHeight)
+      tempCanvas.backgroundColor = 'transparent'
+      
+      // 複製物件到臨時畫布
+      const clonePromises = contextMenu.selectedObjects.map(obj => {
+        return new Promise<void>((resolve) => {
+          obj.clone((cloned: fabric.Object) => {
+            // 調整位置到新的座標系統
+            const objBounds = obj.getBoundingRect()
+            cloned.set({
+              left: objBounds.left - minX + padding,
+              top: objBounds.top - minY + padding
+            })
+            tempCanvas.add(cloned)
+            console.log('📦 Cloned object:', cloned.type, 'at', cloned.left, cloned.top)
+            resolve()
+          })
+        })
+      })
+      
+      // 等待所有複製完成
+      await Promise.all(clonePromises)
+      
+      // 強制渲染
+      tempCanvas.renderAll()
+      
+      // 等待渲染完成後匯出
+      setTimeout(() => {
+        const dataUrl = tempCanvas.toDataURL({ 
+          format: 'png', 
+          quality: 1,
+          multiplier: 2  // Export at 2x resolution for better quality
+        })
+        
+        // 檢查是否成功生成圖片
+        if (dataUrl && dataUrl !== 'data:,') {
+          const link = document.createElement('a')
+          link.download = `selected-objects-${Date.now()}.png`
+          link.href = dataUrl
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          
+          console.log('✅ Export completed successfully')
+        } else {
+          console.error('❌ Failed to generate image data')
+        }
+        
+        tempCanvas.dispose()
+      }, 200)
+      
+    } catch (error) {
+      console.error('❌ Export error:', error)
+    }
   }
 
   // Helper function to create progress image on canvas

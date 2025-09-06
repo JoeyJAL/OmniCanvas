@@ -70,27 +70,13 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
   })
 
   const menuItems = [
-    // 🎨 Advanced AI Composition Zone
+    // 🎨 AI Composition (only for 2+ selected items)
     ...(selectedCount >= 2 ? [
       {
         icon: Brain,
         label: `🧠 AI Smart Compose (${selectedCount})`,
         onClick: onIntelligentCompose,
         className: 'text-blue-600 hover:bg-blue-50 font-semibold',
-        separator: false
-      },
-      {
-        icon: Glasses,
-        label: '🥽 Wear/Use Items',
-        onClick: onWearAccessory,
-        className: 'text-indigo-600 hover:bg-indigo-50',
-        separator: false
-      },
-      {
-        icon: Camera,
-        label: '🏞️ Scene Integration',
-        onClick: onSceneCompose,
-        className: 'text-emerald-600 hover:bg-emerald-50',
         separator: false
       },
       {
@@ -102,14 +88,8 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
       }
     ] : []),
     
+    // Single item AI operations
     ...(selectedCount >= 1 ? [
-      {
-        icon: Palette,
-        label: '🎨 Style Transfer',
-        onClick: onStyleTransfer,
-        className: 'text-purple-600 hover:bg-purple-50',
-        separator: false
-      },
       {
         icon: Sparkles,
         label: '🌟 Generate Similar',
@@ -119,65 +99,25 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
       }
     ] : []),
 
-    // Basic Operations
+    // Essential Operations
     ...(selectedCount >= 1 ? [
       {
+        icon: Download,
+        label: 'Save Selected',
+        onClick: onExportSelected,
+        className: 'text-blue-600 hover:bg-blue-50',
+        separator: false
+      },
+      {
         icon: Copy,
-        label: selectedCount > 1 ? `Duplicate ${selectedCount} Objects` : 'Duplicate',
+        label: selectedCount > 1 ? `Duplicate ${selectedCount}` : 'Duplicate',
         onClick: onDuplicate,
         className: 'hover:bg-gray-50',
         separator: false
       },
       {
-        icon: Download,
-        label: 'Export Selected',
-        onClick: onExportSelected,
-        className: 'hover:bg-gray-50',
-        separator: true
-      }
-    ] : []),
-
-    // Arrangement
-    ...(selectedCount >= 1 ? [
-      {
-        icon: Move,
-        label: 'Bring to Front',
-        onClick: onBringToFront,
-        className: 'hover:bg-gray-50',
-        separator: false
-      },
-      {
-        icon: Move,
-        label: 'Send to Back',
-        onClick: onSendToBack,
-        className: 'hover:bg-gray-50',
-        separator: false
-      },
-      {
-        icon: RotateCw,
-        label: 'Rotate 90°',
-        onClick: onRotate,
-        className: 'hover:bg-gray-50',
-        separator: selectedCount > 1
-      }
-    ] : []),
-
-    // Group Operations
-    ...(selectedCount > 1 ? [
-      {
-        icon: Eye,
-        label: `Group Selection (${selectedCount})`,
-        onClick: onGroupSelection,
-        className: 'hover:bg-gray-50',
-        separator: true
-      }
-    ] : []),
-
-    // Delete Operations
-    ...(selectedCount >= 1 ? [
-      {
         icon: Trash2,
-        label: selectedCount > 1 ? `🗑️ Delete ${selectedCount} Objects` : '🗑️ Delete',
+        label: selectedCount > 1 ? `Delete ${selectedCount}` : 'Delete',
         onClick: onDelete,
         className: 'text-red-600 hover:bg-red-50',
         separator: false
@@ -206,7 +146,7 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-3 py-2 text-xs font-medium text-gray-500 bg-gradient-to-r from-blue-50 to-purple-50">
-          🚀 NEW AI MENU v2.0 - {selectedCount} selected
+          ✨ AI Actions - {selectedCount} selected
         </div>
         
         {menuItems.map((item, index) => {
