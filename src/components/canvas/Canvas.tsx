@@ -345,15 +345,56 @@ export const Canvas: React.FC = () => {
   const handleGenerateSimilar = async () => {
     if (contextMenu.selectedObjects.length === 0) return
     
-    const prompt = window.prompt('描述要生成類似的圖片：', '生成一張類似風格的圖片')
+    console.log('🌟 Generating similar images from selected objects:', contextMenu.selectedObjects.length)
+    
+    const prompt = window.prompt('Describe the style or type of similar image to generate:', 'Create a similar image with the same style and theme')
     if (!prompt) return
 
     try {
-      const result = await aiService.generateImage({ prompt, width: 512, height: 512 })
-      await importImage(result.url)
-      alert('相似圖片生成完成！')
+      // Create progress indicator
+      const progressImg = createProgressImage('🌟 Analyzing selected objects and generating similar content...', 1)
+      
+      // Extract images from selected objects
+      const imageUrls = []
+      for (const obj of contextMenu.selectedObjects) {
+        if (obj.type === 'image') {
+          const imgObj = obj as fabric.Image
+          if (imgObj.getSrc) {
+            imageUrls.push(imgObj.getSrc())
+          }
+        }
+      }
+
+      if (imageUrls.length === 0) {
+        removeProgressImage()
+        alert('Please select at least one image to generate similar content')
+        return
+      }
+
+      console.log('🎯 Using images for similarity generation:', imageUrls.length)
+
+      // Generate similar image using the backend API
+      const result = await aiService.generateSimilar({
+        images: imageUrls,
+        prompt: `Generate a similar image based on the provided reference(s). ${prompt}. Maintain the overall style, composition, and aesthetic qualities while creating something new and original.`,
+        aspectRatio: '1:1'
+      })
+
+      // Remove progress and import generated image
+      removeProgressImage()
+      
+      if (result) {
+        await importImage(result)
+        console.log('✅ Similar image generated and added to canvas!')
+      } else {
+        console.error('❌ No image generated from similarity API')
+        alert('Failed to generate similar image - no result returned')
+      }
+      
     } catch (error) {
-      alert('生成失敗: ' + error)
+      console.error('❌ Generate similar error:', error)
+      removeProgressImage()
+      alert('Failed to generate similar image: ' + error)
     }
   }
 

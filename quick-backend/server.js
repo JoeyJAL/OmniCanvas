@@ -70,11 +70,14 @@ async function imageUrlToBase64(imageUrl) {
   }
 }
 
-// Gemini image generation
+// Gemini text-to-image generation using 2.5 Flash Image Preview
 app.post('/api/ai/generate-image', async (req, res) => {
   try {
-    console.log('🎨 Generating image with Gemini...');
+    console.log('🎨 Generating image with Gemini 2.5 Flash Image Preview...');
     const { prompt, width = 512, height = 512 } = req.body;
+    
+    // Create enhanced prompt for better image generation
+    const enhancedPrompt = `Create a detailed, high-quality image: ${prompt}. Generate a photorealistic, well-composed image with good lighting and professional quality.`;
     
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST',
@@ -84,7 +87,7 @@ app.post('/api/ai/generate-image', async (req, res) => {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: `Create a detailed image: ${prompt}`
+            text: enhancedPrompt
           }]
         }],
         generationConfig: {
@@ -102,41 +105,40 @@ app.post('/api/ai/generate-image', async (req, res) => {
     }
 
     const data = await response.json();
-    console.log('✅ Gemini response received');
+    console.log('✅ Gemini response received:', JSON.stringify(data).substring(0, 200) + '...');
     
-    // For now, return a placeholder since Gemini text-only model doesn't generate images directly
-    // You would need Gemini Pro Vision or another image generation service
-    res.json({
-      imageUrl: `data:image/svg+xml,${encodeURIComponent(`
-        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-            </linearGradient>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grad1)"/>
-          <foreignObject x="20" y="20" width="${width-40}" height="${height-40}">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="color:white;font-family:Arial,sans-serif;font-size:14px;line-height:1.4;padding:20px;height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;">
-              <h3 style="margin:0;font-size:18px;margin-bottom:15px;">🎨 Gemini AI Generated</h3>
-              <p style="margin:0;margin-bottom:15px;font-weight:bold;">Prompt:</p>
-              <p style="margin:0;font-size:12px;opacity:0.9;">"${prompt}"</p>
-              <p style="margin-top:20px;font-size:11px;opacity:0.8;">Generated via backend API</p>
-            </div>
-          </foreignObject>
-        </svg>
-      `)}`,
-      width,
-      height,
-      metadata: {
-        model: 'gemini-2.5-flash-image-preview',
-        prompt,
-        timestamp: Date.now()
+    // Extract image from Gemini response
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      const parts = data.candidates[0].content.parts;
+      
+      // Look for inline image data
+      for (const part of parts) {
+        if (part.inlineData && part.inlineData.data) {
+          const mimeType = part.inlineData.mimeType || 'image/png';
+          const imageData = part.inlineData.data;
+          console.log('🖼️ Image generated successfully, size:', Math.round(imageData.length / 1024), 'KB');
+          
+          return res.json({
+            imageUrl: `data:${mimeType};base64,${imageData}`,
+            width,
+            height,
+            metadata: {
+              model: 'gemini-2.5-flash-image-preview',
+              prompt,
+              timestamp: Date.now()
+            }
+          });
+        }
       }
-    });
+    }
+
+    // If no image found in response, throw error
+    console.error('❌ No image generated in Gemini response:', JSON.stringify(data, null, 2));
+    throw new Error('No image generated');
+    
   } catch (error) {
     console.error('❌ Generate image error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message, response: error.response?.data || null });
   }
 });
 
@@ -368,42 +370,131 @@ app.post('/api/ai/transfer-style', async (req, res) => {
 // Generate similar image
 app.post('/api/ai/generate-similar', async (req, res) => {
   try {
-    console.log('🔄 Generating similar image...');
-    const { prompt, width = 512, height = 512 } = req.body;
+    console.log('🌟 Generating similar image using Gemini 2.5 Flash...');
+    const { imageUrls = [], prompt, aspectRatio = '1:1' } = req.body;
     
-    // Use the same generation logic as generate-image but with "similar" context
-    const enhancedPrompt = `Create a similar variation of: ${prompt}. Make it related but with slight creative differences.`;
-    
-    const similarImageUrl = `data:image/svg+xml,${encodeURIComponent(`
-      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#ffecd2;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#fcb69f;stop-opacity:1" />
-          </linearGradient>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grad1)"/>
-        <foreignObject x="20" y="20" width="${width-40}" height="${height-40}">
-          <div xmlns="http://www.w3.org/1999/xhtml" style="color:#333;font-family:Arial,sans-serif;font-size:14px;line-height:1.4;padding:20px;height:100%;display:flex;flex-direction:column;justify-content:center;text-align:center;">
-            <h3 style="margin:0;font-size:18px;margin-bottom:15px;">🌟 Similar Generated</h3>
-            <p style="margin:0;margin-bottom:15px;font-weight:bold;">Based on:</p>
-            <p style="margin:0;font-size:12px;opacity:0.9;">"${prompt}"</p>
-            <p style="margin-top:20px;font-size:11px;opacity:0.8;">✨ Creative variation generated</p>
-          </div>
-        </foreignObject>
-      </svg>
-    `)}`;
+    if (!imageUrls || imageUrls.length === 0) {
+      return res.status(400).json({ error: 'At least one reference image is required' });
+    }
 
-    res.json({
-      imageUrl: similarImageUrl,
-      width,
-      height,
-      metadata: {
-        model: 'gemini-similar-generation',
-        originalPrompt: prompt,
-        enhancedPrompt,
-        timestamp: Date.now()
+    console.log('📸 Processing', imageUrls.length, 'reference images for similarity generation');
+
+    // Convert image URLs to base64 for Gemini API
+    const imageParts = [];
+    for (const imageUrl of imageUrls) {
+      try {
+        const base64Data = await imageUrlToBase64(imageUrl);
+        imageParts.push({
+          inline_data: {
+            mime_type: "image/jpeg",
+            data: base64Data
+          }
+        });
+        console.log('✅ Converted reference image to base64');
+      } catch (error) {
+        console.warn('⚠️ Failed to process reference image:', error.message);
       }
+    }
+
+    if (imageParts.length === 0) {
+      return res.status(400).json({ error: 'Failed to process any reference images' });
+    }
+
+    // Create enhanced prompt for similarity generation
+    const enhancedPrompt = `CREATE A NEW IMAGE inspired by the style and aesthetic of the reference image(s). Do not analyze or describe the reference images - instead, GENERATE a completely new image that:
+
+🎨 GENERATE: Create a new image with similar artistic style, color palette, and visual mood
+🎨 INSPIRE: Use the reference as inspiration for composition and aesthetic approach
+🎨 CREATE: Make something new and original, not a copy or analysis
+
+USER REQUEST: ${prompt}
+
+IMPORTANT: Generate a new, original image that captures the essence and style of the reference while being completely new and creative. Focus on image generation, not image analysis.`;
+
+    console.log('🎯 Calling Gemini 2.5 Flash Image Preview API for similarity generation');
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            ...imageParts,
+            { text: enhancedPrompt }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          maxOutputTokens: 2048,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Gemini API error:', errorText);
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('📝 Gemini API response received');
+    
+    // Debug: Log the structure of the response
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      console.log('🔍 Response structure:');
+      console.log('- candidates:', data.candidates.length);
+      console.log('- content parts:', data.candidates[0].content.parts?.length || 0);
+      
+      if (data.candidates[0].content.parts) {
+        data.candidates[0].content.parts.forEach((part, index) => {
+          console.log(`- part ${index}:`, Object.keys(part));
+          if (part.inlineData) {
+            console.log(`  - inlineData.mimeType: ${part.inlineData.mimeType}`);
+            console.log(`  - inlineData.data: ${Math.round((part.inlineData.data?.length || 0) / 1024)}KB`);
+          }
+          if (part.inline_data) {
+            console.log(`  - inline_data.mime_type: ${part.inline_data.mime_type}`);
+            console.log(`  - inline_data.data: ${Math.round((part.inline_data.data?.length || 0) / 1024)}KB`);
+          }
+        });
+      }
+    }
+
+    // Extract image from response
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      for (const part of data.candidates[0].content.parts) {
+        // Check both formats: inlineData (camelCase) and inline_data (snake_case)
+        const inlineData = part.inlineData || part.inline_data;
+        if (inlineData && inlineData.data) {
+          const imageData = inlineData.data;
+          const mimeType = inlineData.mimeType || inlineData.mime_type || 'image/jpeg';
+          const dataUrl = `data:${mimeType};base64,${imageData}`;
+          
+          console.log('✅ Similar image generated successfully via Gemini 2.5 Flash!', Math.round(imageData.length / 1024), 'KB');
+          
+          return res.json({
+            imageUrl: dataUrl,
+            aspectRatio: aspectRatio,
+            metadata: {
+              model: 'gemini-2.5-flash-image-preview',
+              type: 'similarity-generation',
+              originalPrompt: prompt,
+              timestamp: Date.now(),
+              referenceImages: imageUrls.length
+            }
+          });
+        }
+      }
+    }
+
+    // If no image found, return error
+    console.error('❌ No image generated in Gemini response');
+    return res.status(500).json({ 
+      error: 'No image generated', 
+      response: data 
     });
 
   } catch (error) {

@@ -22,7 +22,7 @@ class AIService {
 
   constructor() {
     this.config = {
-      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3011/api',
+      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3002/api',
       endpoints: {
         generateImage: '/ai/generate-image',
         mergeImages: '/ai/merge-images',
@@ -138,40 +138,33 @@ class AIService {
     }
   }
 
-  async generateSimilar(request: TextToImageRequest): Promise<AIGeneratedImage> {
+  async generateSimilar(request: { images: string[], prompt: string, aspectRatio?: string }): Promise<string> {
     try {
+      console.log('🌟 Calling generateSimilar API with', request.images.length, 'images')
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateSimilar}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          imageUrls: request.images,
           prompt: request.prompt,
-          width: request.width || 512,
-          height: request.height || 512,
+          aspectRatio: request.aspectRatio || '1:1',
           provider: 'gemini'
         })
       })
 
       if (!response.ok) {
         const errorText = await response.text()
+        console.error('Generate similar API error:', errorText)
         throw new Error(`Generate similar error: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
+      console.log('✅ Generate similar API response:', data)
       
-      return {
-        url: data.imageUrl || data.url,
-        width: data.width || request.width || 512,
-        height: data.height || request.height || 512,
-        prompt: request.prompt,
-        provider: 'gemini' as AIServiceProvider,
-        metadata: {
-          timestamp: Date.now(),
-          model: 'gemini-2.5-flash-image',
-          ...data.metadata
-        }
-      }
+      return data.imageUrl || data.url
     } catch (error) {
       console.error('Generate similar error:', error)
       throw error
