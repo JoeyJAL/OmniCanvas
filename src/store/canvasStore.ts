@@ -21,6 +21,7 @@ interface CanvasStore extends CanvasState {
   clearCanvas: () => void
   exportCanvas: (format: 'png' | 'jpg' | 'pdf') => string | null
   importImage: (imageUrl: string) => Promise<void>
+  getSelectedImages: () => string[]
   
   // Brush settings
   updateBrushSettings: (settings: Partial<BrushSettings>) => void
@@ -362,5 +363,22 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       canvas.setViewportTransform([1, 0, 0, 1, 0, 0])
       canvas.renderAll()
     }
+  },
+
+  // Get selected images from canvas
+  getSelectedImages: () => {
+    const { canvas } = get()
+    if (!canvas) return []
+    
+    const activeObjects = canvas.getActiveObjects()
+    const imageUrls: string[] = []
+    
+    activeObjects.forEach((obj) => {
+      if (obj.type === 'image' && (obj as any)._element?.src) {
+        imageUrls.push((obj as any)._element.src)
+      }
+    })
+    
+    return imageUrls
   }
 }))

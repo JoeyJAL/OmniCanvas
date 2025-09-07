@@ -20,8 +20,8 @@ import {
 } from 'lucide-react'
 
 export const AIPanel: React.FC = () => {
-  const { getSelectedImages } = useImageStore()
-  const { importImage } = useCanvasStore()
+  const { getSelectedImages: getImageStoreImages } = useImageStore()
+  const { importImage, getSelectedImages: getCanvasSelectedImages } = useCanvasStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [prompt, setPrompt] = useState('')
   const [activeTab, setActiveTab] = useState<'generate' | 'merge' | 'style' | 'voice' | 'storyshop'>('generate')
@@ -34,8 +34,45 @@ export const AIPanel: React.FC = () => {
   const [comicPanels, setComicPanels] = useState<string[]>([])
   const [selectedStyle, setSelectedStyle] = useState('comic')
 
-  const selectedImages = getSelectedImages()
+  // Get selected images from canvas (higher priority) or image store
+  const canvasSelectedImages = getCanvasSelectedImages()
+  const imageStoreImages = getImageStoreImages()
+  const selectedImages = canvasSelectedImages.length > 0 ? 
+    canvasSelectedImages.map(url => ({ url })) : 
+    imageStoreImages
+  
   const canMerge = selectedImages.length >= 2
+  const hasSelection = selectedImages.length > 0
+  const isMultiSelection = selectedImages.length > 1
+  
+  // Tab-specific validation
+  const tabValidation = {
+    generate: { 
+      maxImages: 1, 
+      message: 'Generate works best with 0-1 reference image', 
+      canUse: selectedImages.length <= 1 
+    },
+    style: { 
+      maxImages: 1, 
+      message: 'Style transfer requires exactly 1 image', 
+      canUse: selectedImages.length === 1 
+    },
+    voice: { 
+      maxImages: 0, 
+      message: 'Voice generation doesn\'t use images', 
+      canUse: true 
+    },
+    merge: { 
+      maxImages: 10, 
+      message: 'Merge requires 2+ images', 
+      canUse: selectedImages.length >= 2 
+    },
+    storyshop: { 
+      maxImages: 2, 
+      message: 'Story can use up to 2 images (character + product)', 
+      canUse: selectedImages.length <= 2 
+    }
+  }
   
   // Temporary API usage tracking
   const [apiUsage, setApiUsage] = useState({ imagesGenerated: 0 })
@@ -238,6 +275,15 @@ export const AIPanel: React.FC = () => {
             <h3 className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">AI Assistant</h3>
           </div>
           <div className="flex items-center space-x-1">
+            {hasSelection && (
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                tabValidation[activeTab]?.canUse 
+                  ? 'bg-blue-100 text-blue-700' 
+                  : 'bg-orange-100 text-orange-700'
+              }`}>
+                🖼️ {selectedImages.length} selected
+              </span>
+            )}
             <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
               {canGenerateMore() ? `${200 - apiUsage.imagesGenerated} credits` : 'Limit reached'}
             </span>
@@ -270,6 +316,29 @@ export const AIPanel: React.FC = () => {
 
       {/* Content */}
       <div className="p-4 flex-1 overflow-y-auto">
+        {/* Selection Status and Validation */}
+        {hasSelection && (
+          <div className={`mb-3 p-2 rounded-lg border ${
+            tabValidation[activeTab]?.canUse
+              ? 'bg-blue-50 border-blue-200'
+              : 'bg-orange-50 border-orange-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-700">
+                🖼️ {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} selected from canvas
+              </span>
+              {!tabValidation[activeTab]?.canUse && (
+                <span className="text-xs text-orange-600 font-medium">
+                  ⚠️ Invalid for {activeTab}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              {tabValidation[activeTab]?.message}
+            </p>
+          </div>
+        )}
+
         {/* Text Input for all tabs */}
         <div className="mb-3">
           <textarea
@@ -279,6 +348,11 @@ export const AIPanel: React.FC = () => {
             className="w-full h-20 p-2 text-sm border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             disabled={isProcessing}
           />
+          {hasSelection && (
+            <p className="text-xs text-purple-600 mt-1">
+              💡 Selected images will be automatically included in the AI request
+            </p>
+          )}
         </div>
 
         {/* Tab-specific Content */}
@@ -378,7 +452,7 @@ export const AIPanel: React.FC = () => {
             
             <button
               onClick={handleGenerateImage}
-              disabled={isProcessing || !prompt.trim()}
+              disabled={isProcessing || !prompt.trim() || !tabValidation[activeTab]?.canUse}
               className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-400 text-white text-sm rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:scale-100"
             >
               {isProcessing ? (
@@ -451,7 +525,7 @@ export const AIPanel: React.FC = () => {
 
             <button
               onClick={handleMergeImages}
-              disabled={isProcessing || !canMerge}
+              disabled={isProcessing || !tabValidation[activeTab]?.canUse}
               className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:bg-gray-300 text-white text-sm rounded-lg transition-all flex items-center justify-center space-x-2 font-medium shadow-lg"
             >
               {isProcessing ? (
@@ -496,7 +570,7 @@ export const AIPanel: React.FC = () => {
 
             <button
               onClick={handleStyleTransfer}
-              disabled={isProcessing || selectedImages.length === 0 || !prompt.trim()}
+              disabled={isProcessing || !tabValidation[activeTab]?.canUse || !prompt.trim()}
               className="w-full py-2 px-3 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white text-sm rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               {isProcessing ? (
