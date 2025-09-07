@@ -36,6 +36,10 @@ export const AIPanel: React.FC = () => {
 
   const selectedImages = getSelectedImages()
   const canMerge = selectedImages.length >= 2
+  
+  // Temporary API usage tracking
+  const [apiUsage, setApiUsage] = useState({ imagesGenerated: 0 })
+  const canGenerateMore = () => apiUsage.imagesGenerated < 200
 
   const handleGenerateImage = async () => {
     if (!prompt.trim()) return
@@ -178,6 +182,7 @@ export const AIPanel: React.FC = () => {
       }
       
       setComicPanels(panels)
+      setApiUsage(prev => ({ ...prev, imagesGenerated: prev.imagesGenerated + panels.length }))
       
       // Add panels to canvas in a 2x2 grid
       for (let i = 0; i < panels.length; i++) {
@@ -222,16 +227,25 @@ export const AIPanel: React.FC = () => {
   ]
 
   return (
-    <div className="flex-1 border-b border-gray-200 bg-white">
+    <div className="flex-1 border-b border-gray-200 bg-gradient-to-br from-white to-purple-50">
       {/* Header */}
-      <div className="p-2 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <Wand2 className="w-4 h-4 text-purple-600" />
-          <h3 className="text-sm font-semibold text-gray-900">AI Assistant</h3>
+      <div className="p-3 border-b border-gray-200 bg-white/90 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+              <Wand2 className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">AI Assistant</h3>
+          </div>
+          <div className="flex items-center space-x-1">
+            <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+              {canGenerateMore() ? `${200 - apiUsage.imagesGenerated} credits` : 'Limit reached'}
+            </span>
+          </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex mt-3 bg-gray-100 rounded-lg p-1">
+        <div className="flex mt-3 bg-gradient-to-r from-purple-100/50 to-pink-100/50 rounded-xl p-1 shadow-inner">
           {tabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -239,10 +253,10 @@ export const AIPanel: React.FC = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex-1 flex items-center justify-center space-x-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors
+                  flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200
                   ${activeTab === tab.id
-                    ? 'bg-white text-purple-700 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
+                    ? 'bg-white text-purple-700 shadow-md scale-105 border border-purple-200'
+                    : 'text-gray-600 hover:text-purple-600 hover:bg-white/50'
                   }
                 `}
               >
@@ -255,7 +269,7 @@ export const AIPanel: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="p-2 flex-1 overflow-y-auto">
+      <div className="p-4 flex-1 overflow-y-auto">
         {/* Text Input for all tabs */}
         <div className="mb-3">
           <textarea
@@ -413,9 +427,17 @@ export const AIPanel: React.FC = () => {
 
         {activeTab === 'storyshop' && (
           <div className="space-y-4">
-            <div className="text-center">
-              <h4 className="text-sm font-semibold text-purple-700 mb-1">📚 StoryShop Canvas</h4>
-              <p className="text-xs text-gray-600">Create 4-panel comics & videos with consistent characters</p>
+            <div className="text-center p-4 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl border border-purple-200">
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <BookOpen className="w-5 h-5 text-purple-600" />
+                <h4 className="text-base font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">StoryShop Canvas</h4>
+              </div>
+              <p className="text-xs text-gray-700 font-medium">Transform photos into 4-panel comics & 15s videos</p>
+              <div className="flex justify-center space-x-2 mt-2">
+                <span className="text-xs px-2 py-1 bg-white/80 rounded-full border border-purple-300">🎨 Comics</span>
+                <span className="text-xs px-2 py-1 bg-white/80 rounded-full border border-pink-300">🎬 Videos</span>
+                <span className="text-xs px-2 py-1 bg-white/80 rounded-full border border-blue-300">✨ AI Magic</span>
+              </div>
             </div>
 
             {/* Character Upload */}
@@ -424,7 +446,7 @@ export const AIPanel: React.FC = () => {
                 <Camera className="w-3 h-3" />
                 <span>Main Character</span>
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3">
+              <div className="border-2 border-dashed border-purple-300 rounded-xl p-4 bg-white/50 hover:bg-purple-50 transition-colors">
                 {characterImage ? (
                   <div className="relative">
                     <img src={characterImage} alt="Character" className="w-full h-16 object-cover rounded" />
@@ -458,7 +480,7 @@ export const AIPanel: React.FC = () => {
                 <FileImage className="w-3 h-3" />
                 <span>Product (Optional)</span>
               </label>
-              <div className="border-2 border-dashed border-gray-200 rounded-lg p-3">
+              <div className="border-2 border-dashed border-pink-200 rounded-xl p-4 bg-white/50 hover:bg-pink-50 transition-colors">
                 {productImage ? (
                   <div className="relative">
                     <img src={productImage} alt="Product" className="w-full h-16 object-cover rounded" />
@@ -522,7 +544,7 @@ export const AIPanel: React.FC = () => {
             <button
               onClick={handleGenerateComic}
               disabled={isProcessing || !storyPrompt.trim()}
-              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:bg-gray-300 text-white text-sm rounded-lg transition-all flex items-center justify-center space-x-2 font-medium shadow-lg"
+              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-400 text-white text-sm rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:scale-100"
             >
               {isProcessing ? (
                 <>
@@ -539,7 +561,7 @@ export const AIPanel: React.FC = () => {
 
             {/* Show generated panels count */}
             {comicPanels.length > 0 && (
-              <div className="text-center p-2 bg-green-50 rounded-lg border border-green-200">
+              <div className="text-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-300 shadow-sm">
                 <p className="text-xs text-green-700 font-medium">
                   ✅ Generated {comicPanels.length}/4 panels
                 </p>
@@ -548,18 +570,20 @@ export const AIPanel: React.FC = () => {
                 </div>
                 
                 {/* Text-based editing */}
-                <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
-                  <p className="text-xs font-medium text-blue-700 mb-2">✨ Quick Edit with Words</p>
+                <div className="mt-3 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 shadow-inner">
+                  <p className="text-xs font-bold text-blue-700 mb-2 flex items-center">
+                    <span className="mr-1">✨</span> Quick Edit with Words
+                  </p>
                   <input 
                     type="text" 
                     placeholder="Change time to snowy Christmas night, add falling snow..."
-                    className="w-full text-xs p-2 border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
+                    className="w-full text-xs p-2.5 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/70"
                   />
-                  <div className="grid grid-cols-2 gap-1 mt-2">
-                    <button className="text-xs py-1 px-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors">
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    <button className="text-xs py-2 px-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg transition-all font-medium shadow hover:shadow-md transform hover:scale-105">
                       Edit All Panels
                     </button>
-                    <button className="text-xs py-1 px-2 bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors">
+                    <button className="text-xs py-2 px-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-all font-medium shadow hover:shadow-md transform hover:scale-105">
                       Edit Panel 1
                     </button>
                   </div>
@@ -657,10 +681,19 @@ export const AIPanel: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="px-2 py-1 bg-gray-50 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
-          {isProcessing ? 'Processing with AI...' : 'AI services ready'}
-        </p>
+      <div className="px-3 py-2 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-200/30">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium text-purple-600">
+            {isProcessing ? '🤖 AI Processing...' : '✨ AI Ready'}
+          </p>
+          {isProcessing && (
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
