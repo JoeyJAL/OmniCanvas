@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Settings, PanelRightClose, PanelRightOpen } from 'lucide-react'
 import { Canvas } from '@components/canvas/Canvas'
 import { Toolbar } from '@components/toolbar/Toolbar'
@@ -8,6 +8,16 @@ import { SettingsPanel } from '@components/panels/SettingsPanel'
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
+  
+  // Trigger window resize event when panel visibility changes
+  // This ensures Canvas component recalculates its dimensions
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'))
+    }, 300) // Wait for CSS transition to complete
+    
+    return () => clearTimeout(timer)
+  }, [isPanelOpen])
 
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-100">
