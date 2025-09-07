@@ -29,6 +29,21 @@ export const Canvas: React.FC = () => {
     y: 0,
     selectedObjects: [] as fabric.Object[]
   })
+
+  // Canvas position tracking
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [viewportCenter, setViewportCenter] = useState({ x: 0, y: 0 })
+  const [showGrid, setShowGrid] = useState(false)
+  
+  // Navigation helpers
+  const goToOrigin = () => {
+    if (canvas) {
+      canvas.absolutePan(new fabric.Point(0, 0))
+      canvas.setZoom(1)
+      setZoom(1)
+      canvas.renderAll()
+    }
+  }
   
   const {
     canvas,
@@ -307,6 +322,14 @@ export const Canvas: React.FC = () => {
     let lastPosY = 0
 
     fabricCanvas.on('mouse:move', (opt) => {
+      // Update mouse position for display
+      const pointer = fabricCanvas.getPointer(opt.e)
+      setMousePos({ x: Math.round(pointer.x), y: Math.round(pointer.y) })
+      
+      // Update viewport center
+      const center = fabricCanvas.getCenter()
+      setViewportCenter({ x: Math.round(center.left), y: Math.round(center.top) })
+      
       if (isDragging) {
         const e = opt.e
         const vpt = fabricCanvas.viewportTransform!
@@ -930,6 +953,40 @@ export const Canvas: React.FC = () => {
       <canvas ref={canvasRef} />
       
       
+      {/* Canvas Navigator - Top Right */}
+      <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-3 py-2 shadow-lg border border-gray-200">
+        <div className="space-y-1 text-xs text-gray-600">
+          <div className="flex items-center justify-between">
+            <span>📍 Mouse:</span>
+            <span className="font-mono bg-gray-100 px-2 py-0.5 rounded">x:{mousePos.x} y:{mousePos.y}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>🎯 Center:</span>
+            <span className="font-mono bg-blue-100 px-2 py-0.5 rounded">x:{viewportCenter.x} y:{viewportCenter.y}</span>
+          </div>
+          <div className="flex items-center space-x-1 pt-1">
+            <button
+              onClick={goToOrigin}
+              className="text-xs px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded transition-colors"
+              title="Go to origin (0,0)"
+            >
+              🏠 Origin
+            </button>
+            <button
+              onClick={() => setShowGrid(!showGrid)}
+              className={`text-xs px-2 py-1 rounded transition-colors ${
+                showGrid 
+                  ? 'bg-purple-200 text-purple-700' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+              title="Toggle grid"
+            >
+              ⊞ Grid
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Zoom controls */}
       <div className="absolute bottom-4 right-4 flex items-center space-x-2">
         <button 
