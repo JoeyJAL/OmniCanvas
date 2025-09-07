@@ -385,8 +385,8 @@ app.post('/api/ai/generate-similar', async (req, res) => {
       try {
         const base64Data = await imageUrlToBase64(imageUrl);
         imageParts.push({
-          inline_data: {
-            mime_type: "image/jpeg",
+          inlineData: {
+            mimeType: "image/jpeg",
             data: base64Data
           }
         });
