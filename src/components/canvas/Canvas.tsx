@@ -962,10 +962,12 @@ export const Canvas: React.FC = () => {
       </div>
 
       {/* Canvas navigation hints */}
-      <div className="absolute bottom-4 left-4 bg-white bg-opacity-75 rounded px-3 py-2 text-xs text-gray-600">
+      <div className="absolute bottom-4 left-4 bg-white bg-opacity-90 rounded-lg px-3 py-2 text-xs text-gray-600 shadow-lg border border-gray-200">
         <div className="space-y-1">
-          <div>🔍 Cmd + Trackpad: Zoom</div>
+          <div>🔍 <kbd className="px-1 py-0.5 bg-gray-100 rounded text-xs">Cmd</kbd> + Trackpad: Zoom</div>
           <div>🖐️ Trackpad: Move canvas</div>
+          <div>✨ <kbd className="px-1 py-0.5 bg-blue-100 rounded text-xs">Shift</kbd> + Click: Multi-select</div>
+          <div>🎯 <kbd className="px-1 py-0.5 bg-purple-100 rounded text-xs">Cmd</kbd> + Click: Add/Remove selection</div>
         </div>
       </div>
 
