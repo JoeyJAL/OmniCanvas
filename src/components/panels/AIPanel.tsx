@@ -219,7 +219,7 @@ export const AIPanel: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'storyshop' as const, label: 'StoryShop', icon: BookOpen },
+    { id: 'storyshop' as const, label: 'Story', icon: BookOpen },
     { id: 'generate' as const, label: 'Generate', icon: Sparkles },
     { id: 'merge' as const, label: 'Merge', icon: Merge },
     { id: 'style' as const, label: 'Style', icon: Palette },
@@ -227,9 +227,9 @@ export const AIPanel: React.FC = () => {
   ]
 
   return (
-    <div className="flex-1 border-b border-gray-200 bg-gradient-to-br from-white to-purple-50">
+    <div className="flex h-full flex-col bg-gradient-to-br from-white to-purple-50">
       {/* Header */}
-      <div className="p-3 border-b border-gray-200 bg-white/90 backdrop-blur-sm">
+      <div className="p-3 border-b border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
@@ -430,7 +430,7 @@ export const AIPanel: React.FC = () => {
             <div className="text-center p-4 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl border border-purple-200">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <BookOpen className="w-5 h-5 text-purple-600" />
-                <h4 className="text-base font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">StoryShop Canvas</h4>
+                <h4 className="text-base font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Story Canvas</h4>
               </div>
               <p className="text-xs text-gray-700 font-medium">Transform photos into 4-panel comics & 15s videos</p>
               <div className="flex justify-center space-x-2 mt-2">
@@ -680,21 +680,6 @@ export const AIPanel: React.FC = () => {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-3 py-2 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-200/30">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-purple-600">
-            {isProcessing ? '🤖 AI Processing...' : '✨ AI Ready'}
-          </p>
-          {isProcessing && (
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   )
 

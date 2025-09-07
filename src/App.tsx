@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Settings, PanelRightClose, PanelRightOpen } from 'lucide-react'
 import { Canvas } from '@components/canvas/Canvas'
 import { Toolbar } from '@components/toolbar/Toolbar'
-import { ImagePanel } from '@components/panels/ImagePanel'
 import { AIPanel } from '@components/panels/AIPanel'
 import { SettingsPanel } from '@components/panels/SettingsPanel'
 
@@ -48,16 +47,11 @@ function App() {
           <Canvas />
         </div>
         
-        {/* Right Panels - Enhanced width and toggle functionality */}
+        {/* Right Panel - AI Assistant with toggle functionality */}
         {isPanelOpen && (
           <div className="w-80 lg:w-96 xl:w-[420px] bg-white border-l border-gray-200 flex flex-col overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out">
-            <div className="flex-1 flex flex-col min-h-0">
-              <div className="h-1/2 min-h-0 overflow-y-auto border-b border-gray-200">
-                <ImagePanel />
-              </div>
-              <div className="h-1/2 min-h-0 overflow-y-auto">
-                <AIPanel />
-              </div>
+            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+              <AIPanel />
             </div>
           </div>
         )}
