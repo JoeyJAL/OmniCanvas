@@ -70,23 +70,37 @@ export const useImageStore = create<ImageStore>((set, get) => ({
           })
         })
 
-        // Auto-scale if too large
-        const canvasWidth = canvas.width || 800
-        const canvasHeight = canvas.height || 600
-        const maxWidth = options.maxWidth || canvasWidth * 0.3
-        const maxHeight = options.maxHeight || canvasHeight * 0.3
+        // Improved scaling for better visibility
+        const imgWidth = fabricImage.width || 1
+        const imgHeight = fabricImage.height || 1
+        const maxDimension = Math.max(imgWidth, imgHeight)
         
-        const scale = Math.min(
-          maxWidth / (fabricImage.width || 1),
-          maxHeight / (fabricImage.height || 1),
-          1
-        )
-
+        console.log('📏 Original image size:', imgWidth, 'x', imgHeight)
+        
+        // Only scale down if image is too large to avoid blurriness
+        const maxReasonableSize = 600  // Maximum reasonable display size
+        
+        let scale = 1
+        
+        if (maxDimension > maxReasonableSize) {
+          // Only scale down if too large
+          scale = maxReasonableSize / maxDimension
+          console.log('🔽 Scaling down large image:', scale)
+        } else {
+          // Keep original size if reasonable
+          console.log('✅ Using original size (good quality)')
+        }
+        
         fabricImage.scale(scale)
+        console.log('✅ Final display size:', (imgWidth * scale).toFixed(0), 'x', (imgHeight * scale).toFixed(0))
 
         // Position image
-        let x = 50 + (i % 3) * (maxWidth + (options.spacing || 20))
-        let y = 50 + Math.floor(i / 3) * (maxHeight + (options.spacing || 20))
+        const finalWidth = imgWidth * scale
+        const finalHeight = imgHeight * scale
+        const spacing = options.spacing || 100
+        
+        let x = 100 + (i % 2) * (finalWidth + spacing)
+        let y = 100 + Math.floor(i / 2) * (finalHeight + spacing)
 
         if (options.autoArrange) {
           fabricImage.set({ left: x, top: y })

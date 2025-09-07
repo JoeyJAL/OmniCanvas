@@ -7,13 +7,16 @@ import { NewContextMenu } from './NewContextMenu'
 import type { CanvasConfig } from '@/types/canvas'
 
 const defaultConfig: CanvasConfig = {
-  width: 800,
-  height: 600,
+  width: 5000,  // Large virtual canvas size
+  height: 5000,
   backgroundColor: '#ffffff',
-  selection: true,
+  selection: true,  // Enable selection
   renderOnAddRemove: true,
   centeredScaling: true,
-  centeredRotation: true
+  centeredRotation: true,
+  // Enable multi-selection
+  preserveObjectStacking: true,
+  targetFindTolerance: 4
 }
 
 export const Canvas: React.FC = () => {
@@ -35,7 +38,13 @@ export const Canvas: React.FC = () => {
     brushColor,
     setIsDrawing,
     addToHistory,
-    importImage
+    importImage,
+    zoom,
+    zoomIn,
+    zoomOut,
+    resetView,
+    setZoom,
+    setPan
   } = useCanvasStore()
 
   const { setCanvas: setImageCanvas, selectImage, isMultiSelectMode } = useImageStore()
@@ -43,12 +52,70 @@ export const Canvas: React.FC = () => {
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return
 
-    // Initialize Fabric.js canvas
+    // Initialize Fabric.js canvas with viewport size
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
       ...defaultConfig,
       width: containerRef.current.clientWidth,
+      height: containerRef.current.clientHeight,
+      // Enable multi-selection with Ctrl/Cmd+Click
+      selection: true,
+      preserveObjectStacking: true,
+      // Enable multi-selection with modifier keys
+      fireRightClick: true,
+      fireMiddleClick: true,
+      skipTargetFind: false,
+      targetFindTolerance: 4,
+      perPixelTargetFind: false,
+      // Enable multi-select with modifier keys
+      uniformScaling: true,
+      // Additional multi-selection properties
+      stopContextMenu: false,
+      selectionBorderColor: 'rgba(46, 115, 252, 0.8)',
+      selectionLineWidth: 2,
+      selectionDashArray: [5, 5],
+      // Ensure objects can be selected
+      objectCaching: false  // This might help with selection detection
+    })
+
+    // Enable infinite canvas functionality
+    fabricCanvas.setDimensions({
+      width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight
     })
+    
+    // Force enable multi-selection
+    fabricCanvas.selection = true
+    fabricCanvas.preserveObjectStacking = true
+    
+    console.log('Canvas initialized with multi-selection enabled:', fabricCanvas.selection)
+    
+    // Add object configuration for all objects added to canvas
+    fabricCanvas.on('object:added', (e) => {
+      const obj = e.target
+      console.log('📦 Object added to canvas:', obj.type)
+      
+      // Ensure all objects support selection and multi-selection
+      if (obj) {
+        obj.set({
+          selectable: true,
+          evented: true,
+          hasControls: true,
+          hasBorders: true,
+          lockMovementX: false,
+          lockMovementY: false,
+          lockRotation: false,
+          lockScalingX: false,
+          lockScalingY: false,
+          hoverCursor: 'move',
+          moveCursor: 'move'
+        })
+        console.log('✅ Object configured for selection:', obj.type, 'selectable:', obj.selectable)
+      }
+    })
+    
+    // Set large virtual canvas size for infinite scroll
+    fabricCanvas.setWidth(containerRef.current.clientWidth)
+    fabricCanvas.setHeight(containerRef.current.clientHeight)
 
     // Configure free drawing brush
     fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(fabricCanvas)
@@ -74,24 +141,17 @@ export const Canvas: React.FC = () => {
 
     fabricCanvas.on('path:created', addToHistoryDebounced)
 
-    fabricCanvas.on('object:added', () => {
-      if (!fabricCanvas.isDrawingMode) {
-        addToHistoryDebounced()
-      }
-    })
-
     fabricCanvas.on('object:modified', addToHistoryDebounced)
-
-    fabricCanvas.on('mouse:down', () => {
-      setIsDrawing(true)
-    })
-
-    fabricCanvas.on('mouse:up', () => {
-      setIsDrawing(false)
-    })
 
     // Handle object selection for images
     fabricCanvas.on('selection:created', (e) => {
+      console.log('🎯 Selection created:', e.selected?.length || 0, 'objects')
+      if (e.selected) {
+        e.selected.forEach((obj: any) => {
+          console.log('  - Selected object type:', obj.type)
+        })
+      }
+      
       if (isMultiSelectMode && e.selected) {
         e.selected.forEach((obj: any) => {
           if (obj.type === 'image') {
@@ -103,17 +163,32 @@ export const Canvas: React.FC = () => {
       }
     })
 
+    fabricCanvas.on('selection:updated', (e) => {
+      console.log('🔄 Selection updated:', e.selected?.length || 0, 'objects')
+      if (e.selected) {
+        e.selected.forEach((obj: any) => {
+          console.log('  - Updated selection object type:', obj.type)
+        })
+      }
+    })
+
     fabricCanvas.on('selection:cleared', () => {
+      console.log('🗑️ Selection cleared')
       setContextMenu(prev => ({ ...prev, selectedObjects: [] }))
     })
 
-    // Right click context menu - FORCE UPDATE v3.0
+    // Consolidated mouse:down handler for pan, selection, and context menu
     fabricCanvas.on('mouse:down', (options) => {
-      console.log('🔥 MOUSE DOWN EVENT - Button:', options.e.button)
-      if (options.e.button === 2) { // Right click
+      const evt = options.e
+      console.log('🖱️ Mouse down - Button:', evt.button, 'Shift:', evt.shiftKey, 'Ctrl:', evt.ctrlKey, 'Cmd:', evt.metaKey)
+      
+      setIsDrawing(true)
+      
+      if (evt.button === 2) { 
+        // Right click - show context menu
         console.log('🔥 RIGHT CLICK DETECTED! Preventing default...')
-        options.e.preventDefault()
-        options.e.stopPropagation()
+        evt.preventDefault()
+        evt.stopPropagation()
         
         const activeObject = fabricCanvas.getActiveObject()
         const selectedObjects = activeObject ? [activeObject] : []
@@ -126,19 +201,51 @@ export const Canvas: React.FC = () => {
         }
         
         console.log('🔥 SHOWING CONTEXT MENU! activeObject:', activeObject, 'selectedObjects:', selectedObjects.length)
-        console.log('🔥 Context menu position:', options.e.clientX, options.e.clientY)
         
         setContextMenu({
           visible: true,
-          x: options.e.clientX,
-          y: options.e.clientY,
+          x: evt.clientX,
+          y: evt.clientY,
           selectedObjects
         })
-        
-        console.log('🔥 CONTEXT MENU STATE SET!')
       } else {
-        // Hide context menu on left click
+        // Left click - handle pan vs selection
         setContextMenu(prev => ({ ...prev, visible: false }))
+        
+        // Check if we're clicking on an object vs empty canvas
+        const target = fabricCanvas.findTarget(evt, false)
+        console.log('🎯 Target found:', target?.type || 'none')
+        
+        if (evt.shiftKey && !target) {
+          // Shift+drag on empty space = pan canvas
+          console.log('🖐️ Starting pan mode (Shift+drag on empty space)')
+          isDragging = true
+          fabricCanvas.isDragging = true
+          fabricCanvas.selection = false
+          lastPosX = evt.clientX
+          lastPosY = evt.clientY
+        } else {
+          // Not panning - ensure selection is enabled for multi-selection
+          console.log('✅ Ensuring selection is enabled for multi-selection')
+          fabricCanvas.selection = true
+          fabricCanvas.isDragging = false
+          
+          // Log modifier keys for debugging multi-selection
+          if (evt.ctrlKey || evt.metaKey) {
+            console.log('🔥 Ctrl/Cmd detected - multi-selection should work!')
+          }
+        }
+      }
+    })
+
+    fabricCanvas.on('mouse:up', () => {
+      setIsDrawing(false)
+      
+      if (isDragging) {
+        console.log('🖐️ Ending pan mode')
+        isDragging = false
+        fabricCanvas.isDragging = false
+        fabricCanvas.selection = true
       }
     })
 
@@ -174,6 +281,55 @@ export const Canvas: React.FC = () => {
 
     window.addEventListener('resize', handleResize)
 
+    // Zoom functionality
+    const handleWheel = (opt: any) => {
+      const e = opt.e
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        const delta = e.deltaY
+        let zoom = fabricCanvas.getZoom()
+        zoom *= 0.999 ** delta
+        
+        if (zoom > 5) zoom = 5
+        if (zoom < 0.1) zoom = 0.1
+        
+        const point = new fabric.Point(opt.e.offsetX, opt.e.offsetY)
+        fabricCanvas.zoomToPoint(point, zoom)
+        setZoom(zoom)
+      }
+    }
+
+    fabricCanvas.on('mouse:wheel', handleWheel)
+
+    // Pan functionality with trackpad or Shift+drag
+    let isDragging = false
+    let lastPosX = 0
+    let lastPosY = 0
+
+    fabricCanvas.on('mouse:move', (opt) => {
+      if (isDragging) {
+        const e = opt.e
+        const vpt = fabricCanvas.viewportTransform!
+        vpt[4] += e.clientX - lastPosX
+        vpt[5] += e.clientY - lastPosY
+        fabricCanvas.requestRenderAll()
+        lastPosX = e.clientX
+        lastPosY = e.clientY
+      }
+    })
+
+    // Trackpad pan (without modifier keys)
+    fabricCanvas.on('mouse:wheel', (opt) => {
+      const e = opt.e
+      if (!e.ctrlKey && !e.metaKey) {
+        e.preventDefault()
+        const vpt = fabricCanvas.viewportTransform!
+        vpt[4] -= e.deltaX || 0
+        vpt[5] -= e.deltaY || 0
+        fabricCanvas.requestRenderAll()
+      }
+    })
+
     // Don't add initial history - wait for user actions
 
     return () => {
@@ -196,7 +352,7 @@ export const Canvas: React.FC = () => {
       if (!canvas) return
 
       // Prevent default browser shortcuts
-      if ((e.ctrlKey || e.metaKey) && ['z', 'y', 'a', 'c', 'v', 'x'].includes(e.key.toLowerCase())) {
+      if ((e.ctrlKey || e.metaKey) && ['z', 'y', 'a', 'c', 'v', 'x', '+', '-', '=', '0'].includes(e.key.toLowerCase())) {
         e.preventDefault()
       }
 
@@ -216,6 +372,15 @@ export const Canvas: React.FC = () => {
         const selection = new fabric.ActiveSelection(objects, { canvas })
         canvas.setActiveObject(selection)
         canvas.requestRenderAll()
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+        // Zoom in
+        zoomIn()
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+        // Zoom out
+        zoomOut()
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+        // Reset zoom and pan
+        resetView()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         // Delete selected objects
         const activeObject = canvas.getActiveObject()
@@ -765,16 +930,43 @@ export const Canvas: React.FC = () => {
       <canvas ref={canvasRef} />
       
       
-      {/* Grid toggle and zoom controls could go here */}
+      {/* Zoom controls */}
       <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-        <button className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded p-2 text-gray-600">
+        <button 
+          onClick={zoomOut}
+          className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded p-2 text-gray-600 transition-all"
+          title="Zoom out (Ctrl+Mouse wheel)"
+        >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
           </svg>
         </button>
-        <span className="bg-white bg-opacity-75 rounded px-2 py-1 text-sm text-gray-600">
-          100%
-        </span>
+        
+        <button 
+          onClick={resetView}
+          className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded px-3 py-1 text-sm text-gray-600 min-w-[60px] transition-all"
+          title="Reset zoom and pan"
+        >
+          {Math.round(zoom * 100)}%
+        </button>
+        
+        <button 
+          onClick={zoomIn}
+          className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded p-2 text-gray-600 transition-all"
+          title="Zoom in (Ctrl+Mouse wheel)"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Canvas navigation hints */}
+      <div className="absolute bottom-4 left-4 bg-white bg-opacity-75 rounded px-3 py-2 text-xs text-gray-600">
+        <div className="space-y-1">
+          <div>🔍 Cmd + Trackpad: Zoom</div>
+          <div>🖐️ Trackpad: Move canvas</div>
+        </div>
       </div>
 
       {/* Right-click Context Menu */}

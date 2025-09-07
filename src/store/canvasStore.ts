@@ -24,6 +24,16 @@ interface CanvasStore extends CanvasState {
   
   // Brush settings
   updateBrushSettings: (settings: Partial<BrushSettings>) => void
+  
+  // Infinite canvas controls
+  zoom: number
+  panX: number
+  panY: number
+  setZoom: (zoom: number) => void
+  setPan: (x: number, y: number) => void
+  zoomIn: () => void
+  zoomOut: () => void
+  resetView: () => void
 }
 
 export const useCanvasStore = create<CanvasStore>((set, get) => ({
@@ -34,6 +44,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   isDrawing: false,
   history: [],
   historyIndex: -1,
+  zoom: 1,
+  panX: 0,
+  panY: 0,
 
   setCanvas: (canvas) => set({ canvas }),
   
@@ -224,21 +237,29 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
               if (img && img.width && img.height) {
                 console.log('✅ Image loaded successfully:', img.width, 'x', img.height)
                 
-                // Keep original resolution - no scaling unless image is extremely large
-                const maxDimension = 2000 // Only scale down if larger than this
-                const needsScaling = (img.width || 0) > maxDimension || (img.height || 0) > maxDimension
+                // Apply same scaling logic as imageStore for consistency
+                const imgWidth = img.width || 1
+                const imgHeight = img.height || 1
+                const maxDimension = Math.max(imgWidth, imgHeight)
                 
-                if (needsScaling) {
-                  const scale = Math.min(
-                    maxDimension / (img.width || 1),
-                    maxDimension / (img.height || 1)
-                  )
-                  img.scale(scale)
-                  console.log('🔍 Scaled large image:', scale)
+                console.log('📏 Original AI image size:', imgWidth, 'x', imgHeight)
+                
+                // Only scale down if image is too large to avoid blurriness
+                const maxReasonableSize = 600  // Same as imageStore
+                
+                let scale = 1
+                
+                if (maxDimension > maxReasonableSize) {
+                  // Only scale down if too large
+                  scale = maxReasonableSize / maxDimension
+                  console.log('🔽 Scaling down large AI image:', scale)
                 } else {
-                  // Keep original size
-                  console.log('✅ Using original resolution:', img.width, 'x', img.height)
+                  // Keep original size if reasonable
+                  console.log('✅ Using original AI image size (good quality)')
                 }
+                
+                img.scale(scale)
+                console.log('✅ Final AI image display size:', (imgWidth * scale).toFixed(0), 'x', (imgHeight * scale).toFixed(0))
                 
                 img.center()
                 
@@ -299,5 +320,47 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       brushSize: newSize,
       brushColor: newColor
     })
+  },
+
+  // Infinite canvas controls
+  setZoom: (zoom) => {
+    const { canvas } = get()
+    if (canvas) {
+      const center = canvas.getCenter()
+      canvas.zoomToPoint(new fabric.Point(center.left, center.top), zoom)
+      canvas.renderAll()
+    }
+    set({ zoom })
+  },
+
+  setPan: (x, y) => {
+    const { canvas } = get()
+    if (canvas) {
+      canvas.absolutePan(new fabric.Point(x, y))
+      canvas.renderAll()
+    }
+    set({ panX: x, panY: y })
+  },
+
+  zoomIn: () => {
+    const { zoom, setZoom } = get()
+    const newZoom = Math.min(zoom * 1.2, 5) // Max zoom 5x
+    setZoom(newZoom)
+  },
+
+  zoomOut: () => {
+    const { zoom, setZoom } = get()
+    const newZoom = Math.max(zoom / 1.2, 0.1) // Min zoom 0.1x
+    setZoom(newZoom)
+  },
+
+  resetView: () => {
+    const { canvas, setZoom, setPan } = get()
+    if (canvas) {
+      setZoom(1)
+      setPan(0, 0)
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0])
+      canvas.renderAll()
+    }
   }
 }))
