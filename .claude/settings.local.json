@@ -20,7 +20,8 @@
       "Bash(git commit:*)",
       "Bash(gh repo create:*)",
       "Bash(git push:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

@@ -14,6 +14,10 @@ interface BackendAPIConfig {
     transferStyle: string
     generateSimilar: string
     elevenlabs?: string
+    generateComic: string
+    editWithWords: string
+    blendProduct: string
+    generateVideo: string
   }
 }
 
@@ -28,7 +32,11 @@ class AIService {
         mergeImages: '/ai/merge-images',
         transferStyle: '/ai/transfer-style', 
         generateSimilar: '/ai/generate-similar',
-        elevenlabs: '/ai/elevenlabs'
+        elevenlabs: '/ai/elevenlabs',
+        generateComic: '/ai/generate-comic',
+        editWithWords: '/ai/edit-with-words',
+        blendProduct: '/ai/blend-product',
+        generateVideo: '/ai/generate-video'
       }
     }
   }
@@ -194,6 +202,143 @@ class AIService {
       return data.audioUrl || data.url
     } catch (error) {
       console.error('Voice generation error:', error)
+      throw error
+    }
+  }
+
+  // StoryShop specific methods
+  async generateComic(request: {
+    storyPrompt: string
+    characterImage?: string
+    productImage?: string
+    style: string
+    panelCount?: number
+  }): Promise<string[]> {
+    try {
+      console.log('📚 Generating comic with StoryShop API')
+      
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateComic}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          storyPrompt: request.storyPrompt,
+          characterImage: request.characterImage,
+          productImage: request.productImage,
+          style: request.style,
+          panelCount: request.panelCount || 4,
+          provider: 'gemini'
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Comic generation error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data.panelUrls || []
+    } catch (error) {
+      console.error('Comic generation error:', error)
+      throw error
+    }
+  }
+
+  async editWithWords(request: {
+    imageUrl: string
+    editPrompt: string
+    maskUrl?: string
+  }): Promise<string> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.editWithWords}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          imageUrl: request.imageUrl,
+          editPrompt: request.editPrompt,
+          maskUrl: request.maskUrl,
+          provider: 'gemini'
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Edit with words error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data.imageUrl || data.url
+    } catch (error) {
+      console.error('Edit with words error:', error)
+      throw error
+    }
+  }
+
+  async blendProduct(request: {
+    sceneImageUrl: string
+    productImageUrl: string
+    blendPrompt: string
+  }): Promise<string> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.blendProduct}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sceneImageUrl: request.sceneImageUrl,
+          productImageUrl: request.productImageUrl,
+          blendPrompt: request.blendPrompt,
+          provider: 'gemini'
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Product blend error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data.imageUrl || data.url
+    } catch (error) {
+      console.error('Product blend error:', error)
+      throw error
+    }
+  }
+
+  async generateVideoFromPanels(request: {
+    panelUrls: string[]
+    narrationText: string
+    voiceId?: string
+    duration?: number
+  }): Promise<string> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateVideo}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          panelUrls: request.panelUrls,
+          narrationText: request.narrationText,
+          voiceId: request.voiceId || 'default',
+          duration: request.duration || 15,
+          provider: 'fal-ai'
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Video generation error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data.videoUrl || data.url
+    } catch (error) {
+      console.error('Video generation error:', error)
       throw error
     }
   }

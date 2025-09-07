@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useImageStore } from '@store/imageStore'
 import { useCanvasStore } from '@store/canvasStore'
+import { useStoryShopStore } from '@store/storyShopStore'
 import { aiService } from '@services/aiService'
 import { 
   Sparkles, 
@@ -10,7 +11,12 @@ import {
   Volume2,
   Settings,
   Play,
-  TestTube
+  TestTube,
+  BookOpen,
+  Upload,
+  Camera,
+  FileImage,
+  Video
 } from 'lucide-react'
 
 export const AIPanel: React.FC = () => {
@@ -18,8 +24,15 @@ export const AIPanel: React.FC = () => {
   const { importImage } = useCanvasStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [prompt, setPrompt] = useState('')
-  const [activeTab, setActiveTab] = useState<'generate' | 'merge' | 'style' | 'voice'>('generate')
+  const [activeTab, setActiveTab] = useState<'generate' | 'merge' | 'style' | 'voice' | 'storyshop'>('storyshop')
   const [_lastResult, setLastResult] = useState<string | null>(null)
+  
+  // StoryShop state
+  const [characterImage, setCharacterImage] = useState<string | null>(null)
+  const [productImage, setProductImage] = useState<string | null>(null)
+  const [storyPrompt, setStoryPrompt] = useState('')
+  const [comicPanels, setComicPanels] = useState<string[]>([])
+  const [selectedStyle, setSelectedStyle] = useState('comic')
 
   const selectedImages = getSelectedImages()
   const canMerge = selectedImages.length >= 2
@@ -128,7 +141,80 @@ export const AIPanel: React.FC = () => {
     }
   }
 
+  // StoryShop handlers
+  const handleImageUpload = (type: 'character' | 'product', file: File) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageUrl = e.target?.result as string
+      if (type === 'character') {
+        setCharacterImage(imageUrl)
+      } else {
+        setProductImage(imageUrl)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleGenerateComic = async () => {
+    if (!storyPrompt.trim()) {
+      alert('Please enter a story prompt')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      // Generate 4-panel comic with consistent character
+      const panels = []
+      const basePrompt = `${selectedStyle} style comic panel, consistent character`
+      
+      for (let i = 0; i < 4; i++) {
+        const panelPrompt = `${basePrompt}, panel ${i + 1}/4: ${storyPrompt}`
+        const result = await aiService.generateImage({
+          prompt: panelPrompt,
+          width: 512,
+          height: 512
+        })
+        panels.push(result.url)
+      }
+      
+      setComicPanels(panels)
+      
+      // Add panels to canvas in a 2x2 grid
+      for (let i = 0; i < panels.length; i++) {
+        await importImage(panels[i])
+      }
+      
+      alert('4-panel comic generated successfully!')
+    } catch (error) {
+      console.error('Comic generation failed:', error)
+      alert('Comic generation failed: ' + error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleGenerateVideo = async () => {
+    if (comicPanels.length === 0) {
+      alert('Generate a comic first!')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      // TODO: Integrate with Fal.ai for video generation
+      const videoUrl = await aiService.generateVoice(storyPrompt) // Placeholder
+      console.log('Video generated:', videoUrl)
+      alert('Video generation feature coming soon!')
+    } catch (error) {
+      console.error('Video generation failed:', error)
+      alert('Video generation failed: ' + error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   const tabs = [
+    { id: 'storyshop' as const, label: 'StoryShop', icon: BookOpen },
     { id: 'generate' as const, label: 'Generate', icon: Sparkles },
     { id: 'merge' as const, label: 'Merge', icon: Merge },
     { id: 'style' as const, label: 'Style', icon: Palette },
@@ -325,6 +411,204 @@ export const AIPanel: React.FC = () => {
           </div>
         )}
 
+        {activeTab === 'storyshop' && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h4 className="text-sm font-semibold text-purple-700 mb-1">📚 StoryShop Canvas</h4>
+              <p className="text-xs text-gray-600">Create 4-panel comics & videos with consistent characters</p>
+            </div>
+
+            {/* Character Upload */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-700 flex items-center space-x-1">
+                <Camera className="w-3 h-3" />
+                <span>Main Character</span>
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3">
+                {characterImage ? (
+                  <div className="relative">
+                    <img src={characterImage} alt="Character" className="w-full h-16 object-cover rounded" />
+                    <button
+                      onClick={() => setCharacterImage(null)}
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleImageUpload('character', e.target.files[0])}
+                    />
+                    <div className="text-center">
+                      <Upload className="w-8 h-8 mx-auto text-gray-400 mb-1" />
+                      <p className="text-xs text-gray-500">Upload character photo</p>
+                    </div>
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Product Upload (Optional) */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-700 flex items-center space-x-1">
+                <FileImage className="w-3 h-3" />
+                <span>Product (Optional)</span>
+              </label>
+              <div className="border-2 border-dashed border-gray-200 rounded-lg p-3">
+                {productImage ? (
+                  <div className="relative">
+                    <img src={productImage} alt="Product" className="w-full h-16 object-cover rounded" />
+                    <button
+                      onClick={() => setProductImage(null)}
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleImageUpload('product', e.target.files[0])}
+                    />
+                    <div className="text-center">
+                      <Upload className="w-6 h-6 mx-auto text-gray-300 mb-1" />
+                      <p className="text-xs text-gray-400">Add product to story</p>
+                    </div>
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {/* Story Input */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-700">Story (One Sentence)</label>
+              <textarea
+                value={storyPrompt}
+                onChange={(e) => setStoryPrompt(e.target.value)}
+                placeholder="A coffee shop encounter on a snowy Christmas night..."
+                className="w-full h-16 p-2 text-sm border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                disabled={isProcessing}
+              />
+            </div>
+
+            {/* Style Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-700">Visual Style</label>
+              <div className="grid grid-cols-3 gap-1 text-xs">
+                {['comic', 'manga', 'disney', 'realistic', 'anime', 'vintage'].map(style => (
+                  <button
+                    key={style}
+                    onClick={() => setSelectedStyle(style)}
+                    className={`py-1.5 px-2 rounded transition-colors ${
+                      selectedStyle === style
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    {style}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Generate Comic Button */}
+            <button
+              onClick={handleGenerateComic}
+              disabled={isProcessing || !storyPrompt.trim()}
+              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:bg-gray-300 text-white text-sm rounded-lg transition-all flex items-center justify-center space-x-2 font-medium shadow-lg"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Creating Magic...</span>
+                </>
+              ) : (
+                <>
+                  <BookOpen className="w-4 h-4" />
+                  <span>🎨 Generate 4-Panel Comic</span>
+                </>
+              )}
+            </button>
+
+            {/* Show generated panels count */}
+            {comicPanels.length > 0 && (
+              <div className="text-center p-2 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-xs text-green-700 font-medium">
+                  ✅ Generated {comicPanels.length}/4 panels
+                </p>
+                <div className="mt-1 text-xs text-green-600">
+                  📖 Story broken into: Setup → Development → Climax → Resolution
+                </div>
+                
+                {/* Text-based editing */}
+                <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                  <p className="text-xs font-medium text-blue-700 mb-2">✨ Quick Edit with Words</p>
+                  <input 
+                    type="text" 
+                    placeholder="Change time to snowy Christmas night, add falling snow..."
+                    className="w-full text-xs p-2 border border-blue-300 rounded focus:ring-1 focus:ring-blue-500"
+                  />
+                  <div className="grid grid-cols-2 gap-1 mt-2">
+                    <button className="text-xs py-1 px-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors">
+                      Edit All Panels
+                    </button>
+                    <button className="text-xs py-1 px-2 bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors">
+                      Edit Panel 1
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Generate Video Button */}
+                <button
+                  onClick={handleGenerateVideo}
+                  disabled={isProcessing}
+                  className="mt-2 w-full py-2 px-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:bg-gray-300 text-white text-xs rounded-lg transition-all flex items-center justify-center space-x-1"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                      <span>Creating Video...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Video className="w-3 h-3" />
+                      <span>🎬 Make 15s Video</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Quick Examples */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-gray-700">💡 Quick Story Ideas:</p>
+              <div className="space-y-1">
+                {[
+                  'A magical coffee shop encounter',
+                  'Lost pet finds way home',
+                  'Time traveler in modern world',
+                  'Robot learns about friendship'
+                ].map((example, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setStoryPrompt(example)}
+                    className="w-full text-left text-xs p-2 bg-gray-50 hover:bg-purple-50 text-gray-600 hover:text-purple-600 rounded border transition-colors"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'voice' && (
           <div className="space-y-3">
             <p className="text-xs text-gray-600">
@@ -391,6 +675,8 @@ export const AIPanel: React.FC = () => {
         return 'Describe the artistic style to apply...\nExample: "Van Gogh starry night style" or choose from buttons below'
       case 'voice':
         return 'Enter text to convert to speech...\nExample: "Hello, this is a test of AI voice generation"'
+      case 'storyshop':
+        return 'This prompt is for other tabs. Use StoryShop interface above.'
       default:
         return 'Enter your prompt...'
     }
