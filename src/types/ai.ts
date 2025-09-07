@@ -9,6 +9,19 @@ export interface TextToImageRequest {
   style?: string
 }
 
+export interface ImageToImageRequest {
+  prompt: string
+  imageUrl: string  // Reference image for image-to-image generation
+  negativePrompt?: string
+  width?: number
+  height?: number
+  steps?: number
+  guidance?: number
+  seed?: number
+  strength?: number  // How much to follow the reference image (0.0 to 1.0)
+  style?: string
+}
+
 export interface AIGeneratedImage {
   id: string
   url: string

@@ -20,7 +20,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
       testConnection(saved)
     } else {
       // Set default URL
-      const defaultUrl = 'http://localhost:3011/api'
+      const defaultUrl = 'http://localhost:3003/api'
       setBackendUrl(defaultUrl)
       testConnection(defaultUrl)
     }

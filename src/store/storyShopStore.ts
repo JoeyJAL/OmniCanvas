@@ -301,7 +301,7 @@ export const useStoryShopStore = create<StoryShopStore>((set, get) => ({
       const videoUrl = await aiService.generateVideoFromPanels({
         panelUrls,
         narrationText: textToNarrate,
-        duration: 15
+        duration: 8
       })
       
       set(state => ({

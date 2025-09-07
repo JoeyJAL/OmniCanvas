@@ -20,7 +20,7 @@ interface CanvasStore extends CanvasState {
   // Canvas operations
   clearCanvas: () => void
   exportCanvas: (format: 'png' | 'jpg' | 'pdf') => string | null
-  importImage: (imageUrl: string) => Promise<void>
+  importImage: (imageUrl: string, position?: { x?: number, y?: number }) => Promise<void>
   getSelectedImages: () => string[]
   
   // Brush settings
@@ -223,7 +223,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
   },
   
-  importImage: async (imageUrl) => {
+  importImage: async (imageUrl, position) => {
     const { canvas } = get()
     if (!canvas) return
     
@@ -262,7 +262,18 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
                 img.scale(scale)
                 console.log('✅ Final AI image display size:', (imgWidth * scale).toFixed(0), 'x', (imgHeight * scale).toFixed(0))
                 
-                img.center()
+                // Smart positioning: use provided position or auto-calculate
+                if (position?.x !== undefined && position?.y !== undefined) {
+                  img.set({
+                    left: position.x,
+                    top: position.y
+                  })
+                  console.log('📍 Positioned image at:', position.x, position.y)
+                } else {
+                  // Default to center if no position specified
+                  img.center()
+                  console.log('📍 Centered image (no position specified)')
+                }
                 
                 // Add a unique identifier for AI-generated images
                 try {
@@ -365,20 +376,101 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
   },
 
-  // Get selected images from canvas
-  getSelectedImages: () => {
+  // Helper function to calculate smart layout positions for multiple images
+  calculateSmartLayout: (imageCount: number, imageSize: { width: number, height: number }) => {
     const { canvas } = get()
     if (!canvas) return []
     
+    const canvasWidth = canvas.width || 800
+    const canvasHeight = canvas.height || 600
+    const padding = 20
+    const positions: Array<{ x: number, y: number }> = []
+    
+    console.log('🧮 Calculating smart layout for', imageCount, 'images')
+    console.log('📐 Canvas size:', canvasWidth, 'x', canvasHeight)
+    console.log('🖼️ Image size:', imageSize.width, 'x', imageSize.height)
+    
+    if (imageCount === 1) {
+      // Single image: center it
+      positions.push({
+        x: (canvasWidth - imageSize.width) / 2,
+        y: (canvasHeight - imageSize.height) / 2
+      })
+    } else if (imageCount === 2) {
+      // Two images: side by side
+      const totalWidth = imageSize.width * 2 + padding
+      const startX = (canvasWidth - totalWidth) / 2
+      const centerY = (canvasHeight - imageSize.height) / 2
+      
+      positions.push(
+        { x: startX, y: centerY },
+        { x: startX + imageSize.width + padding, y: centerY }
+      )
+    } else if (imageCount === 4) {
+      // Four images: 2x2 grid (perfect for story panels!)
+      const totalWidth = imageSize.width * 2 + padding
+      const totalHeight = imageSize.height * 2 + padding
+      const startX = (canvasWidth - totalWidth) / 2
+      const startY = (canvasHeight - totalHeight) / 2
+      
+      positions.push(
+        // Top row
+        { x: startX, y: startY },
+        { x: startX + imageSize.width + padding, y: startY },
+        // Bottom row
+        { x: startX, y: startY + imageSize.height + padding },
+        { x: startX + imageSize.width + padding, y: startY + imageSize.height + padding }
+      )
+    } else {
+      // Multiple images: flexible grid
+      const cols = Math.ceil(Math.sqrt(imageCount))
+      const rows = Math.ceil(imageCount / cols)
+      
+      const totalWidth = imageSize.width * cols + padding * (cols - 1)
+      const totalHeight = imageSize.height * rows + padding * (rows - 1)
+      const startX = Math.max(padding, (canvasWidth - totalWidth) / 2)
+      const startY = Math.max(padding, (canvasHeight - totalHeight) / 2)
+      
+      for (let i = 0; i < imageCount; i++) {
+        const row = Math.floor(i / cols)
+        const col = i % cols
+        positions.push({
+          x: startX + col * (imageSize.width + padding),
+          y: startY + row * (imageSize.height + padding)
+        })
+      }
+    }
+    
+    console.log('✅ Generated positions:', positions)
+    return positions
+  },
+  
+  // Get selected images from canvas
+  getSelectedImages: () => {
+    const { canvas } = get()
+    console.log('🎯 Canvas selection check:', { hasCanvas: !!canvas })
+    
+    if (!canvas) return []
+    
     const activeObjects = canvas.getActiveObjects()
+    console.log('📋 Active objects:', { count: activeObjects.length, objects: activeObjects })
+    
     const imageUrls: string[] = []
     
-    activeObjects.forEach((obj) => {
+    activeObjects.forEach((obj, index) => {
+      console.log(`🖼️ Object ${index}:`, { 
+        type: obj.type, 
+        hasElement: !!(obj as any)._element, 
+        hasSrc: !!(obj as any)._element?.src,
+        src: (obj as any)._element?.src?.substring(0, 50) + '...'
+      })
+      
       if (obj.type === 'image' && (obj as any)._element?.src) {
         imageUrls.push((obj as any)._element.src)
       }
     })
     
+    console.log('✅ Selected image URLs:', { count: imageUrls.length })
     return imageUrls
   }
 }))

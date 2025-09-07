@@ -1,5 +1,6 @@
 import type { 
   TextToImageRequest, 
+  ImageToImageRequest,
   AIGeneratedImage, 
   ImageEditRequest,
   StyleTransferRequest,
@@ -18,6 +19,7 @@ interface BackendAPIConfig {
     editWithWords: string
     blendProduct: string
     generateVideo: string
+    generateText: string
   }
 }
 
@@ -26,7 +28,7 @@ class AIService {
 
   constructor() {
     this.config = {
-      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3002/api',
+      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3003/api',
       endpoints: {
         generateImage: '/ai/generate-image',
         mergeImages: '/ai/merge-images',
@@ -36,7 +38,8 @@ class AIService {
         generateComic: '/ai/generate-comic',
         editWithWords: '/ai/edit-with-words',
         blendProduct: '/ai/blend-product',
-        generateVideo: '/ai/generate-video'
+        generateVideo: '/ai/generate-video',
+        generateText: '/ai/generate-text'
       }
     }
   }
@@ -83,6 +86,62 @@ class AIService {
       }
     } catch (error) {
       console.error('Image generation error:', error)
+      throw error
+    }
+  }
+
+  // New method for image-to-image generation using Nano Banana
+  async imageToImage(request: ImageToImageRequest): Promise<AIGeneratedImage> {
+    try {
+      console.log('🎨 Frontend AI Image-to-Image called!')
+      console.log('📝 Request details:', {
+        prompt: request.prompt.substring(0, 100) + '...',
+        imageUrl: request.imageUrl.substring(0, 50) + '...',
+        width: request.width,
+        height: request.height,
+        strength: request.strength
+      })
+      
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateImage}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: request.prompt,
+          imageUrl: request.imageUrl,  // Reference image
+          width: request.width || 512,
+          height: request.height || 512,
+          strength: request.strength || 0.7,  // How much to follow reference image
+          provider: 'gemini',
+          mode: 'image-to-image'  // Specify mode
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Backend API error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      
+      return {
+        url: data.imageUrl || data.url,
+        width: data.width || request.width || 512,
+        height: data.height || request.height || 512,
+        prompt: request.prompt,
+        provider: 'gemini' as AIServiceProvider,
+        metadata: {
+          timestamp: Date.now(),
+          model: 'gemini-2.5-flash-image',
+          mode: 'image-to-image',
+          referenceImage: request.imageUrl,
+          strength: request.strength || 0.7,
+          ...data.metadata
+        }
+      }
+    } catch (error) {
+      console.error('Image-to-image generation error:', error)
       throw error
     }
   }
@@ -325,7 +384,7 @@ class AIService {
           panelUrls: request.panelUrls,
           narrationText: request.narrationText,
           voiceId: request.voiceId || 'default',
-          duration: request.duration || 15,
+          duration: request.duration || 8,
           provider: 'fal-ai'
         })
       })
@@ -339,6 +398,35 @@ class AIService {
       return data.videoUrl || data.url
     } catch (error) {
       console.error('Video generation error:', error)
+      throw error
+    }
+  }
+
+  async generateText(request: {
+    prompt: string
+    maxLength?: number
+  }): Promise<string> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateText}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: request.prompt,
+          maxLength: request.maxLength || 100
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Text generation error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      return data.text
+    } catch (error) {
+      console.error('Text generation error:', error)
       throw error
     }
   }

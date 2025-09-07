@@ -11,7 +11,8 @@ import {
   Wand2,
   Brain,
   Camera,
-  Glasses
+  Glasses,
+  Play
 } from 'lucide-react'
 
 interface NewContextMenuProps {
@@ -35,6 +36,9 @@ interface NewContextMenuProps {
   onWearAccessory: () => void
   onSceneCompose: () => void
   onCreativeBlend: () => void
+  // Video playback function
+  onPlayVideo?: () => void
+  hasVideoThumbnail?: boolean
 }
 
 export const NewContextMenu: React.FC<NewContextMenuProps> = ({
@@ -56,7 +60,9 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
   onIntelligentCompose,
   onWearAccessory,
   onSceneCompose,
-  onCreativeBlend
+  onCreativeBlend,
+  onPlayVideo,
+  hasVideoThumbnail
 }) => {
   if (!visible) return null
 
@@ -70,6 +76,17 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
   })
 
   const menuItems = [
+    // 🎬 Video Operations (only if video thumbnail is selected)
+    ...(hasVideoThumbnail && selectedCount === 1 && onPlayVideo ? [
+      {
+        icon: Play,
+        label: '🎬 Play Video',
+        onClick: onPlayVideo,
+        className: 'text-orange-600 hover:bg-orange-50 font-semibold',
+        separator: true
+      }
+    ] : []),
+    
     // 🎨 AI Composition (only for 2+ selected items)
     ...(selectedCount >= 2 ? [
       {
