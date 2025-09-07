@@ -285,17 +285,106 @@ export const AIPanel: React.FC = () => {
         {activeTab === 'generate' && (
           <div className="space-y-3">
             <p className="text-xs text-gray-600">
-              Generate new images from text descriptions using AI.
+              Generate images with Gemini 2.5 Flash (Nano Banana)
             </p>
+            
+            {/* Popular Templates */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-purple-700 flex items-center">
+                🔥 Popular Templates (Click to use)
+              </p>
+              
+              {/* Figurine Template - Most Viral */}
+              <div className="p-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-orange-200">
+                <button
+                  onClick={() => setPrompt('A cute miniature figurine of [your subject] as a tiny desktop collectible toy. The figurine is placed on a wooden desk with soft studio lighting. Detailed textures, photorealistic rendering, tilt-shift photography effect, shallow depth of field.')}
+                  className="w-full text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-orange-700">🏆 Viral Figurine Style</span>
+                    <span className="text-xs px-2 py-0.5 bg-orange-200 text-orange-800 rounded-full">TRENDING</span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">Turn anyone into a cute desktop figurine</p>
+                </button>
+              </div>
+              
+              {/* Template Grid */}
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setPrompt('A photorealistic close-up portrait of an elderly Japanese ceramicist with deep, sun-etched wrinkles and a warm, knowing smile. He is carefully inspecting a freshly glazed tea bowl. The setting is his rustic, sun-drenched workshop. Soft golden hour light, 85mm portrait lens, bokeh background.')}
+                  className="p-2 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-purple-700">📸 Portrait Pro</span>
+                  <p className="text-xs text-gray-600 mt-0.5">Photorealistic portrait</p>
+                </button>
+                
+                <button
+                  onClick={() => setPrompt('A kawaii-style sticker of a happy red panda wearing a tiny bamboo hat, munching on a green bamboo leaf. Bold clean outlines, simple cel-shading, vibrant colors. White background.')}
+                  className="p-2 bg-pink-50 hover:bg-pink-100 rounded-lg border border-pink-200 transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-pink-700">🎨 Kawaii Sticker</span>
+                  <p className="text-xs text-gray-600 mt-0.5">Cute sticker design</p>
+                </button>
+                
+                <button
+                  onClick={() => setPrompt('A high-resolution studio product photograph of a minimalist ceramic coffee mug in matte black on polished concrete. Three-point softbox lighting, 45-degree angle, ultra-realistic with steam rising from coffee.')}
+                  className="p-2 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-blue-700">📦 Product Shot</span>
+                  <p className="text-xs text-gray-600 mt-0.5">E-commerce ready</p>
+                </button>
+                
+                <button
+                  onClick={() => setPrompt('Studio Ghibli style, pastel colors, dreamy anime portrait with soft lighting and whimsical atmosphere')}
+                  className="p-2 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-green-700">🌸 Ghibli Style</span>
+                  <p className="text-xs text-gray-600 mt-0.5">Anime aesthetic</p>
+                </button>
+                
+                <button
+                  onClick={() => setPrompt('LinkedIn headshot, professional attire, confident smile, blurred modern office background, soft natural lighting')}
+                  className="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-indigo-700">💼 LinkedIn Pro</span>
+                  <p className="text-xs text-gray-600 mt-0.5">Professional headshot</p>
+                </button>
+                
+                <button
+                  onClick={() => setPrompt('A minimalist composition with a single delicate red maple leaf in bottom-right corner. Vast empty off-white canvas, significant negative space for text. Soft diffused lighting from top left.')}
+                  className="p-2 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors text-left"
+                >
+                  <span className="text-xs font-medium text-gray-700">⬜ Minimalist</span>
+                  <p className="text-xs text-gray-600 mt-0.5">Clean & simple</p>
+                </button>
+              </div>
+              
+              {/* Quick Style Modifiers */}
+              <div className="mt-2 p-2 bg-purple-50 rounded-lg">
+                <p className="text-xs font-medium text-purple-700 mb-1">✨ Quick Enhancements (Add to prompt)</p>
+                <div className="flex flex-wrap gap-1">
+                  {['viral meme style', '4K ultra HD', 'cinematic lighting', 'trending on artstation', 'octane render'].map(modifier => (
+                    <button
+                      key={modifier}
+                      onClick={() => setPrompt(prev => prev + (prev ? ', ' : '') + modifier)}
+                      className="text-xs px-2 py-1 bg-white hover:bg-purple-100 rounded border border-purple-300 transition-colors"
+                    >
+                      {modifier}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
             <button
               onClick={handleGenerateImage}
               disabled={isProcessing || !prompt.trim()}
-              className="w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white text-sm rounded-lg transition-colors flex items-center justify-center space-x-2"
+              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-400 text-white text-sm rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:scale-100"
             >
               {isProcessing ? (
                 <>
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                  <span>Generating...</span>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Generating with Nano Banana...</span>
                 </>
               ) : (
                 <>
