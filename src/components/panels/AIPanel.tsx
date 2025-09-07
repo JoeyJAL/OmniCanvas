@@ -24,7 +24,7 @@ export const AIPanel: React.FC = () => {
   const { importImage } = useCanvasStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [prompt, setPrompt] = useState('')
-  const [activeTab, setActiveTab] = useState<'generate' | 'merge' | 'style' | 'voice' | 'storyshop'>('storyshop')
+  const [activeTab, setActiveTab] = useState<'generate' | 'merge' | 'style' | 'voice' | 'storyshop'>('generate')
   const [_lastResult, setLastResult] = useState<string | null>(null)
   
   // StoryShop state
@@ -219,8 +219,8 @@ export const AIPanel: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'storyshop' as const, label: 'Story', icon: BookOpen },
     { id: 'generate' as const, label: 'Generate', icon: Sparkles },
+    { id: 'storyshop' as const, label: 'Story', icon: BookOpen },
     { id: 'merge' as const, label: 'Merge', icon: Merge },
     { id: 'style' as const, label: 'Style', icon: Palette },
     { id: 'voice' as const, label: 'Voice', icon: Volume2 }
