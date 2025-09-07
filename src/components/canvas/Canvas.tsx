@@ -347,8 +347,7 @@ export const Canvas: React.FC = () => {
     
     console.log('🌟 Generating similar images from selected objects:', contextMenu.selectedObjects.length)
     
-    const prompt = window.prompt('Describe the style or type of similar image to generate:', 'Create a similar image with the same style and theme')
-    if (!prompt) return
+    const prompt = 'Generate a very similar object or item with the same category, style, and visual characteristics. Keep the same type of object, similar colors, materials, and overall appearance. Maintain the same scene context and background style.'
 
     try {
       // Create progress indicator
@@ -376,7 +375,7 @@ export const Canvas: React.FC = () => {
       // Generate similar image using the backend API
       const result = await aiService.generateSimilar({
         images: imageUrls,
-        prompt: `Generate a similar image based on the provided reference(s). ${prompt}. Maintain the overall style, composition, and aesthetic qualities while creating something new and original.`,
+        prompt: `Create an image of the exact same type of object/item as shown in the reference image(s). If it's sunglasses, generate different sunglasses. If it's a car, generate a different car. ${prompt}. Do NOT change the object category - keep it as the same type of item but with variations in design, color, or style.`,
         aspectRatio: '1:1'
       })
 
@@ -555,6 +554,7 @@ export const Canvas: React.FC = () => {
             isProgressImage: true
           })
           canvas.add(img)
+          canvas.bringToFront(img)
           canvas.renderAll()
           resolve(img)
         }

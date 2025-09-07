@@ -77,7 +77,16 @@ app.post('/api/ai/generate-image', async (req, res) => {
     const { prompt, width = 512, height = 512 } = req.body;
     
     // Create enhanced prompt for better image generation
-    const enhancedPrompt = `Create a detailed, high-quality image: ${prompt}. Generate a photorealistic, well-composed image with good lighting and professional quality.`;
+    const enhancedPrompt = `Create a detailed, high-quality image: ${prompt}. Generate a photorealistic, well-composed image with good lighting and professional quality.
+
+IMPORTANT FORMATTING REQUIREMENTS:
+- Generate the image with a CLEAN WHITE or TRANSPARENT background
+- Avoid black borders, frames, or padding around the image
+- Create a clean, professional image without unnecessary backgrounds or frames
+- Focus on the main subject without black edges or borders
+- Ensure the image fills the entire canvas without black padding
+
+Generate a high-quality result with clean edges and no black frames.`;
     
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST',
@@ -166,7 +175,16 @@ app.post('/api/ai/merge-images', async (req, res) => {
     );
 
     // Create enhanced prompt for multi-image composition
-    const enhancedPrompt = `Create a photorealistic composition that intelligently combines elements from these images. ${prompt || 'Merge the key subjects and objects naturally into a cohesive, well-lit scene'}. Generate a high-quality result that looks professionally composed.`;
+    const enhancedPrompt = `Create a photorealistic composition that intelligently combines elements from these images. ${prompt || 'Merge the key subjects and objects naturally into a cohesive, well-lit scene'}. 
+
+IMPORTANT FORMATTING REQUIREMENTS:
+- Generate the image with a CLEAN WHITE or TRANSPARENT background
+- Avoid black borders, frames, or padding around the image
+- Create a clean, professional composition without unnecessary backgrounds
+- Focus on the main subjects without black edges or borders
+- Ensure the image fills the entire canvas without black padding
+
+Generate a high-quality result that looks professionally composed with clean edges and no black frames.`;
 
     console.log('🎨 Generating composed image with Gemini 2.5 Flash (Nano Banana)...');
     
@@ -408,6 +426,13 @@ app.post('/api/ai/generate-similar', async (req, res) => {
 🎨 CREATE: Make something new and original, not a copy or analysis
 
 USER REQUEST: ${prompt}
+
+IMPORTANT FORMATTING REQUIREMENTS:
+- Generate the image with a CLEAN WHITE or TRANSPARENT background
+- Avoid black borders or frames around the image
+- Create a clean, professional product-style image
+- Focus on the main subject without unnecessary backgrounds or frames
+- Ensure the image fills the entire canvas without black padding
 
 IMPORTANT: Generate a new, original image that captures the essence and style of the reference while being completely new and creative. Focus on image generation, not image analysis.`;
 
