@@ -29,7 +29,18 @@
       "Bash(PORT=3002 npm start)",
       "Bash(PORT=3003 npm start)",
       "WebFetch(domain:fal.ai)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(cat:*)",
+      "Read(//Users/joeyjal/Development/App/**)",
+      "Bash(vite build:*)",
+      "Bash(npx vite build:*)",
+      "Bash(npm run:*)",
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-62t2x9afy-joeyjals-projects.vercel.app/api)",
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-j31thpk27-joeyjals-projects.vercel.app/api)",
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-dyrigu2m3-joeyjals-projects.vercel.app/api)",
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-vnq5pfksd-joeyjals-projects.vercel.app/api)",
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-mttekvbpb-joeyjals-projects.vercel.app/api)",
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend.vercel.app/api)"
     ],
     "deny": [],
     "ask": []

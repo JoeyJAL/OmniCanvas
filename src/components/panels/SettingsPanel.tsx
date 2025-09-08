@@ -20,7 +20,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
       testConnection(saved)
     } else {
       // Set default URL
-      const defaultUrl = 'http://localhost:3003/api'
+      const defaultUrl = 'https://omnicanvas-backend.vercel.app/api'
       setBackendUrl(defaultUrl)
       testConnection(defaultUrl)
     }
@@ -136,7 +136,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                     type="url"
                     value={backendUrl}
                     onChange={(e) => handleUrlChange(e.target.value)}
-                    placeholder="http://localhost:3001/api"
+                    placeholder="https://your-backend.vercel.app/api"
                     className="flex-1 text-sm border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                   <button

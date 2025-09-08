@@ -16,15 +16,68 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow localhost on any port for development
-    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) {
+      return callback(null, true);
     }
-  }
+
+    // Allow localhost on any port for development
+    if (/^http:\/\/localhost:\d+$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow any *.vercel.app domain
+    if (/^https:\/\/.*\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    // Allow specific frontend URL from environment variable
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (frontendUrl && origin === frontendUrl) {
+      return callback(null, true);
+    }
+
+    console.log('🚫 CORS blocked origin:', origin);
+    callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json({ limit: '50mb' }));
+// Custom middleware to handle large image requests by compressing them first
+app.use('/api/ai/merge-images', async (req, res, next) => {
+  try {
+    if (req.method === 'POST' && req.body && req.body.imageUrls) {
+      console.log('🔧 Pre-processing large images for merge request...');
+      
+      // Compress any data URLs in the imageUrls array
+      req.body.imageUrls = await Promise.all(
+        req.body.imageUrls.map(async (url) => {
+          if (url.startsWith('data:') && url.length > 100000) { // >100KB data URL
+            console.log('📦 Compressing large data URL...');
+            const base64Data = url.split(',')[1];
+            const buffer = Buffer.from(base64Data, 'base64');
+            
+            const compressedBuffer = await sharp(buffer)
+              .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
+              .jpeg({ quality: 30 })
+              .toBuffer();
+            
+            return `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
+          }
+          return url;
+        })
+      );
+    }
+    next();
+  } catch (error) {
+    console.error('❌ Pre-compression failed:', error);
+    next();
+  }
+});
+
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // 檢查必要的環境變數
 const requiredEnvVars = ['GEMINI_API_KEY'];
@@ -47,6 +100,40 @@ app.get('/api/health', (req, res) => {
       fal: !!process.env.FAL_AI_API_KEY
     }
   });
+});
+
+// Temporary image compression endpoint to handle large images before merging
+app.post('/api/compress-image', async (req, res) => {
+  try {
+    const { imageData } = req.body;
+    
+    if (!imageData || !imageData.startsWith('data:')) {
+      return res.status(400).json({ error: 'Valid data URL required' });
+    }
+    
+    console.log('🔧 Compressing large image for merging...');
+    
+    // Convert data URL to buffer and compress aggressively
+    const base64Data = imageData.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+    console.log('📊 Original image size:', Math.round(buffer.length / 1024), 'KB');
+    
+    // Very aggressive compression for merge requests
+    const compressedBuffer = await sharp(buffer)
+      .resize(400, 400, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 40 }) // Very aggressive compression
+      .toBuffer();
+    
+    // Convert back to data URL
+    const compressedDataUrl = `data:image/jpeg;base64,${compressedBuffer.toString('base64')}`;
+    
+    console.log('✅ Image compressed:', Math.round(buffer.length/1024), 'KB →', Math.round(compressedBuffer.length/1024), 'KB');
+    
+    res.json({ compressedImageUrl: compressedDataUrl });
+  } catch (error) {
+    console.error('❌ Image compression failed:', error);
+    res.status(500).json({ error: 'Image compression failed' });
+  }
 });
 
 // Helper function to preprocess image for Fal.ai veo3 requirements
@@ -99,27 +186,37 @@ async function preprocessImageForVideo(imageUrl) {
   }
 }
 
-// Helper function to convert image URL to base64
+// Helper function to convert image URL to base64 with compression
 async function imageUrlToBase64(imageUrl) {
   try {
     console.log('🖼️ Converting image to base64:', imageUrl.substring(0, 50) + '...');
+    
+    let buffer;
     
     // Handle data URLs directly
     if (imageUrl.startsWith('data:')) {
       const base64Part = imageUrl.split(',')[1];
       if (base64Part) {
-        console.log('✅ Data URL converted, size:', Math.round(base64Part.length / 1024), 'KB');
-        return base64Part;
+        buffer = Buffer.from(base64Part, 'base64');
+        console.log('📊 Original data URL size:', Math.round(buffer.length / 1024), 'KB');
       } else {
         throw new Error('Invalid data URL format');
       }
+    } else {
+      // Handle HTTP(S) URLs
+      const response = await fetch(imageUrl);
+      buffer = await response.buffer();
+      console.log('📊 Original image size:', Math.round(buffer.length / 1024), 'KB');
     }
     
-    // Handle HTTP(S) URLs
-    const response = await fetch(imageUrl);
-    const buffer = await response.buffer();
-    const base64 = buffer.toString('base64');
-    console.log('✅ HTTP image converted, size:', Math.round(base64.length / 1024), 'KB');
+    // Compress image using sharp to reduce payload size
+    const compressedBuffer = await sharp(buffer)
+      .resize(512, 512, { fit: 'inside', withoutEnlargement: true }) // Max 512px on longest side
+      .jpeg({ quality: 60 }) // Compress to JPEG with 60% quality for smaller size
+      .toBuffer();
+    
+    const base64 = compressedBuffer.toString('base64');
+    console.log('✅ Image compressed and converted, size:', Math.round(base64.length / 1024), 'KB');
     return base64;
   } catch (error) {
     console.error('❌ Failed to convert image:', error.message);
@@ -318,17 +415,52 @@ app.post('/api/ai/merge-images', async (req, res) => {
     if (!imageUrls || imageUrls.length < 2) {
       throw new Error('At least 2 images required for merging');
     }
+    
+    // Check request size early
+    const requestSize = JSON.stringify(req.body).length;
+    console.log('📊 Request body size:', Math.round(requestSize / 1024), 'KB');
+    
+    if (requestSize > 8 * 1024 * 1024) { // 8MB limit
+      return res.status(413).json({ error: 'Request too large. Please use smaller images.' });
+    }
 
-    // Convert images to base64 for multi-image composition
+    // Convert images to base64 for multi-image composition with aggressive compression
+    console.log('🔧 Processing', imageUrls.length, 'images with aggressive compression...');
     const imageParts = await Promise.all(
-      imageUrls.map(async (url) => {
-        const base64 = await imageUrlToBase64(url);
-        return {
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: base64
-          }
-        };
+      imageUrls.map(async (url, index) => {
+        console.log(`📸 Processing image ${index + 1}/${imageUrls.length}`);
+        
+        // For data URLs, compress aggressively BEFORE converting to base64
+        if (url.startsWith('data:')) {
+          const base64Data = url.split(',')[1];
+          const buffer = Buffer.from(base64Data, 'base64');
+          console.log(`📊 Original image ${index + 1} size:`, Math.round(buffer.length / 1024), 'KB');
+          
+          // Ultra-aggressive compression for merge requests
+          const compressedBuffer = await sharp(buffer)
+            .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
+            .jpeg({ quality: 30 }) // Ultra low quality for small size
+            .toBuffer();
+          
+          const compressedBase64 = compressedBuffer.toString('base64');
+          console.log(`✅ Compressed image ${index + 1}:`, Math.round(buffer.length/1024), 'KB →', Math.round(compressedBuffer.length/1024), 'KB');
+          
+          return {
+            inlineData: {
+              mimeType: 'image/jpeg',
+              data: compressedBase64
+            }
+          };
+        } else {
+          // For HTTP URLs, use existing compression function
+          const base64 = await imageUrlToBase64(url);
+          return {
+            inlineData: {
+              mimeType: 'image/jpeg',
+              data: base64
+            }
+          };
+        }
       })
     );
 

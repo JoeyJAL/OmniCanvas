@@ -6,6 +6,7 @@ import type {
   StyleTransferRequest,
   AIServiceProvider 
 } from '@/types/ai'
+import { compressDataURLs, compressDataURL, getDataURLSize } from '@/utils/imageCompression'
 
 interface BackendAPIConfig {
   baseUrl: string
@@ -28,7 +29,7 @@ class AIService {
 
   constructor() {
     this.config = {
-      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3003/api',
+      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'https://omnicanvas-backend.vercel.app/api',
       endpoints: {
         generateImage: '/ai/generate-image',
         mergeImages: '/ai/merge-images',
@@ -102,6 +103,26 @@ class AIService {
         strength: request.strength
       })
       
+      // Compress the reference image if it's a data URL
+      let processedImageUrl = request.imageUrl
+      
+      if (request.imageUrl.startsWith('data:')) {
+        console.log('🔧 Compressing reference image for image-to-image...')
+        const originalSize = getDataURLSize(request.imageUrl)
+        console.log(`📏 Original image size: ${Math.round(originalSize / 1024)}KB`)
+        
+        const compressionResult = await compressDataURL(request.imageUrl, {
+          maxWidth: 768,
+          maxHeight: 768,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 2000
+        })
+        
+        processedImageUrl = compressionResult.dataURL
+        console.log(`✅ Compressed image size: ${Math.round(compressionResult.compressedSize / 1024)}KB`)
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateImage}`, {
         method: 'POST',
         headers: {
@@ -109,7 +130,7 @@ class AIService {
         },
         body: JSON.stringify({
           prompt: request.prompt,
-          imageUrl: request.imageUrl,  // Reference image
+          imageUrl: processedImageUrl,  // Reference image (compressed if needed)
           width: request.width || 512,
           height: request.height || 512,
           strength: request.strength || 0.7,  // How much to follow reference image
@@ -150,13 +171,44 @@ class AIService {
     try {
       console.log('🎨 Backend AI Merge - Images:', imageUrls.length, 'Prompt:', prompt)
       
+      // Check if any images are data URLs that need compression
+      const dataUrls = imageUrls.filter(url => url.startsWith('data:'))
+      const regularUrls = imageUrls.filter(url => !url.startsWith('data:'))
+      
+      let processedUrls = [...regularUrls]
+      
+      if (dataUrls.length > 0) {
+        console.log('🔧 Compressing', dataUrls.length, 'data URLs on client side...')
+        
+        // Log original sizes
+        const originalSizes = dataUrls.map(url => getDataURLSize(url))
+        const totalOriginalSize = originalSizes.reduce((sum, size) => sum + size, 0)
+        console.log(`📏 Original total size: ${Math.round(totalOriginalSize / 1024)}KB`)
+        
+        // Compress data URLs
+        const compressionResults = await compressDataURLs(dataUrls, {
+          maxWidth: 800,
+          maxHeight: 800,
+          quality: 0.6,
+          format: 'jpeg',
+          maxSizeKB: 1500 // Conservative limit for each image
+        })
+        
+        const compressedUrls = compressionResults.map(result => result.dataURL)
+        const totalCompressedSize = compressionResults.reduce((sum, result) => sum + result.compressedSize, 0)
+        
+        console.log(`✅ Compressed total size: ${Math.round(totalCompressedSize / 1024)}KB (${Math.round(totalOriginalSize / totalCompressedSize * 100)/100}x reduction)`)
+        
+        processedUrls = [...regularUrls, ...compressedUrls]
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.mergeImages}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          imageUrls,
+          imageUrls: processedUrls,
           prompt,
           provider: 'gemini'
         })
@@ -209,13 +261,34 @@ class AIService {
     try {
       console.log('🌟 Calling generateSimilar API with', request.images.length, 'images')
       
+      // Compress large data URLs
+      const dataUrls = request.images.filter(url => url.startsWith('data:'))
+      const regularUrls = request.images.filter(url => !url.startsWith('data:'))
+      
+      let processedImages = [...regularUrls]
+      
+      if (dataUrls.length > 0) {
+        console.log('🔧 Compressing', dataUrls.length, 'data URLs for generateSimilar...')
+        
+        const compressionResults = await compressDataURLs(dataUrls, {
+          maxWidth: 768,
+          maxHeight: 768,
+          quality: 0.7,
+          format: 'jpeg',
+          maxSizeKB: 1800
+        })
+        
+        const compressedUrls = compressionResults.map(result => result.dataURL)
+        processedImages = [...regularUrls, ...compressedUrls]
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateSimilar}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          imageUrls: request.images,
+          imageUrls: processedImages,
           prompt: request.prompt,
           aspectRatio: request.aspectRatio || '1:1',
           provider: 'gemini'
@@ -276,6 +349,36 @@ class AIService {
     try {
       console.log('📚 Generating comic with StoryShop API')
       
+      // Compress character and product images if they are data URLs
+      let processedCharacterImage = request.characterImage
+      let processedProductImage = request.productImage
+
+      if (request.characterImage && request.characterImage.startsWith('data:')) {
+        console.log('🔧 Compressing character image for comic generation...')
+        const compressionResult = await compressDataURL(request.characterImage, {
+          maxWidth: 512,
+          maxHeight: 512,
+          quality: 0.7,
+          format: 'jpeg',
+          maxSizeKB: 1200
+        })
+        processedCharacterImage = compressionResult.dataURL
+        console.log(`✅ Character image compressed: ${Math.round(compressionResult.compressedSize / 1024)}KB`)
+      }
+
+      if (request.productImage && request.productImage.startsWith('data:')) {
+        console.log('🔧 Compressing product image for comic generation...')
+        const compressionResult = await compressDataURL(request.productImage, {
+          maxWidth: 512,
+          maxHeight: 512,
+          quality: 0.7,
+          format: 'jpeg',
+          maxSizeKB: 1200
+        })
+        processedProductImage = compressionResult.dataURL
+        console.log(`✅ Product image compressed: ${Math.round(compressionResult.compressedSize / 1024)}KB`)
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateComic}`, {
         method: 'POST',
         headers: {
@@ -283,8 +386,8 @@ class AIService {
         },
         body: JSON.stringify({
           storyPrompt: request.storyPrompt,
-          characterImage: request.characterImage,
-          productImage: request.productImage,
+          characterImage: processedCharacterImage,
+          productImage: processedProductImage,
           style: request.style,
           panelCount: request.panelCount || 4,
           provider: 'gemini'
@@ -310,15 +413,43 @@ class AIService {
     maskUrl?: string
   }): Promise<string> {
     try {
+      // Compress images if they are data URLs
+      let processedImageUrl = request.imageUrl
+      let processedMaskUrl = request.maskUrl
+
+      if (request.imageUrl.startsWith('data:')) {
+        console.log('🔧 Compressing image for editWithWords...')
+        const compressionResult = await compressDataURL(request.imageUrl, {
+          maxWidth: 768,
+          maxHeight: 768,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 2000
+        })
+        processedImageUrl = compressionResult.dataURL
+      }
+
+      if (request.maskUrl && request.maskUrl.startsWith('data:')) {
+        console.log('🔧 Compressing mask for editWithWords...')
+        const compressionResult = await compressDataURL(request.maskUrl, {
+          maxWidth: 768,
+          maxHeight: 768,
+          quality: 0.8,
+          format: 'png', // Keep mask as PNG to preserve transparency
+          maxSizeKB: 1000
+        })
+        processedMaskUrl = compressionResult.dataURL
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.editWithWords}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          imageUrl: request.imageUrl,
+          imageUrl: processedImageUrl,
           editPrompt: request.editPrompt,
-          maskUrl: request.maskUrl,
+          maskUrl: processedMaskUrl,
           provider: 'gemini'
         })
       })
@@ -342,14 +473,42 @@ class AIService {
     blendPrompt: string
   }): Promise<string> {
     try {
+      // Compress images if they are data URLs
+      let processedSceneUrl = request.sceneImageUrl
+      let processedProductUrl = request.productImageUrl
+
+      if (request.sceneImageUrl.startsWith('data:')) {
+        console.log('🔧 Compressing scene image for blendProduct...')
+        const compressionResult = await compressDataURL(request.sceneImageUrl, {
+          maxWidth: 768,
+          maxHeight: 768,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 2000
+        })
+        processedSceneUrl = compressionResult.dataURL
+      }
+
+      if (request.productImageUrl.startsWith('data:')) {
+        console.log('🔧 Compressing product image for blendProduct...')
+        const compressionResult = await compressDataURL(request.productImageUrl, {
+          maxWidth: 512,
+          maxHeight: 512,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 1500
+        })
+        processedProductUrl = compressionResult.dataURL
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.blendProduct}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          sceneImageUrl: request.sceneImageUrl,
-          productImageUrl: request.productImageUrl,
+          sceneImageUrl: processedSceneUrl,
+          productImageUrl: processedProductUrl,
           blendPrompt: request.blendPrompt,
           provider: 'gemini'
         })
@@ -375,13 +534,46 @@ class AIService {
     duration?: number
   }): Promise<string> {
     try {
+      console.log('🎬 Generating video from panels...')
+      
+      // Compress panel images if they are data URLs
+      const dataUrls = request.panelUrls.filter(url => url.startsWith('data:'))
+      const regularUrls = request.panelUrls.filter(url => !url.startsWith('data:'))
+      
+      let processedPanelUrls = [...regularUrls]
+      
+      if (dataUrls.length > 0) {
+        console.log('🔧 Compressing', dataUrls.length, 'panel images for video generation...')
+        
+        // Calculate original total size
+        const originalSizes = dataUrls.map(url => getDataURLSize(url))
+        const totalOriginalSize = originalSizes.reduce((sum, size) => sum + size, 0)
+        console.log(`📏 Original panels total size: ${Math.round(totalOriginalSize / 1024)}KB`)
+        
+        // Compress panel images with video-specific settings
+        const compressionResults = await compressDataURLs(dataUrls, {
+          maxWidth: 720,  // HD-ready size for video
+          maxHeight: 720,
+          quality: 0.75,  // Good quality for video frames
+          format: 'jpeg',
+          maxSizeKB: 1000 // Conservative limit per panel
+        })
+        
+        const compressedUrls = compressionResults.map(result => result.dataURL)
+        const totalCompressedSize = compressionResults.reduce((sum, result) => sum + result.compressedSize, 0)
+        
+        console.log(`✅ Compressed panels total size: ${Math.round(totalCompressedSize / 1024)}KB (${Math.round(totalOriginalSize / totalCompressedSize * 100)/100}x reduction)`)
+        
+        processedPanelUrls = [...regularUrls, ...compressedUrls]
+      }
+      
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateVideo}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          panelUrls: request.panelUrls,
+          panelUrls: processedPanelUrls,
           narrationText: request.narrationText,
           voiceId: request.voiceId || 'default',
           duration: request.duration || 8,
@@ -445,6 +637,8 @@ class AIService {
 }
 
 export const aiService = new AIService()
+
+// Client-side compression enabled for all image operations
 
 export function configureAIServices(config?: any) {
   console.log('AI services now use backend API - frontend configuration ignored')
