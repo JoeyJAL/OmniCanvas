@@ -241,7 +241,7 @@ export const AIPanel: React.FC = () => {
     console.log(`🖼️ Using ${type} from canvas, selected:`, selectedImages.length, 'images')
     
     if (selectedImages.length === 0) {
-      alert(`Please select an image on the canvas first for the ${type}!`)
+      alert(t.aiPanel.storyMaker.errors.characterRequired)
       return
     }
     
@@ -258,7 +258,7 @@ export const AIPanel: React.FC = () => {
 
   const handleGenerateComic = async () => {
     if (!storyPrompt.trim()) {
-      alert('Please enter a story prompt first!')
+      alert(t.aiPanel.storyMaker.errors.noStory)
       return
     }
 
@@ -984,10 +984,10 @@ Apply the edit instructions while maintaining:
                 <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="text-lg font-black tracking-tight">Story Maker</h4>
+                <h4 className="text-lg font-black tracking-tight">{t.aiPanel.storyMaker.title}</h4>
               </div>
               <p className="text-sm font-semibold mb-3 leading-tight">
-                🪄 One Story + One Photo = 4-Panel Comic + 8s Video
+                🪄 {t.aiPanel.storyMaker.description}
               </p>
               <p className="text-xs opacity-90 mb-4">
                 Perfect for <strong>social media</strong>, <strong>marketing</strong>, and <strong>content creation</strong>
@@ -1018,10 +1018,10 @@ Apply the edit instructions while maintaining:
                   <div className="p-1 bg-purple-100 rounded-lg">
                     <Camera className="w-4 h-4 text-purple-600" />
                   </div>
-                  <span>Main Character</span>
+                  <span>{t.aiPanel.storyMaker.characterSection.title}</span>
                 </label>
                 <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
-                  Step 1
+                  {t.aiPanel.storyMaker.characterSection.required}
                 </span>
               </div>
               <div className="border-2 border-dashed border-purple-300 rounded-xl p-5 bg-gradient-to-br from-purple-50/50 to-pink-50/50 hover:from-purple-100/50 hover:to-pink-100/50 transition-all duration-300">
@@ -1037,7 +1037,7 @@ Apply the edit instructions while maintaining:
                       </button>
                     </div>
                     <div className="mt-2 text-center">
-                      <p className="text-xs text-green-600 font-medium">✅ Character ready for story!</p>
+                      <p className="text-xs text-green-600 font-medium">✅ {t.aiPanel.storyMaker.characterSection.description}</p>
                     </div>
                   </div>
                 ) : (
@@ -1046,8 +1046,8 @@ Apply the edit instructions while maintaining:
                       <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center mb-2">
                         <Upload className="w-8 h-8 text-purple-500" />
                       </div>
-                      <p className="text-sm font-semibold text-gray-700 mb-1">Add Your Main Character</p>
-                      <p className="text-xs text-gray-500 mb-3">Drag from canvas or upload a photo</p>
+                      <p className="text-sm font-semibold text-gray-700 mb-1">{t.aiPanel.storyMaker.characterSection.title}</p>
+                      <p className="text-xs text-gray-500 mb-3">{t.aiPanel.storyMaker.characterSection.description}</p>
                     </div>
                     
                     <div className="grid grid-cols-1 gap-2">
@@ -1055,7 +1055,7 @@ Apply the edit instructions while maintaining:
                         onClick={() => handleUseFromCanvas('character')}
                         className="py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg"
                       >
-                        📸 Use Selected from Canvas
+                        📸 {t.aiPanel.storyMaker.useFromCanvas}
                       </button>
                       <label className="cursor-pointer">
                         <input
@@ -1065,7 +1065,7 @@ Apply the edit instructions while maintaining:
                           onChange={(e) => e.target.files?.[0] && handleImageUpload('character', e.target.files[0])}
                         />
                         <div className="py-2 px-4 bg-white hover:bg-gray-50 text-gray-700 text-xs rounded-lg border border-gray-300 font-medium transition-all">
-                          📁 Upload New Photo
+                          📁 {t.aiPanel.storyMaker.uploadImage}
                         </div>
                       </label>
                     </div>
@@ -1081,10 +1081,10 @@ Apply the edit instructions while maintaining:
                   <div className="p-1 bg-orange-100 rounded-lg">
                     <FileImage className="w-4 h-4 text-orange-600" />
                   </div>
-                  <span>Product Integration</span>
+                  <span>{t.aiPanel.storyMaker.productSection.title}</span>
                 </label>
                 <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
-                  Optional
+                  {t.aiPanel.storyMaker.productSection.optional}
                 </span>
               </div>
               <div className="border-2 border-dashed border-orange-200 rounded-xl p-4 bg-gradient-to-br from-orange-50/50 to-yellow-50/50 hover:from-orange-100/50 hover:to-yellow-100/50 transition-all duration-300">
@@ -1100,7 +1100,7 @@ Apply the edit instructions while maintaining:
                       </button>
                     </div>
                     <div className="mt-2 text-center">
-                      <p className="text-xs text-green-600 font-medium">🛍️ Product will appear in story!</p>
+                      <p className="text-xs text-green-600 font-medium">🛍️ {t.aiPanel.storyMaker.productSection.description}</p>
                     </div>
                   </div>
                 ) : (
@@ -1108,15 +1108,15 @@ Apply the edit instructions while maintaining:
                     <div className="w-12 h-12 mx-auto bg-gradient-to-br from-orange-100 to-yellow-100 rounded-lg flex items-center justify-center mb-2">
                       <FileImage className="w-6 h-6 text-orange-500" />
                     </div>
-                    <p className="text-xs font-semibold text-gray-700 mb-1">Add Product for E-commerce</p>
-                    <p className="text-xs text-gray-500 mb-2">Perfect for product marketing & ads</p>
+                    <p className="text-xs font-semibold text-gray-700 mb-1">{t.aiPanel.storyMaker.productSection.title}</p>
+                    <p className="text-xs text-gray-500 mb-2">{t.aiPanel.storyMaker.productSection.description}</p>
                     
                     <div className="grid grid-cols-1 gap-1">
                       <button 
                         onClick={() => handleUseFromCanvas('product')}
                         className="py-1.5 px-3 bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 text-white text-xs rounded-lg font-medium transition-all"
                       >
-                        🛍️ Use from Canvas
+                        🛍️ {t.aiPanel.storyMaker.useFromCanvas}
                       </button>
                       <label className="cursor-pointer">
                         <input
@@ -1126,7 +1126,7 @@ Apply the edit instructions while maintaining:
                           onChange={(e) => e.target.files?.[0] && handleImageUpload('product', e.target.files[0])}
                         />
                         <div className="py-1.5 px-3 bg-white hover:bg-gray-50 text-gray-600 text-xs rounded-lg border border-gray-200 font-medium transition-all">
-                          📁 Upload Product
+                          📁 {t.aiPanel.storyMaker.uploadImage}
                         </div>
                       </label>
                     </div>
@@ -1142,10 +1142,10 @@ Apply the edit instructions while maintaining:
                   <div className="p-1 bg-green-100 rounded-lg">
                     <TestTube className="w-4 h-4 text-green-600" />
                   </div>
-                  <span>Your Story Idea</span>
+                  <span>{t.aiPanel.storyMaker.storySection.title}</span>
                 </label>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                  Step 2
+                  {t.aiPanel.storyMaker.characterSection.required}
                 </span>
               </div>
               <div className="relative">
@@ -1199,21 +1199,20 @@ Apply the edit instructions while maintaining:
                   <div className="p-1 bg-blue-100 rounded-lg">
                     <Palette className="w-4 h-4 text-blue-600" />
                   </div>
-                  <span>Visual Style</span>
+                  <span>{t.aiPanel.storyMaker.styleLabel}</span>
                 </label>
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                  Step 3
+                  {t.aiPanel.storyMaker.characterSection.optional}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 {[
-                  { style: 'comic', emoji: '💥', desc: 'Bold & Dynamic' },
-                  { style: 'manga', emoji: '🎌', desc: 'Japanese Style' },
-                  { style: 'disney', emoji: '🏰', desc: 'Magical & Cute' },
-                  { style: 'realistic', emoji: '📷', desc: 'Photo-like' },
-                  { style: 'anime', emoji: '✨', desc: 'Anime Style' },
-                  { style: 'vintage', emoji: '🎨', desc: 'Classic Art' }
-                ].map(({ style, emoji, desc }) => (
+                  { style: 'comic', emoji: '💥', getDesc: () => t.aiPanel.storyMaker.styles.comic },
+                  { style: 'manga', emoji: '🎌', getDesc: () => t.aiPanel.storyMaker.styles.manga },
+                  { style: 'watercolor', emoji: '🏰', getDesc: () => t.aiPanel.storyMaker.styles.watercolor },
+                  { style: 'oil', emoji: '📷', getDesc: () => t.aiPanel.storyMaker.styles.oil },
+                  { style: 'sketch', emoji: '✨', getDesc: () => t.aiPanel.storyMaker.styles.sketch }
+                ].map(({ style, emoji, getDesc }) => (
                   <button
                     key={style}
                     onClick={() => setSelectedStyle(style)}
@@ -1224,9 +1223,9 @@ Apply the edit instructions while maintaining:
                     }`}
                   >
                     <div className="text-lg mb-1">{emoji}</div>
-                    <div className="font-bold capitalize">{style}</div>
+                    <div className="font-bold capitalize">{getDesc()}</div>
                     <div className={`text-xs opacity-75 ${selectedStyle === style ? 'text-white' : 'text-gray-500'}`}>
-                      {desc}
+                      {style}
                     </div>
                   </button>
                 ))}
@@ -1253,7 +1252,7 @@ Apply the edit instructions while maintaining:
                 {isProcessing ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>🎬 Creating Your Story Magic...</span>
+                    <span>🎬 {t.aiPanel.storyMaker.generatingPanels}</span>
                   </>
                 ) : (
                   <>
@@ -1261,7 +1260,7 @@ Apply the edit instructions while maintaining:
                       <BookOpen className="w-5 h-5" />
                       <span className="font-bold">4 PANELS</span>
                     </div>
-                    <span>✨ GENERATE COMIC</span>
+                    <span>✨ {t.aiPanel.storyMaker.generateButton.toUpperCase()}</span>
                     <div className="flex items-center space-x-1 bg-white/20 rounded-lg px-2 py-1">
                       <Video className="w-4 h-4" />
                       <span className="text-xs font-medium">+ Video</span>

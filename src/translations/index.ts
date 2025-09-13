@@ -94,6 +94,7 @@ export interface Translations {
     }
     storyMaker: {
       title: string
+      description: string
       styleLabel: string
       characterLabel: string
       productLabel: string
@@ -103,6 +104,37 @@ export interface Translations {
       uploadImage: string
       generating: string
       placeholder: string
+      styles: {
+        comic: string
+        manga: string
+        watercolor: string
+        oil: string
+        sketch: string
+      }
+      characterSection: {
+        title: string
+        description: string
+        required: string
+        optional: string
+      }
+      productSection: {
+        title: string
+        description: string
+        optional: string
+      }
+      storySection: {
+        title: string
+        description: string
+        examples: string[]
+      }
+      generatingPanels: string
+      panelComplete: string
+      storyComplete: string
+      errors: {
+        noStory: string
+        characterRequired: string
+        generationFailed: string
+      }
     }
   }
   
@@ -209,15 +241,51 @@ const en: Translations = {
     },
     storyMaker: {
       title: 'Story Maker',
-      styleLabel: 'Style',
-      characterLabel: 'Character',
-      productLabel: 'Product (Optional)',
-      storyPromptLabel: 'Story Prompt',
-      generateButton: 'Generate Comic Story',
+      description: 'Create 4-panel comic stories with consistent characters',
+      styleLabel: 'Art Style',
+      characterLabel: 'Main Character',
+      productLabel: 'Featured Product',
+      storyPromptLabel: 'Story Concept',
+      generateButton: 'Generate 4-Panel Comic',
       useFromCanvas: 'Use from Canvas',
       uploadImage: 'Upload Image',
       generating: 'Generating panel',
-      placeholder: 'Enter your story idea...'
+      placeholder: 'Describe your story in one sentence...\n\nExamples:\n• A coffee shop encounter on a snowy Christmas night\n• Finding the perfect gift during holiday shopping\n• A friendship that blooms in a cozy bookstore',
+      styles: {
+        comic: 'Comic Book',
+        manga: 'Manga Style',
+        watercolor: 'Watercolor',
+        oil: 'Oil Painting',
+        sketch: 'Pencil Sketch'
+      },
+      characterSection: {
+        title: 'Main Character',
+        description: 'Upload or select the main character for your story',
+        required: 'Required',
+        optional: 'Optional'
+      },
+      productSection: {
+        title: 'Featured Product',
+        description: 'Add a product to feature in your story (optional)',
+        optional: 'Optional'
+      },
+      storySection: {
+        title: 'Story Concept',
+        description: 'Describe your story idea in one sentence',
+        examples: [
+          'A coffee shop encounter on a snowy Christmas night',
+          'Finding the perfect gift during holiday shopping',
+          'A friendship that blooms in a cozy bookstore'
+        ]
+      },
+      generatingPanels: 'Generating comic panels...',
+      panelComplete: 'Panel completed',
+      storyComplete: 'Comic story completed!',
+      errors: {
+        noStory: 'Please enter a story prompt first!',
+        characterRequired: 'Please upload or select a character image!',
+        generationFailed: 'Comic generation failed. Please try again.'
+      }
     }
   },
   common: {
@@ -322,15 +390,51 @@ const zhTW: Translations = {
     },
     storyMaker: {
       title: '故事創作',
-      styleLabel: '風格',
-      characterLabel: '角色',
-      productLabel: '產品（選填）',
-      storyPromptLabel: '故事提示',
-      generateButton: '生成漫畫故事',
+      description: '創建具有一致角色的四格漫畫故事',
+      styleLabel: '藝術風格',
+      characterLabel: '主要角色',
+      productLabel: '特色產品',
+      storyPromptLabel: '故事概念',
+      generateButton: '生成四格漫畫',
       useFromCanvas: '從畫布使用',
       uploadImage: '上傳圖片',
-      generating: '正在生成第',
-      placeholder: '輸入您的故事想法...'
+      generating: '正在生成分鏡',
+      placeholder: '用一句話描述您的故事...\n\n範例：\n• 雪夜中的咖啡店邂逅\n• 假期購物中尋找完美禮物\n• 在溫馨書店中綻放的友誼',
+      styles: {
+        comic: '漫畫風格',
+        manga: '日式漫畫',
+        watercolor: '水彩畫',
+        oil: '油畫',
+        sketch: '鉛筆素描'
+      },
+      characterSection: {
+        title: '主要角色',
+        description: '上傳或選擇故事的主要角色',
+        required: '必填',
+        optional: '選填'
+      },
+      productSection: {
+        title: '特色產品',
+        description: '添加要在故事中展示的產品（選填）',
+        optional: '選填'
+      },
+      storySection: {
+        title: '故事概念',
+        description: '用一句話描述您的故事想法',
+        examples: [
+          '雪夜中的咖啡店邂逅',
+          '假期購物中尋找完美禮物',
+          '在溫馨書店中綻放的友誼'
+        ]
+      },
+      generatingPanels: '正在生成漫畫分鏡...',
+      panelComplete: '分鏡完成',
+      storyComplete: '漫畫故事完成！',
+      errors: {
+        noStory: '請先輸入故事提示！',
+        characterRequired: '請上傳或選擇角色圖片！',
+        generationFailed: '漫畫生成失敗，請重試。'
+      }
     }
   },
   common: {
@@ -435,15 +539,51 @@ const es: Translations = {
     },
     storyMaker: {
       title: 'Creador de Historias',
-      styleLabel: 'Estilo',
-      characterLabel: 'Personaje',
-      productLabel: 'Producto (Opcional)',
-      storyPromptLabel: 'Prompt de Historia',
-      generateButton: 'Generar Historia Cómic',
+      description: 'Crea historias de cómic de 4 paneles con personajes consistentes',
+      styleLabel: 'Estilo Artístico',
+      characterLabel: 'Personaje Principal',
+      productLabel: 'Producto Destacado',
+      storyPromptLabel: 'Concepto de Historia',
+      generateButton: 'Generar Cómic de 4 Paneles',
       useFromCanvas: 'Usar del Lienzo',
       uploadImage: 'Subir Imagen',
       generating: 'Generando panel',
-      placeholder: 'Ingresa tu idea de historia...'
+      placeholder: 'Describe tu historia en una oración...\n\nEjemplos:\n• Un encuentro en una cafetería en una noche navideña nevada\n• Encontrar el regalo perfecto durante las compras navideñas\n• Una amistad que florece en una acogedora librería',
+      styles: {
+        comic: 'Cómic',
+        manga: 'Estilo Manga',
+        watercolor: 'Acuarela',
+        oil: 'Pintura al Óleo',
+        sketch: 'Boceto a Lápiz'
+      },
+      characterSection: {
+        title: 'Personaje Principal',
+        description: 'Sube o selecciona el personaje principal de tu historia',
+        required: 'Requerido',
+        optional: 'Opcional'
+      },
+      productSection: {
+        title: 'Producto Destacado',
+        description: 'Agrega un producto para destacar en tu historia (opcional)',
+        optional: 'Opcional'
+      },
+      storySection: {
+        title: 'Concepto de Historia',
+        description: 'Describe tu idea de historia en una oración',
+        examples: [
+          'Un encuentro en una cafetería en una noche navideña nevada',
+          'Encontrar el regalo perfecto durante las compras navideñas',
+          'Una amistad que florece en una acogedora librería'
+        ]
+      },
+      generatingPanels: 'Generando paneles de cómic...',
+      panelComplete: 'Panel completado',
+      storyComplete: '¡Historia de cómic completada!',
+      errors: {
+        noStory: '¡Por favor ingresa una propuesta de historia primero!',
+        characterRequired: '¡Por favor sube o selecciona una imagen de personaje!',
+        generationFailed: 'La generación del cómic falló. Por favor intenta de nuevo.'
+      }
     }
   },
   common: {
@@ -548,15 +688,51 @@ const ja: Translations = {
     },
     storyMaker: {
       title: 'ストーリーメーカー',
-      styleLabel: 'スタイル',
-      characterLabel: 'キャラクター',
-      productLabel: '製品（オプション）',
-      storyPromptLabel: 'ストーリープロンプト',
-      generateButton: 'コミックストーリー生成',
+      description: '一貫したキャラクターで4コマ漫画ストーリーを作成',
+      styleLabel: 'アートスタイル',
+      characterLabel: 'メインキャラクター',
+      productLabel: 'フィーチャー商品',
+      storyPromptLabel: 'ストーリーコンセプト',
+      generateButton: '4コマ漫画生成',
       useFromCanvas: 'キャンバスから使用',
       uploadImage: '画像をアップロード',
       generating: 'パネル生成中',
-      placeholder: 'ストーリーのアイデアを入力...'
+      placeholder: 'ストーリーを一文で説明してください...\n\n例：\n• 雪のクリスマスの夜のコーヒーショップでの出会い\n• ホリデーショッピングで完璧なギフトを見つける\n• 居心地の良い本屋で咲く友情',
+      styles: {
+        comic: 'コミックブック',
+        manga: 'マンガスタイル',
+        watercolor: '水彩画',
+        oil: '油絵',
+        sketch: '鉛筆スケッチ'
+      },
+      characterSection: {
+        title: 'メインキャラクター',
+        description: 'ストーリーのメインキャラクターをアップロードまたは選択',
+        required: '必須',
+        optional: 'オプション'
+      },
+      productSection: {
+        title: 'フィーチャー商品',
+        description: 'ストーリーで紹介する商品を追加（オプション）',
+        optional: 'オプション'
+      },
+      storySection: {
+        title: 'ストーリーコンセプト',
+        description: 'ストーリーのアイデアを一文で説明',
+        examples: [
+          '雪のクリスマスの夜のコーヒーショップでの出会い',
+          'ホリデーショッピングで完璧なギフトを見つける',
+          '居心地の良い本屋で咲く友情'
+        ]
+      },
+      generatingPanels: 'コミックパネル生成中...',
+      panelComplete: 'パネル完了',
+      storyComplete: 'コミックストーリー完了！',
+      errors: {
+        noStory: 'まずストーリープロンプトを入力してください！',
+        characterRequired: 'キャラクター画像をアップロードまたは選択してください！',
+        generationFailed: 'コミック生成に失敗しました。もう一度お試しください。'
+      }
     }
   },
   common: {
@@ -661,15 +837,51 @@ const fr: Translations = {
     },
     storyMaker: {
       title: 'Créateur d\'Histoires',
-      styleLabel: 'Style',
-      characterLabel: 'Personnage',
-      productLabel: 'Produit (Optionnel)',
-      storyPromptLabel: 'Prompt d\'Histoire',
-      generateButton: 'Générer Histoire BD',
+      description: 'Créez des histoires de bande dessinée à 4 panneaux avec des personnages cohérents',
+      styleLabel: 'Style Artistique',
+      characterLabel: 'Personnage Principal',
+      productLabel: 'Produit Vedette',
+      storyPromptLabel: 'Concept d\'Histoire',
+      generateButton: 'Générer BD 4 Panneaux',
       useFromCanvas: 'Utiliser du Canevas',
       uploadImage: 'Télécharger Image',
       generating: 'Génération panneau',
-      placeholder: 'Entrez votre idée d\'histoire...'
+      placeholder: 'Décrivez votre histoire en une phrase...\n\nExemples :\n• Une rencontre dans un café par une nuit de Noël enneigée\n• Trouver le cadeau parfait pendant les achats des fêtes\n• Une amitié qui s\'épanouit dans une librairie douillette',
+      styles: {
+        comic: 'Bande Dessinée',
+        manga: 'Style Manga',
+        watercolor: 'Aquarelle',
+        oil: 'Peinture à l\'Huile',
+        sketch: 'Croquis au Crayon'
+      },
+      characterSection: {
+        title: 'Personnage Principal',
+        description: 'Téléchargez ou sélectionnez le personnage principal de votre histoire',
+        required: 'Requis',
+        optional: 'Optionnel'
+      },
+      productSection: {
+        title: 'Produit Vedette',
+        description: 'Ajoutez un produit à mettre en vedette dans votre histoire (optionnel)',
+        optional: 'Optionnel'
+      },
+      storySection: {
+        title: 'Concept d\'Histoire',
+        description: 'Décrivez votre idée d\'histoire en une phrase',
+        examples: [
+          'Une rencontre dans un café par une nuit de Noël enneigée',
+          'Trouver le cadeau parfait pendant les achats des fêtes',
+          'Une amitié qui s\'épanouit dans une librairie douillette'
+        ]
+      },
+      generatingPanels: 'Génération des panneaux de BD...',
+      panelComplete: 'Panneau terminé',
+      storyComplete: 'Histoire de BD terminée !',
+      errors: {
+        noStory: 'Veuillez d\'abord entrer une proposition d\'histoire !',
+        characterRequired: 'Veuillez télécharger ou sélectionner une image de personnage !',
+        generationFailed: 'La génération de la BD a échoué. Veuillez réessayer.'
+      }
     }
   },
   common: {
