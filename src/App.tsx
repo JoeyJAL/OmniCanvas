@@ -30,7 +30,7 @@ function App() {
         </div>
         
         <div className="flex items-center space-x-2">
-          <LanguageSwitcher />
+          {/* <LanguageSwitcher /> */}
           <button
             onClick={() => setIsPanelOpen(!isPanelOpen)}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
