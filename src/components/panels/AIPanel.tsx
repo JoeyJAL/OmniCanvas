@@ -33,6 +33,7 @@ export const AIPanel: React.FC = () => {
   const [comicPanels, setComicPanels] = useState<string[]>([])
   const [selectedStyle, setSelectedStyle] = useState('comic')
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
+  const [templateCategory, setTemplateCategory] = useState<'all' | 'creative' | 'professional' | 'fun'>('all')
   const [activeEnhancements, setActiveEnhancements] = useState<string[]>([])
   const [editPrompt, setEditPrompt] = useState('')
   const [latestVideoUrl, setLatestVideoUrl] = useState<string | null>(null)
@@ -692,184 +693,331 @@ Apply the edit instructions while maintaining:
               </div>
             )}
             
-            {/* Popular Templates - Always available */}
-            <div className="space-y-2">
+            {/* Popular Templates - With Categories */}
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-purple-700 flex items-center">
-                  🔥 Popular Templates (Click to use)
+                  🔥 Nano Banana 熱門模板 (點擊使用)
                 </p>
                 {hasSelection && (
-                  <span className="text-xs text-blue-600 font-medium">+ Selected Images</span>
+                  <span className="text-xs text-blue-600 font-medium">+ 已選圖片</span>
                 )}
               </div>
-            
-              {/* Professional Figurine Template */}
-              <div className={`p-2 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border transition-all ${
-                selectedTemplate === 'figurine' ? 'border-orange-500 ring-2 ring-orange-300' : 'border-orange-200'
-              }`}>
+
+              {/* Template Categories */}
+              <div className="flex gap-2 mb-2 flex-wrap">
                 <button
-                  onClick={() => {
-                    const templatePrompt = 'A hyper-realistic 1/7 scale figurine of the person shown in the reference image, designed as a finished commercial product, placed on an iMac computer desk with a white Apple keyboard. The figurine perfectly captures the appearance, clothing, pose, and personality of the person from the reference image. The figurine stands on a clean, round transparent acrylic base with no labels or text. Professional studio lighting highlights the sculpted details. On the iMac screen in the background, display the ongoing ZBrush modeling process of the same figurine, showing the contrast between "work in progress" and the finished product. Next to the figurine, place its packaging box with rounded corners and a transparent front window. The box design should visually match the person\'s style and theme, incorporating the same colors, patterns, and motifs from their outfit and personality, as if it were an official collaboration box. The box is open at the top, revealing only the inner transparent plastic clamshell, and its height is slightly taller than the figure, realistically sized to contain it.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('figurine');
-                  }}
-                  className="w-full text-left"
+                  onClick={() => setTemplateCategory('all')}
+                  className={`px-2 py-1 text-xs rounded-full transition-all ${
+                    templateCategory === 'all' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-orange-700">🎎 Professional Figurine</span>
-                    <span className="text-xs px-2 py-0.5 bg-orange-200 text-orange-800 rounded-full">PREMIUM</span>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {hasSelection ? 'Create professional figurine of the person in your image' : 'Generate commercial-quality figurine design'}
-                  </p>
+                  全部
+                </button>
+                <button
+                  onClick={() => setTemplateCategory('creative')}
+                  className={`px-2 py-1 text-xs rounded-full transition-all ${
+                    templateCategory === 'creative' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  🎨 創意轉換
+                </button>
+                <button
+                  onClick={() => setTemplateCategory('professional')}
+                  className={`px-2 py-1 text-xs rounded-full transition-all ${
+                    templateCategory === 'professional' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  💼 專業商用
+                </button>
+                <button
+                  onClick={() => setTemplateCategory('fun')}
+                  className={`px-2 py-1 text-xs rounded-full transition-all ${
+                    templateCategory === 'fun' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                  }`}
+                >
+                  🎮 趣味玩法
                 </button>
               </div>
-              
-              {/* ID Photo Template */}
-              <div className={`p-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border transition-all ${
-                selectedTemplate === 'id-photo' ? 'border-blue-500 ring-2 ring-blue-300' : 'border-blue-200'
-              }`}>
-                <button
-                  onClick={() => {
-                    const templatePrompt = 'Transform the person from the reference image into a professional ID photo with white background. Keep the same person\'s face, features, and appearance exactly as shown in the reference image. The person should wear formal business attire (suit or professional clothing), display a confident expression, and be photographed in either full-body or half-body portrait style. Professional studio lighting, sharp focus, official document quality, clean white backdrop, formal posture, business professional appearance. Maintain the person\'s identity and facial characteristics from the original image.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('id-photo');
-                  }}
-                  className="w-full text-left"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-blue-700">📷 Professional ID Photo</span>
-                    <span className="text-xs px-2 py-0.5 bg-blue-200 text-blue-800 rounded-full">BUSINESS</span>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {hasSelection ? 'Convert the person in your image to professional ID photo' : 'Create business-ready ID photo format'}
-                  </p>
-                </button>
+
+              {/* Templates Grid */}
+              <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto">
+                {/* Creative Templates */}
+                {(templateCategory === 'all' || templateCategory === 'creative') && (
+                  <>
+                    {/* 3D Figurine Template */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將參考圖片中的人物轉換成超寫實的1/7比例模型，放置在iMac電腦桌上，旁邊有白色Apple鍵盤。模型完美捕捉人物的外觀、服裝和個性。模型站在透明壓克力底座上。iMac螢幕顯示ZBrush建模過程。旁邊放置包裝盒，盒子設計配合人物風格主題。'
+                          : '創建一個精緻的動漫角色1/7比例模型，放置在工作桌上，專業攝影棚燈光，展現模型細節。';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('figurine');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'figurine'
+                          ? 'bg-gradient-to-r from-orange-100 to-yellow-100 border-orange-400 ring-1 ring-orange-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🎎</div>
+                      <div className="text-xs font-bold text-gray-800">3D 模型公仔</div>
+                      <div className="text-xs text-gray-600 mt-0.5">桌面擺飾模型</div>
+                    </button>
+
+                    {/* Hand-drawn Process */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將圖片轉換成4階段手繪插畫過程：1.鉛筆草稿輪廓 2.加入基本線條 3.添加細節和陰影 4.完成的彩色插畫。展示從草圖到完成品的繪畫步驟。'
+                          : '創建一個角色的4階段手繪過程，從簡單草稿到完整彩色插畫';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('hand-drawn');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'hand-drawn'
+                          ? 'bg-gradient-to-r from-pink-100 to-purple-100 border-pink-400 ring-1 ring-pink-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">✏️</div>
+                      <div className="text-xs font-bold text-gray-800">手繪過程</div>
+                      <div className="text-xs text-gray-600 mt-0.5">草稿到完稿</div>
+                    </button>
+
+                    {/* 3D Cross-section */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '創建物體的3D剖面圖，展示內部結構和組件，技術圖解風格，標註各部分名稱，工程圖紙風格'
+                          : '生成建築物的3D剖面圖，展示內部樓層結構';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('cross-section');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'cross-section'
+                          ? 'bg-gradient-to-r from-cyan-100 to-blue-100 border-cyan-400 ring-1 ring-cyan-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🔧</div>
+                      <div className="text-xs font-bold text-gray-800">3D 剖面圖</div>
+                      <div className="text-xs text-gray-600 mt-0.5">內部結構解析</div>
+                    </button>
+
+                    {/* Old Photo Restoration */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '修復並上色這張老照片，去除刮痕、污漬和褪色，增強細節，添加自然色彩，保持原始構圖和人物特徵'
+                          : '修復一張1950年代的黑白家庭照片，添加色彩';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('restore');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'restore'
+                          ? 'bg-gradient-to-r from-amber-100 to-orange-100 border-amber-400 ring-1 ring-amber-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">📸</div>
+                      <div className="text-xs font-bold text-gray-800">老照片修復</div>
+                      <div className="text-xs text-gray-600 mt-0.5">上色與修復</div>
+                    </button>
+                  </>
+                )}
+
+                {/* Professional Templates */}
+                {(templateCategory === 'all' || templateCategory === 'professional') && (
+                  <>
+                    {/* Professional ID Photo */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將人物轉換成專業證件照：白色背景、正裝、自信表情、證件照規格、專業攝影棚燈光、保持人物臉部特徵'
+                          : '生成專業商務證件照，白色背景，正裝';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('id-photo');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'id-photo'
+                          ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-400 ring-1 ring-blue-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">📷</div>
+                      <div className="text-xs font-bold text-gray-800">專業證件照</div>
+                      <div className="text-xs text-gray-600 mt-0.5">商務形象照</div>
+                    </button>
+
+                    {/* Product Photography */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將產品轉換成專業電商攝影：純白背景、多角度展示、專業打光、展現產品細節和質感'
+                          : '創建專業產品攝影，適合電商平台使用';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('product');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'product'
+                          ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-green-400 ring-1 ring-green-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">📦</div>
+                      <div className="text-xs font-bold text-gray-800">產品攝影</div>
+                      <div className="text-xs text-gray-600 mt-0.5">電商專業照</div>
+                    </button>
+
+                    {/* Interior Design */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將空間重新設計：添加現代家具、改變牆面顏色、加入裝飾品、專業室內設計風格'
+                          : '設計現代簡約風格客廳，包含沙發、茶几和裝飾';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('interior');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'interior'
+                          ? 'bg-gradient-to-r from-teal-100 to-cyan-100 border-teal-400 ring-1 ring-teal-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🏠</div>
+                      <div className="text-xs font-bold text-gray-800">室內設計</div>
+                      <div className="text-xs text-gray-600 mt-0.5">空間改造</div>
+                    </button>
+
+                    {/* Marketing Material */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '創建社群媒體行銷素材：加入吸引人的背景、文字空間、品牌色彩、適合Instagram發布'
+                          : '設計引人注目的社群媒體廣告圖片';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('marketing');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'marketing'
+                          ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-purple-400 ring-1 ring-purple-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">📱</div>
+                      <div className="text-xs font-bold text-gray-800">行銷素材</div>
+                      <div className="text-xs text-gray-600 mt-0.5">社群媒體圖</div>
+                    </button>
+                  </>
+                )}
+
+                {/* Fun Templates */}
+                {(templateCategory === 'all' || templateCategory === 'fun') && (
+                  <>
+                    {/* Clothing Try-on */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將第一張圖片的人物穿上第二張圖片的服裝，保持人物姿勢和背景不變，服裝要自然貼合'
+                          : '展示模特兒試穿不同風格服裝';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('try-on');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'try-on'
+                          ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-rose-400 ring-1 ring-rose-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">👗</div>
+                      <div className="text-xs font-bold text-gray-800">虛擬試穿</div>
+                      <div className="text-xs text-gray-600 mt-0.5">服裝換搭</div>
+                    </button>
+
+                    {/* Character in Different Eras */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將人物放到不同年代：1920年代復古風、1960年代嬉皮風、1980年代迪斯可、2000年代Y2K風格，保持人物特徵'
+                          : '展示同一角色在不同歷史時期的造型';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('time-travel');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'time-travel'
+                          ? 'bg-gradient-to-r from-indigo-100 to-purple-100 border-indigo-400 ring-1 ring-indigo-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">⏰</div>
+                      <div className="text-xs font-bold text-gray-800">時空旅行</div>
+                      <div className="text-xs text-gray-600 mt-0.5">不同年代造型</div>
+                    </button>
+
+                    {/* Pet Adventures */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將寵物放入冒險場景：太空人裝扮在月球、海盜船長在船上、超級英雄飛行、騎士盔甲在城堡'
+                          : '創造寵物的奇幻冒險場景';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('pet-adventure');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'pet-adventure'
+                          ? 'bg-gradient-to-r from-yellow-100 to-amber-100 border-yellow-400 ring-1 ring-yellow-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🐾</div>
+                      <div className="text-xs font-bold text-gray-800">寵物冒險</div>
+                      <div className="text-xs text-gray-600 mt-0.5">趣味場景</div>
+                    </button>
+
+                    {/* Food Ingredients */}
+                    <button
+                      onClick={() => {
+                        const templatePrompt = hasSelection
+                          ? '將食物分解成食材：每個食材放在單獨的碗中，標註名稱和份量，烹飪教學風格排列'
+                          : '展示料理的所有食材和調味料';
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate('ingredients');
+                      }}
+                      className={`p-2 rounded-lg border text-left transition-all ${
+                        selectedTemplate === 'ingredients'
+                          ? 'bg-gradient-to-r from-lime-100 to-green-100 border-lime-400 ring-1 ring-lime-300'
+                          : 'bg-white hover:bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <div className="text-lg mb-1">🍳</div>
+                      <div className="text-xs font-bold text-gray-800">食材分解</div>
+                      <div className="text-xs text-gray-600 mt-0.5">料理教學</div>
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Template Description */}
+              {selectedTemplate && (
+                <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
+                  <p className="text-xs text-purple-700">
+                    ✨ 模板已套用！可以直接生成或在上方輸入框中修改提示詞
+                  </p>
+                </div>
+              )}
+            </div>
               
-              {/* Superhero Selfie Template */}
-              <div className={`p-2 bg-gradient-to-r from-red-50 to-purple-50 rounded-lg border transition-all ${
-                selectedTemplate === 'superhero' ? 'border-red-500 ring-2 ring-red-300' : 'border-red-200'
-              }`}>
-                <button
-                  onClick={() => {
-                    const templatePrompt = 'Ultra-realistic 8K cinematic scene showing the exact person from the reference image in casual clothing, smiling and holding a smartphone, taking a selfie with the Avengers team. Keep the person\'s face, features, clothing, and appearance exactly as shown in the reference image. The person should be the main focus of the selfie. The Avengers (Iron Man, Hulk, Captain America, Thor, Black Widow, Wonder Woman, and Hawkeye) are happily posing around this specific person in playful poses. The scene should be bright, dynamic, and fun with vibrant colors, sharp details, and realistic lighting and shadows. The style should resemble an actual photograph with natural facial expressions and exquisite cinematic quality. Maintain the exact identity and appearance of the person from the original image.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('superhero');
-                  }}
-                  className="w-full text-left"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-red-700">🦸 Superhero Selfie</span>
-                    <span className="text-xs px-2 py-0.5 bg-red-200 text-red-800 rounded-full">EPIC</span>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-1">
-                    {hasSelection ? 'Put the person from your image with the Avengers' : 'Create superhero team selfie scene'}
-                  </p>
-                </button>
-              </div>
-              
-              {/* Template Grid */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => {
-                    const templatePrompt = hasSelection ? 'A photorealistic professional portrait of the person from the reference image. Keep their exact facial features, expressions, and characteristics. Professional studio lighting, soft shadows, clean background, high-quality photography style with sharp focus and beautiful depth of field. Maintain the person\'s identity and natural appearance from the original image.' : 'A photorealistic close-up portrait of an elderly Japanese ceramicist with deep, sun-etched wrinkles and a warm, knowing smile. He is carefully inspecting a freshly glazed tea bowl. The setting is his rustic, sun-drenched workshop. Soft golden hour light, 85mm portrait lens, bokeh background.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('portrait');
-                  }}
-                  className={`p-2 hover:bg-purple-100 rounded-lg border transition-all text-left ${
-                    selectedTemplate === 'portrait' ? 'bg-purple-100 border-purple-500 ring-2 ring-purple-300' : 'bg-purple-50 border-purple-200'
-                  }`}
-                >
-                  <span className="text-xs font-medium text-purple-700">📸 Portrait Pro</span>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {hasSelection ? 'Professional portrait of your person' : 'Photorealistic portrait'}
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    const templatePrompt = hasSelection ? 'A kawaii-style sticker design of the person from the reference image. Transform them into a cute, chibi-style character while keeping their recognizable features. Bold clean outlines, simple cel-shading, vibrant colors, adorable expression. White background. Maintain the person\'s identity in kawaii art style.' : 'A kawaii-style sticker of a happy red panda wearing a tiny bamboo hat, munching on a green bamboo leaf. Bold clean outlines, simple cel-shading, vibrant colors. White background.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('kawaii');
-                  }}
-                  className={`p-2 hover:bg-pink-100 rounded-lg border transition-all text-left ${
-                    selectedTemplate === 'kawaii' ? 'bg-pink-100 border-pink-500 ring-2 ring-pink-300' : 'bg-pink-50 border-pink-200'
-                  }`}
-                >
-                  <span className="text-xs font-medium text-pink-700">🎨 Kawaii Sticker</span>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {hasSelection ? 'Kawaii sticker of your person' : 'Cute sticker design'}
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    const templatePrompt = 'A high-resolution studio product photograph of a minimalist ceramic coffee mug in matte black on polished concrete. Three-point softbox lighting, 45-degree angle, ultra-realistic with steam rising from coffee.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('product');
-                  }}
-                  className={`p-2 hover:bg-blue-100 rounded-lg border transition-all text-left ${
-                    selectedTemplate === 'product' ? 'bg-blue-100 border-blue-500 ring-2 ring-blue-300' : 'bg-blue-50 border-blue-200'
-                  }`}
-                >
-                  <span className="text-xs font-medium text-blue-700">📦 Product Shot</span>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {hasSelection ? 'Product photography style' : 'E-commerce ready'}
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    const templatePrompt = hasSelection ? 'Studio Ghibli style anime portrait of the person from the reference image. Transform them into Ghibli art style while keeping their recognizable facial features and characteristics. Pastel colors, dreamy atmosphere, soft lighting, whimsical background, beautiful anime aesthetic. Maintain the person\'s identity in Ghibli animation style.' : 'Studio Ghibli style, pastel colors, dreamy anime portrait with soft lighting and whimsical atmosphere';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('ghibli');
-                  }}
-                  className={`p-2 hover:bg-green-100 rounded-lg border transition-all text-left ${
-                    selectedTemplate === 'ghibli' ? 'bg-green-100 border-green-500 ring-2 ring-green-300' : 'bg-green-50 border-green-200'
-                  }`}
-                >
-                  <span className="text-xs font-medium text-green-700">🌸 Ghibli Style</span>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {hasSelection ? 'Ghibli anime style of your person' : 'Anime aesthetic'}
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    const templatePrompt = hasSelection ? 'Professional LinkedIn headshot of the person from the reference image. Keep their exact facial features and appearance. Professional business attire, confident smile, blurred modern office background, soft natural lighting. High-quality corporate photography style. Maintain the person\'s identity and professional appearance.' : 'LinkedIn headshot, professional attire, confident smile, blurred modern office background, soft natural lighting';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('linkedin');
-                  }}
-                  className={`p-2 hover:bg-indigo-100 rounded-lg border transition-all text-left ${
-                    selectedTemplate === 'linkedin' ? 'bg-indigo-100 border-indigo-500 ring-2 ring-indigo-300' : 'bg-indigo-50 border-indigo-200'
-                  }`}
-                >
-                  <span className="text-xs font-medium text-indigo-700">💼 LinkedIn Pro</span>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {hasSelection ? 'LinkedIn headshot of your person' : 'Professional headshot'}
-                  </p>
-                </button>
-                
-                <button
-                  onClick={() => {
-                    const templatePrompt = 'A minimalist composition with a single delicate red maple leaf in bottom-right corner. Vast empty off-white canvas, significant negative space for text. Soft diffused lighting from top left.';
-                    setPrompt(templatePrompt);
-                    setSelectedTemplate('minimalist');
-                  }}
-                  className={`p-2 hover:bg-gray-100 rounded-lg border transition-all text-left ${
-                    selectedTemplate === 'minimalist' ? 'bg-gray-100 border-gray-500 ring-2 ring-gray-300' : 'bg-gray-50 border-gray-200'
-                  }`}
-                >
-                  <span className="text-xs font-medium text-gray-700">⬜ Minimalist</span>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    {hasSelection ? 'Minimalist composition' : 'Clean & simple'}
-                  </p>
-                </button>
-              </div>
-              
-              {/* Quick Style Modifiers */}
-              <div className="mt-2 p-2 bg-purple-50 rounded-lg">
+            {/* Quick Style Modifiers */}
+            <div className="mt-2 p-2 bg-purple-50 rounded-lg">
                 <p className="text-xs font-medium text-purple-700 mb-1">✨ Quick Enhancements (Click to toggle)</p>
                 <div className="flex flex-wrap gap-1">
                   {['viral meme style', '4K ultra HD', 'cinematic lighting', 'trending on artstation', 'octane render'].map(modifier => {
@@ -908,7 +1056,6 @@ Apply the edit instructions while maintaining:
                   })}
                 </div>
               </div>
-            </div>
             
             <button
               onClick={handleGenerateImage}

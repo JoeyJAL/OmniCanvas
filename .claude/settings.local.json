@@ -40,7 +40,8 @@
       "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-dyrigu2m3-joeyjals-projects.vercel.app/api)",
       "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-vnq5pfksd-joeyjals-projects.vercel.app/api)",
       "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-mttekvbpb-joeyjals-projects.vercel.app/api)",
-      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend.vercel.app/api)"
+      "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend.vercel.app/api)",
+      "WebFetch(domain:www.bnext.com.tw)"
     ],
     "deny": [],
     "ask": []
