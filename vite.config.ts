@@ -12,7 +12,9 @@ export default defineConfig({
       '@store': resolve(__dirname, './src/store'),
       '@utils': resolve(__dirname, './src/utils'),
       '@types': resolve(__dirname, './src/types'),
-      '@services': resolve(__dirname, './src/services')
+      '@services': resolve(__dirname, './src/services'),
+      '@translations': resolve(__dirname, './src/translations'),
+      '@data': resolve(__dirname, './src/data')
     }
   },
   server: {

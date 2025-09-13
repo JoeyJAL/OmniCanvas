@@ -3,6 +3,9 @@ import { useImageStore } from '@store/imageStore'
 import { useCanvasStore } from '@store/canvasStore'
 import { useStoryShopStore } from '@store/storyShopStore'
 import { aiService } from '@services/aiService'
+import { useTranslation } from '@hooks/useTranslation'
+import { useLanguageStore } from '@store/languageStore'
+import { templatePrompts, getTemplatePrompt } from '@data/templatePrompts'
 import { 
   Sparkles, 
   Wand2, 
@@ -19,6 +22,8 @@ import {
 } from 'lucide-react'
 
 export const AIPanel: React.FC = () => {
+  const t = useTranslation()
+  const { currentLanguage } = useLanguageStore()
   const { getSelectedImages: getImageStoreImages } = useImageStore()
   const { importImage, getSelectedImages: getCanvasSelectedImages, calculateSmartLayout } = useCanvasStore()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -571,8 +576,8 @@ Apply the edit instructions while maintaining:
   }
 
   const tabs = [
-    { id: 'storyshop' as const, label: 'Story Maker', icon: BookOpen },
-    { id: 'generate' as const, label: 'Generate', icon: Sparkles },
+    { id: 'storyshop' as const, label: t.aiPanel.tabs.storyMaker, icon: BookOpen },
+    { id: 'generate' as const, label: t.aiPanel.tabs.generate, icon: Sparkles },
   ]
 
   return (
@@ -658,7 +663,7 @@ Apply the edit instructions while maintaining:
                 setSelectedTemplate(null); // Clear template selection when user types
                 setActiveEnhancements([]); // Clear active enhancements when user types
               }}
-              placeholder={getPlaceholderText()}
+              placeholder={t.aiPanel.generate.placeholder}
               className="w-full h-20 p-2 text-sm border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               disabled={isProcessing}
             />
@@ -697,10 +702,10 @@ Apply the edit instructions while maintaining:
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-purple-700 flex items-center">
-                  🔥 Nano Banana 熱門模板 (點擊使用)
+                  🔥 {t.aiPanel.generate.templates.title}
                 </p>
                 {hasSelection && (
-                  <span className="text-xs text-blue-600 font-medium">+ 已選圖片</span>
+                  <span className="text-xs text-blue-600 font-medium">{t.aiPanel.generate.templates.withSelection}</span>
                 )}
               </div>
 
@@ -714,7 +719,7 @@ Apply the edit instructions while maintaining:
                       : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                   }`}
                 >
-                  全部
+                  {t.aiPanel.generate.templates.categories.all}
                 </button>
                 <button
                   onClick={() => setTemplateCategory('creative')}
@@ -724,7 +729,7 @@ Apply the edit instructions while maintaining:
                       : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                   }`}
                 >
-                  🎨 創意轉換
+                  {t.aiPanel.generate.templates.categories.creative}
                 </button>
                 <button
                   onClick={() => setTemplateCategory('professional')}
@@ -734,7 +739,7 @@ Apply the edit instructions while maintaining:
                       : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                   }`}
                 >
-                  💼 專業商用
+                  {t.aiPanel.generate.templates.categories.professional}
                 </button>
                 <button
                   onClick={() => setTemplateCategory('fun')}
@@ -744,273 +749,41 @@ Apply the edit instructions while maintaining:
                       : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
                   }`}
                 >
-                  🎮 趣味玩法
+                  {t.aiPanel.generate.templates.categories.fun}
                 </button>
               </div>
 
               {/* Templates Grid */}
               <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto">
-                {/* Creative Templates */}
-                {(templateCategory === 'all' || templateCategory === 'creative') && (
-                  <>
-                    {/* 3D Figurine Template */}
+                {templatePrompts
+                  .filter(template => templateCategory === 'all' || template.category === templateCategory)
+                  .map(template => (
                     <button
+                      key={template.id}
                       onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將參考圖片中的人物轉換成超寫實的1/7比例模型，放置在iMac電腦桌上，旁邊有白色Apple鍵盤。模型完美捕捉人物的外觀、服裝和個性。模型站在透明壓克力底座上。iMac螢幕顯示ZBrush建模過程。旁邊放置包裝盒，盒子設計配合人物風格主題。'
-                          : '創建一個精緻的動漫角色1/7比例模型，放置在工作桌上，專業攝影棚燈光，展現模型細節。';
+                        const templatePrompt = getTemplatePrompt(template.id, hasSelection, currentLanguage);
                         setPrompt(templatePrompt);
-                        setSelectedTemplate('figurine');
+                        setSelectedTemplate(template.id);
                       }}
                       className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'figurine'
+                        selectedTemplate === template.id
                           ? 'bg-gradient-to-r from-orange-100 to-yellow-100 border-orange-400 ring-1 ring-orange-300'
                           : 'bg-white hover:bg-gray-50 border-gray-200'
                       }`}
                     >
-                      <div className="text-lg mb-1">🎎</div>
-                      <div className="text-xs font-bold text-gray-800">3D 模型公仔</div>
-                      <div className="text-xs text-gray-600 mt-0.5">桌面擺飾模型</div>
+                      <div className="text-lg mb-1">{template.icon}</div>
+                      <div className="text-xs font-bold text-gray-800">{t.aiPanel.generate.templates.items[template.id as keyof typeof t.aiPanel.generate.templates.items]?.title}</div>
+                      <div className="text-xs text-gray-600 mt-0.5">{t.aiPanel.generate.templates.items[template.id as keyof typeof t.aiPanel.generate.templates.items]?.description}</div>
                     </button>
-
-                    {/* Hand-drawn Process */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將圖片轉換成4階段手繪插畫過程：1.鉛筆草稿輪廓 2.加入基本線條 3.添加細節和陰影 4.完成的彩色插畫。展示從草圖到完成品的繪畫步驟。'
-                          : '創建一個角色的4階段手繪過程，從簡單草稿到完整彩色插畫';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('hand-drawn');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'hand-drawn'
-                          ? 'bg-gradient-to-r from-pink-100 to-purple-100 border-pink-400 ring-1 ring-pink-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">✏️</div>
-                      <div className="text-xs font-bold text-gray-800">手繪過程</div>
-                      <div className="text-xs text-gray-600 mt-0.5">草稿到完稿</div>
-                    </button>
-
-                    {/* 3D Cross-section */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '創建物體的3D剖面圖，展示內部結構和組件，技術圖解風格，標註各部分名稱，工程圖紙風格'
-                          : '生成建築物的3D剖面圖，展示內部樓層結構';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('cross-section');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'cross-section'
-                          ? 'bg-gradient-to-r from-cyan-100 to-blue-100 border-cyan-400 ring-1 ring-cyan-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">🔧</div>
-                      <div className="text-xs font-bold text-gray-800">3D 剖面圖</div>
-                      <div className="text-xs text-gray-600 mt-0.5">內部結構解析</div>
-                    </button>
-
-                    {/* Old Photo Restoration */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '修復並上色這張老照片，去除刮痕、污漬和褪色，增強細節，添加自然色彩，保持原始構圖和人物特徵'
-                          : '修復一張1950年代的黑白家庭照片，添加色彩';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('restore');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'restore'
-                          ? 'bg-gradient-to-r from-amber-100 to-orange-100 border-amber-400 ring-1 ring-amber-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">📸</div>
-                      <div className="text-xs font-bold text-gray-800">老照片修復</div>
-                      <div className="text-xs text-gray-600 mt-0.5">上色與修復</div>
-                    </button>
-                  </>
-                )}
-
-                {/* Professional Templates */}
-                {(templateCategory === 'all' || templateCategory === 'professional') && (
-                  <>
-                    {/* Professional ID Photo */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將人物轉換成專業證件照：白色背景、正裝、自信表情、證件照規格、專業攝影棚燈光、保持人物臉部特徵'
-                          : '生成專業商務證件照，白色背景，正裝';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('id-photo');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'id-photo'
-                          ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-400 ring-1 ring-blue-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">📷</div>
-                      <div className="text-xs font-bold text-gray-800">專業證件照</div>
-                      <div className="text-xs text-gray-600 mt-0.5">商務形象照</div>
-                    </button>
-
-                    {/* Product Photography */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將產品轉換成專業電商攝影：純白背景、多角度展示、專業打光、展現產品細節和質感'
-                          : '創建專業產品攝影，適合電商平台使用';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('product');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'product'
-                          ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-green-400 ring-1 ring-green-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">📦</div>
-                      <div className="text-xs font-bold text-gray-800">產品攝影</div>
-                      <div className="text-xs text-gray-600 mt-0.5">電商專業照</div>
-                    </button>
-
-                    {/* Interior Design */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將空間重新設計：添加現代家具、改變牆面顏色、加入裝飾品、專業室內設計風格'
-                          : '設計現代簡約風格客廳，包含沙發、茶几和裝飾';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('interior');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'interior'
-                          ? 'bg-gradient-to-r from-teal-100 to-cyan-100 border-teal-400 ring-1 ring-teal-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">🏠</div>
-                      <div className="text-xs font-bold text-gray-800">室內設計</div>
-                      <div className="text-xs text-gray-600 mt-0.5">空間改造</div>
-                    </button>
-
-                    {/* Marketing Material */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '創建社群媒體行銷素材：加入吸引人的背景、文字空間、品牌色彩、適合Instagram發布'
-                          : '設計引人注目的社群媒體廣告圖片';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('marketing');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'marketing'
-                          ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-purple-400 ring-1 ring-purple-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">📱</div>
-                      <div className="text-xs font-bold text-gray-800">行銷素材</div>
-                      <div className="text-xs text-gray-600 mt-0.5">社群媒體圖</div>
-                    </button>
-                  </>
-                )}
-
-                {/* Fun Templates */}
-                {(templateCategory === 'all' || templateCategory === 'fun') && (
-                  <>
-                    {/* Clothing Try-on */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將第一張圖片的人物穿上第二張圖片的服裝，保持人物姿勢和背景不變，服裝要自然貼合'
-                          : '展示模特兒試穿不同風格服裝';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('try-on');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'try-on'
-                          ? 'bg-gradient-to-r from-rose-100 to-pink-100 border-rose-400 ring-1 ring-rose-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">👗</div>
-                      <div className="text-xs font-bold text-gray-800">虛擬試穿</div>
-                      <div className="text-xs text-gray-600 mt-0.5">服裝換搭</div>
-                    </button>
-
-                    {/* Character in Different Eras */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將人物放到不同年代：1920年代復古風、1960年代嬉皮風、1980年代迪斯可、2000年代Y2K風格，保持人物特徵'
-                          : '展示同一角色在不同歷史時期的造型';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('time-travel');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'time-travel'
-                          ? 'bg-gradient-to-r from-indigo-100 to-purple-100 border-indigo-400 ring-1 ring-indigo-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">⏰</div>
-                      <div className="text-xs font-bold text-gray-800">時空旅行</div>
-                      <div className="text-xs text-gray-600 mt-0.5">不同年代造型</div>
-                    </button>
-
-                    {/* Pet Adventures */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將寵物放入冒險場景：太空人裝扮在月球、海盜船長在船上、超級英雄飛行、騎士盔甲在城堡'
-                          : '創造寵物的奇幻冒險場景';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('pet-adventure');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'pet-adventure'
-                          ? 'bg-gradient-to-r from-yellow-100 to-amber-100 border-yellow-400 ring-1 ring-yellow-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">🐾</div>
-                      <div className="text-xs font-bold text-gray-800">寵物冒險</div>
-                      <div className="text-xs text-gray-600 mt-0.5">趣味場景</div>
-                    </button>
-
-                    {/* Food Ingredients */}
-                    <button
-                      onClick={() => {
-                        const templatePrompt = hasSelection
-                          ? '將食物分解成食材：每個食材放在單獨的碗中，標註名稱和份量，烹飪教學風格排列'
-                          : '展示料理的所有食材和調味料';
-                        setPrompt(templatePrompt);
-                        setSelectedTemplate('ingredients');
-                      }}
-                      className={`p-2 rounded-lg border text-left transition-all ${
-                        selectedTemplate === 'ingredients'
-                          ? 'bg-gradient-to-r from-lime-100 to-green-100 border-lime-400 ring-1 ring-lime-300'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <div className="text-lg mb-1">🍳</div>
-                      <div className="text-xs font-bold text-gray-800">食材分解</div>
-                      <div className="text-xs text-gray-600 mt-0.5">料理教學</div>
-                    </button>
-                  </>
-                )}
+                  ))
+                }
               </div>
 
               {/* Template Description */}
               {selectedTemplate && (
                 <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
                   <p className="text-xs text-purple-700">
-                    ✨ 模板已套用！可以直接生成或在上方輸入框中修改提示詞
+                    {t.aiPanel.generate.templates.applied}
                   </p>
                 </div>
               )}
@@ -1018,9 +791,9 @@ Apply the edit instructions while maintaining:
               
             {/* Quick Style Modifiers */}
             <div className="mt-2 p-2 bg-purple-50 rounded-lg">
-                <p className="text-xs font-medium text-purple-700 mb-1">✨ Quick Enhancements (Click to toggle)</p>
+                <p className="text-xs font-medium text-purple-700 mb-1">✨ {t.aiPanel.generate.quickEnhancements}</p>
                 <div className="flex flex-wrap gap-1">
-                  {['viral meme style', '4K ultra HD', 'cinematic lighting', 'trending on artstation', 'octane render'].map(modifier => {
+                  {t.aiPanel.generate.enhancementItems.map(modifier => {
                     const isActive = activeEnhancements.includes(modifier);
                     return (
                       <button
@@ -1034,8 +807,7 @@ Apply the edit instructions while maintaining:
                           
                           // Update prompt with active enhancements
                           const basePrompt = prompt.split(',').filter(part => 
-                            !['viral meme style', '4K ultra HD', 'cinematic lighting', 'trending on artstation', 'octane render']
-                              .includes(part.trim())
+                            !t.aiPanel.generate.enhancementItems.includes(part.trim())
                           ).join(',').trim();
                           
                           const newPrompt = basePrompt + (newEnhancements.length > 0 
@@ -1067,8 +839,8 @@ Apply the edit instructions while maintaining:
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>
                     {hasSelection 
-                      ? `Generating with selected image${selectedImages.length !== 1 ? 's' : ''}...`
-                      : 'Generating with Nano Banana...'
+                      ? `${t.aiPanel.generate.generating} (${selectedImages.length} ${t.aiPanel.generate.selectedImages})`
+                      : t.aiPanel.generate.generating
                     }
                   </span>
                 </>
@@ -1077,8 +849,8 @@ Apply the edit instructions while maintaining:
                   <Sparkles className="w-4 h-4" />
                   <span>
                     {hasSelection 
-                      ? `Generate with ${selectedImages.length} Selected Image${selectedImages.length !== 1 ? 's' : ''}`
-                      : 'Generate with Nano Banana'
+                      ? `${t.aiPanel.generate.generateButton} (${selectedImages.length} ${t.aiPanel.generate.selectedImages})`
+                      : t.aiPanel.generate.generateButton
                     }
                   </span>
                 </>
@@ -1380,12 +1152,7 @@ Apply the edit instructions while maintaining:
                 <textarea
                   value={storyPrompt}
                   onChange={(e) => setStoryPrompt(e.target.value)}
-                  placeholder="✨ Write your story in one sentence...
-
-Examples:
-• A coffee shop encounter on a snowy Christmas night
-• Finding the perfect gift during holiday shopping
-• A friendship that blooms in a cozy bookstore"
+                  placeholder={t.aiPanel.storyMaker.placeholder}
                   className="w-full h-24 p-4 text-sm border-2 border-green-200 rounded-xl resize-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-gradient-to-br from-green-50/30 to-emerald-50/30 placeholder-gray-500"
                   disabled={isProcessing}
                 />

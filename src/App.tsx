@@ -4,6 +4,7 @@ import { Canvas } from '@components/canvas/Canvas'
 import { Toolbar } from '@components/toolbar/Toolbar'
 import { AIPanel } from '@components/panels/AIPanel'
 import { SettingsPanel } from '@components/panels/SettingsPanel'
+import { LanguageSwitcher } from '@components/LanguageSwitcher'
 
 function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -29,6 +30,7 @@ function App() {
         </div>
         
         <div className="flex items-center space-x-2">
+          <LanguageSwitcher />
           <button
             onClick={() => setIsPanelOpen(!isPanelOpen)}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"

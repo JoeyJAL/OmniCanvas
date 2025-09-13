@@ -23,7 +23,9 @@
       "@store/*": ["./src/store/*"],
       "@utils/*": ["./src/utils/*"],
       "@types/*": ["./src/types/*"],
-      "@services/*": ["./src/services/*"]
+      "@services/*": ["./src/services/*"],
+      "@translations/*": ["./src/translations/*"],
+      "@data/*": ["./src/data/*"]
     }
   },
   "include": ["src"],
