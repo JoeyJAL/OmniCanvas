@@ -405,21 +405,32 @@ export const Canvas: React.FC = () => {
         // Reset zoom and pan
         resetView()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        // Delete selected objects
-        const activeObject = canvas.getActiveObject()
-        if (activeObject) {
-          if (activeObject.type === 'activeSelection') {
-            // Multiple objects selected
-            const selection = activeObject as fabric.ActiveSelection
-            selection.forEachObject((obj) => {
-              canvas.remove(obj)
-            })
-            canvas.discardActiveObject()
-          } else {
-            // Single object selected
-            canvas.remove(activeObject)
+        // Check if the focus is on an input field, textarea, or contenteditable element
+        const activeElement = document.activeElement
+        const isInputField = activeElement && (
+          activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA' ||
+          activeElement.getAttribute('contenteditable') === 'true'
+        )
+        
+        // Only delete canvas objects if not typing in an input field
+        if (!isInputField) {
+          // Delete selected objects
+          const activeObject = canvas.getActiveObject()
+          if (activeObject) {
+            if (activeObject.type === 'activeSelection') {
+              // Multiple objects selected
+              const selection = activeObject as fabric.ActiveSelection
+              selection.forEachObject((obj) => {
+                canvas.remove(obj)
+              })
+              canvas.discardActiveObject()
+            } else {
+              // Single object selected
+              canvas.remove(activeObject)
+            }
+            canvas.requestRenderAll()
           }
-          canvas.requestRenderAll()
         }
       }
     }

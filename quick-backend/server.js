@@ -136,6 +136,98 @@ app.post('/api/compress-image', async (req, res) => {
   }
 });
 
+// Helper function to create composite image from multiple panels
+async function createCompositeImage(panelUrls) {
+  try {
+    console.log(`🎨 Creating composite image from ${panelUrls.length} panels...`);
+    
+    // Convert all panel URLs to buffers
+    const imageBuffers = [];
+    for (const [index, url] of panelUrls.entries()) {
+      let buffer;
+      if (url.startsWith('data:')) {
+        const base64Data = url.split(',')[1];
+        buffer = Buffer.from(base64Data, 'base64');
+      } else {
+        const response = await fetch(url);
+        buffer = await response.buffer();
+      }
+      imageBuffers.push(buffer);
+      console.log(`📸 Panel ${index + 1} loaded: ${Math.round(buffer.length / 1024)}KB`);
+    }
+    
+    // Create a grid layout based on number of panels
+    const panelCount = imageBuffers.length;
+    let gridCols, gridRows;
+    
+    if (panelCount === 1) {
+      gridCols = 1; gridRows = 1;
+    } else if (panelCount === 2) {
+      gridCols = 2; gridRows = 1;
+    } else if (panelCount <= 4) {
+      gridCols = 2; gridRows = 2;
+    } else {
+      gridCols = 3; gridRows = Math.ceil(panelCount / 3);
+    }
+    
+    // Target dimensions for 16:9 aspect ratio at 720p
+    const targetWidth = 1280;
+    const targetHeight = 720;
+    const panelWidth = Math.floor(targetWidth / gridCols);
+    const panelHeight = Math.floor(targetHeight / gridRows);
+    
+    console.log(`📐 Grid layout: ${gridCols}x${gridRows}, Panel size: ${panelWidth}x${panelHeight}`);
+    
+    // Create base canvas
+    let composite = sharp({
+      create: {
+        width: targetWidth,
+        height: targetHeight,
+        channels: 3,
+        background: { r: 255, g: 255, b: 255 }
+      }
+    }).jpeg();
+    
+    // Prepare overlay operations
+    const overlays = [];
+    for (let i = 0; i < Math.min(imageBuffers.length, gridCols * gridRows); i++) {
+      const row = Math.floor(i / gridCols);
+      const col = i % gridCols;
+      const left = col * panelWidth;
+      const top = row * panelHeight;
+      
+      // Resize panel to fit grid cell
+      const resizedPanel = await sharp(imageBuffers[i])
+        .resize(panelWidth, panelHeight, { fit: 'cover', position: 'center' })
+        .jpeg()
+        .toBuffer();
+      
+      overlays.push({
+        input: resizedPanel,
+        left: left,
+        top: top
+      });
+      
+      console.log(`🔧 Panel ${i + 1} positioned at (${left}, ${top})`);
+    }
+    
+    // Apply all overlays
+    composite = composite.composite(overlays);
+    
+    // Generate final composite
+    const compositeBuffer = await composite.toBuffer();
+    const compositeDataUrl = `data:image/jpeg;base64,${compositeBuffer.toString('base64')}`;
+    
+    console.log(`✅ Composite image created: ${Math.round(compositeBuffer.length / 1024)}KB`);
+    return compositeDataUrl;
+    
+  } catch (error) {
+    console.error('❌ Failed to create composite image:', error);
+    // Fallback to first panel if composite fails
+    return panelUrls[0];
+  }
+}
+
 // Helper function to preprocess image for Fal.ai veo3 requirements
 async function preprocessImageForVideo(imageUrl) {
   try {
@@ -942,13 +1034,28 @@ app.post('/api/ai/generate-video', async (req, res) => {
     console.log('🎬 Using Fal.ai Image-to-Video for story animation...');
     console.log('🖼️ Processing', panelUrls.length, 'comic panels into video');
     
-    // Preprocess and upload image to fal.ai storage
-    let imageUrl = panelUrls[0];
+    // Preprocess and upload image(s) to fal.ai storage
+    let imageUrl;
+    
+    if (panelUrls.length > 1) {
+      console.log(`🔧 Merging ${panelUrls.length} panels into single image for video generation...`);
+      
+      // Create a composite image from multiple panels
+      const compositePanels = panelUrls.slice(0, 4); // Use up to 4 panels
+      const compositeImageUrl = await createCompositeImage(compositePanels);
+      imageUrl = compositeImageUrl;
+      
+      console.log('✅ Multi-panel composite image created');
+    } else {
+      console.log('🔧 Using single panel for video generation...');
+      imageUrl = panelUrls[0];
+    }
+    
     try {
-      console.log('🔧 Preprocessing image for Fal.ai video generation...');
+      console.log('🔧 Preprocessing composite image for Fal.ai video generation...');
       
       // Preprocess image to meet Fal.ai veo3 requirements
-      const processedImageUrl = await preprocessImageForVideo(panelUrls[0]);
+      const processedImageUrl = await preprocessImageForVideo(imageUrl);
       console.log('✅ Image preprocessing completed');
       
       // Upload processed image to fal.ai storage
@@ -981,13 +1088,59 @@ app.post('/api/ai/generate-video', async (req, res) => {
       // Keep original URL as fallback
     }
     
-    // Create a detailed prompt for video animation based on the story content
-    const videoPrompt = `Animate this comic panel with smooth camera movement and dynamic action. ${narrationText || 'Dynamic storytelling scene with cinematic motion'}. Style: Comic book animation with smooth transitions, vibrant colors, and engaging camera work.`;
+    // Create a marketing-focused video prompt
+    const videoPrompt = `Create an engaging, cinematic marketing video from this image. ${narrationText || 'Professional marketing presentation with dynamic visual appeal'}.
+
+MARKETING VIDEO STYLE:
+- Smooth, professional camera movements with cinematic pans and zooms
+- Dynamic lighting effects and visual transitions
+- Engaging, attention-grabbing visual storytelling
+- Modern, sleek aesthetic with vibrant colors and high contrast
+- Professional marketing video production quality
+- Captivating visual flow that draws viewer attention
+
+CRITICAL CHARACTER CONSISTENCY:
+- Maintain EXACT facial features and identity of any people/characters in the original image
+- Keep character appearances, clothing, and distinctive features IDENTICAL to the source image
+- Preserve character positioning and proportions from the reference image
+- Characters should remain recognizable and consistent throughout the 8-second duration
+- Focus on environmental animation, lighting effects, and sophisticated camera work
+
+TECHNICAL REQUIREMENTS:
+- Full 8-second duration with engaging content throughout
+- Professional marketing video quality and pacing
+- Cinematic camera movements and visual effects
+- High-impact visual storytelling suitable for promotional content
+
+Style: High-end marketing video production with cinematic quality, dynamic visuals, and professional presentation.`;
     
     console.log('🎬 Generated video prompt:', videoPrompt.substring(0, 100) + '...');
     
-    // Try multiple Fal.ai models for better compatibility - ordered by quality
+    // Try Fal.ai veo3 models first (prioritized as requested)
     const models = [
+      {
+        name: 'veo3/image-to-video',
+        id: 'fal-ai/veo3/image-to-video',
+        config: {
+          prompt: videoPrompt,
+          image_url: imageUrl,
+          duration: "8s", // Full 8-second duration for veo3
+          generate_audio: false,
+          resolution: "720p",
+          aspect_ratio: "16:9"
+        }
+      },
+      {
+        name: 'veo3/fast/image-to-video',
+        id: 'fal-ai/veo3/fast/image-to-video',
+        config: {
+          prompt: videoPrompt,
+          image_url: imageUrl,
+          duration: "8s", // Full 8-second duration for veo3
+          generate_audio: false,
+          resolution: "720p"
+        }
+      },
       {
         name: 'kling-1.6',
         id: 'fal-ai/kling-1.6/image-to-video',
@@ -1016,31 +1169,12 @@ app.post('/api/ai/generate-video', async (req, res) => {
           loop: false,
           aspect_ratio: "16:9"
         }
-      },
-      {
-        name: 'hunyuan-video',
-        id: 'fal-ai/hunyuan-video',
-        config: {
-          prompt: videoPrompt,
-          image_url: imageUrl,
-          duration: `${Math.min(duration, 5)}s`
-        }
-      },
-      {
-        name: 'veo3/fast/image-to-video',
-        id: 'fal-ai/veo3/fast/image-to-video',
-        config: {
-          prompt: videoPrompt,
-          image_url: imageUrl,
-          duration: `${Math.min(duration, 8)}s`,
-          generate_audio: false,
-          resolution: "720p"
-        }
       }
     ];
 
     let result = null;
     let lastError = null;
+    let usedModel = null;
 
     for (const model of models) {
       try {
@@ -1056,6 +1190,7 @@ app.post('/api/ai/generate-video', async (req, res) => {
           },
         });
         
+        usedModel = model.name;
         console.log(`✅ ${model.name} succeeded!`);
         break; // Success, exit loop
         
@@ -1085,9 +1220,9 @@ app.post('/api/ai/generate-video', async (req, res) => {
         narration: narrationText.length,
         timestamp: Date.now(),
         provider: 'fal-ai',
-        model: 'veo3/fast/image-to-video',
+        model: usedModel,
         prompt: videoPrompt.substring(0, 100) + '...',
-        actualDuration: Math.min(duration, 8),
+        actualDuration: 8, // veo3 full 8-second capability
         quality: '720p'
       }
     });
