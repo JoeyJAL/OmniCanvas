@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, Server, Check, X, Wifi, Shield, Key } from 'lucide-react'
+import { Settings, Server, Check, X, Wifi, Shield, Key, Eye, EyeOff, AlertCircle, Save } from 'lucide-react'
 import { aiService } from '@services/aiService'
+import { useAPIKeyStore, APIKeys } from '@store/apiKeyStore'
 
 interface SettingsPanelProps {
   isOpen: boolean
@@ -8,87 +9,86 @@ interface SettingsPanelProps {
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen }) => {
-  const [backendUrl, setBackendUrl] = useState<string>('')
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'connected' | 'error'>('idle')
+  const { apiKeys, setAPIKey, removeAPIKey, validateAPIKey, getObfuscatedKey, isConfigured } = useAPIKeyStore()
+  const [localKeys, setLocalKeys] = useState<APIKeys>({})
+  const [showKeys, setShowKeys] = useState<Record<keyof APIKeys, boolean>>({})
+  const [validationStatus, setValidationStatus] = useState<Record<keyof APIKeys, 'valid' | 'invalid' | 'unchecked'>>({})
+  const [activeTab, setActiveTab] = useState<'apikeys' | 'backend'>('apikeys')
 
-  // Load saved backend URL
+  // Load saved API keys
   useEffect(() => {
-    const saved = localStorage.getItem('omnicanvas-backend-url')
-    if (saved) {
-      setBackendUrl(saved)
-      aiService.configure(saved)
-      testConnection(saved)
+    setLocalKeys(apiKeys)
+    // Initialize validation status
+    const status: Record<string, 'unchecked'> = {}
+    Object.keys(apiKeys).forEach(key => {
+      status[key as keyof APIKeys] = 'unchecked'
+    })
+    setValidationStatus(status as any)
+  }, [apiKeys])
+
+  const handleKeyChange = (service: keyof APIKeys, value: string) => {
+    setLocalKeys(prev => ({ ...prev, [service]: value }))
+    setValidationStatus(prev => ({ ...prev, [service]: 'unchecked' }))
+  }
+
+  const handleSaveKey = async (service: keyof APIKeys) => {
+    const key = localKeys[service]
+    if (!key) {
+      removeAPIKey(service)
+      setValidationStatus(prev => ({ ...prev, [service]: 'unchecked' }))
+      return
+    }
+
+    const isValid = await validateAPIKey(service, key)
+    if (isValid) {
+      setAPIKey(service, key)
+      setValidationStatus(prev => ({ ...prev, [service]: 'valid' }))
     } else {
-      // Set default URL
-      const defaultUrl = 'https://omnicanvas-backend.vercel.app/api'
-      setBackendUrl(defaultUrl)
-      testConnection(defaultUrl)
-    }
-  }, [])
-
-  // Test backend connection
-  const testConnection = async (url?: string) => {
-    const testUrl = url || backendUrl
-    if (!testUrl) return
-
-    setConnectionStatus('testing')
-    
-    try {
-      // Update aiService with new URL
-      aiService.configure(testUrl)
-      
-      // Test connection
-      const isConnected = await aiService.testConnection()
-      
-      if (isConnected) {
-        setConnectionStatus('connected')
-        // Save working URL
-        localStorage.setItem('omnicanvas-backend-url', testUrl)
-      } else {
-        setConnectionStatus('error')
-      }
-    } catch (error) {
-      console.error('Connection test failed:', error)
-      setConnectionStatus('error')
+      setValidationStatus(prev => ({ ...prev, [service]: 'invalid' }))
     }
   }
 
-  const handleUrlChange = (value: string) => {
-    setBackendUrl(value)
-    setConnectionStatus('idle')
+  const handleToggleShow = (service: keyof APIKeys) => {
+    setShowKeys(prev => ({ ...prev, [service]: !prev[service] }))
   }
 
-  const handleTestConnection = () => {
-    if (backendUrl) {
-      testConnection()
+  const apiKeyServices = [
+    { 
+      key: 'openai' as keyof APIKeys,
+      name: 'OpenAI',
+      placeholder: 'sk-...',
+      description: 'For GPT models and DALL-E image generation',
+      required: false
+    },
+    { 
+      key: 'anthropic' as keyof APIKeys,
+      name: 'Anthropic Claude',
+      placeholder: 'sk-ant-...',
+      description: 'For Claude AI models',
+      required: false
+    },
+    { 
+      key: 'falai' as keyof APIKeys,
+      name: 'Fal.ai',
+      placeholder: 'Your Fal.ai API key',
+      description: 'For advanced image and video generation',
+      required: true
+    },
+    { 
+      key: 'replicate' as keyof APIKeys,
+      name: 'Replicate',
+      placeholder: 'Your Replicate API token',
+      description: 'For open-source AI models',
+      required: false
+    },
+    { 
+      key: 'stabilityai' as keyof APIKeys,
+      name: 'Stability AI',
+      placeholder: 'sk-...',
+      description: 'For Stable Diffusion models',
+      required: false
     }
-  }
-
-  const getStatusIcon = () => {
-    switch (connectionStatus) {
-      case 'testing':
-        return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-      case 'connected':
-        return <Check className="w-4 h-4 text-green-600" />
-      case 'error':
-        return <X className="w-4 h-4 text-red-600" />
-      default:
-        return <Wifi className="w-4 h-4 text-gray-400" />
-    }
-  }
-
-  const getStatusText = () => {
-    switch (connectionStatus) {
-      case 'testing':
-        return 'Testing connection...'
-      case 'connected':
-        return 'Connected to backend'
-      case 'error':
-        return 'Connection failed'
-      default:
-        return 'Ready to test'
-    }
-  }
+  ]
 
   return (
     <>
@@ -102,11 +102,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
           />
           
           {/* Modal */}
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
-                <Server className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Backend API Settings</h2>
+                <Settings className="w-5 h-5 text-blue-600" />
+                <h2 className="text-lg font-semibold text-gray-900">API Configuration</h2>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -117,72 +117,101 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
             </div>
 
             <div className="space-y-4">
-              {/* API Status Info */}
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-blue-900 mb-2 flex items-center">
+              {/* Important Notice */}
+              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                <div className="flex items-start">
+                  <AlertCircle className="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-sm font-medium text-amber-900 mb-1">Important: Use Your Own API Keys</h3>
+                    <p className="text-xs text-amber-800">
+                      This application requires you to provide your own API keys. Your keys are stored locally in your browser and never sent to our servers. At minimum, you need a Fal.ai API key to use the core features.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* API Keys Configuration */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center">
                   <Key className="w-4 h-4 mr-2" />
-                  AI Service Configuration
+                  API Keys Configuration
                 </h3>
-                <p className="text-xs text-blue-800">
-                  API keys are securely managed by your backend service. Configure your backend URL below to connect to your AI services.
-                </p>
+                
+                {apiKeyServices.map((service) => (
+                  <div key={service.key} className="space-y-2 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-700">
+                        {service.name}
+                        {service.required && <span className="text-red-500 ml-1">*</span>}
+                      </label>
+                      {validationStatus[service.key] === 'valid' && (
+                        <span className="text-xs text-green-600 flex items-center">
+                          <Check className="w-3 h-3 mr-1" /> Valid
+                        </span>
+                      )}
+                      {validationStatus[service.key] === 'invalid' && (
+                        <span className="text-xs text-red-600 flex items-center">
+                          <X className="w-3 h-3 mr-1" /> Invalid
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-600">{service.description}</p>
+                    <div className="flex space-x-2">
+                      <div className="flex-1 relative">
+                        <input
+                          type={showKeys[service.key] ? 'text' : 'password'}
+                          value={localKeys[service.key] || ''}
+                          onChange={(e) => handleKeyChange(service.key, e.target.value)}
+                          placeholder={service.placeholder}
+                          className="w-full text-sm border border-gray-300 rounded px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleToggleShow(service.key)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showKeys[service.key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => handleSaveKey(service.key)}
+                        className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors flex items-center"
+                      >
+                        <Save className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {apiKeys[service.key] && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Current: {getObfuscatedKey(service.key)}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* Backend URL Configuration */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Backend API URL</label>
-                <div className="flex space-x-2">
-                  <input
-                    type="url"
-                    value={backendUrl}
-                    onChange={(e) => handleUrlChange(e.target.value)}
-                    placeholder="https://your-backend.vercel.app/api"
-                    className="flex-1 text-sm border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    onClick={handleTestConnection}
-                    disabled={!backendUrl || connectionStatus === 'testing'}
-                    className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded transition-colors flex items-center space-x-2"
-                  >
-                    {getStatusIcon()}
-                    <span>Test</span>
-                  </button>
-                </div>
-                <div className="flex items-center space-x-2 mt-2">
-                  {getStatusIcon()}
-                  <span className={`text-xs ${
-                    connectionStatus === 'connected' ? 'text-green-600' :
-                    connectionStatus === 'error' ? 'text-red-600' : 
-                    connectionStatus === 'testing' ? 'text-blue-600' :
-                    'text-gray-500'
-                  }`}>
-                    {getStatusText()}
-                  </span>
-                </div>
-              </div>
-
-              {/* Backend Service Info */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Backend Services Required:</h3>
-                <ul className="text-xs text-gray-700 space-y-1">
-                  <li>• <strong>Gemini API:</strong> Image generation and AI composition</li>
-                  <li>• <strong>Fal.ai API:</strong> Advanced image processing</li>
-                  <li>• <strong>ElevenLabs API:</strong> Voice generation</li>
-                  <li>• <strong>Health Check:</strong> /health endpoint for status</li>
-                </ul>
+              {/* Getting Started Guide */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="text-sm font-medium text-blue-900 mb-2">Getting Started:</h3>
+                <ol className="text-xs text-blue-800 space-y-1">
+                  <li>1. Get your API keys from the respective platforms</li>
+                  <li>2. <strong>Required:</strong> Sign up at <a href="https://fal.ai" target="_blank" rel="noopener noreferrer" className="underline">fal.ai</a> for image generation</li>
+                  <li>3. <strong>Optional:</strong> Add other API keys for enhanced features</li>
+                  <li>4. Save your keys and start creating!</li>
+                </ol>
               </div>
 
               {/* Security Info */}
               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                 <h3 className="text-sm font-medium text-green-900 mb-2 flex items-center">
                   <Shield className="w-4 h-4 mr-2" />
-                  Security Benefits
+                  Security & Privacy
                 </h3>
                 <ul className="text-xs text-green-800 space-y-1">
-                  <li>• API keys never leave your backend server</li>
-                  <li>• No sensitive data stored in browser</li>
-                  <li>• Centralized API key management</li>
-                  <li>• Rate limiting and usage control</li>
+                  <li>• Your API keys are stored locally in your browser</li>
+                  <li>• Keys are never sent to our servers</li>
+                  <li>• You have full control over your API usage and costs</li>
+                  <li>• Keys are obfuscated in local storage</li>
+                  <li>• Clear your browser data to remove stored keys</li>
                 </ul>
               </div>
 
