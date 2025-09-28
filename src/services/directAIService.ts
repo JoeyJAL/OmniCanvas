@@ -6,17 +6,70 @@ import type {
 } from '@/types/ai'
 import { useAPIKeyStore } from '@store/apiKeyStore'
 
+// Rate limiting implementation
+interface RateLimitInfo {
+  count: number
+  resetTime: number
+}
+
 class DirectAIService {
+  private rateLimits: Map<string, RateLimitInfo> = new Map()
+  private readonly RATE_LIMIT_WINDOW = 60000 // 1 minute
+  private readonly MAX_REQUESTS_PER_WINDOW = 10
+
   private getAPIKey(service: keyof ReturnType<typeof useAPIKeyStore.getState>['apiKeys']): string | undefined {
-    return useAPIKeyStore.getState().apiKeys[service]
+    const key = useAPIKeyStore.getState().apiKeys[service]
+    // Additional validation before using the key
+    if (key && !this.isKeyValid(key)) {
+      console.error(`Invalid API key detected for ${service}`)
+      return undefined
+    }
+    return key
+  }
+
+  private isKeyValid(key: string): boolean {
+    // Basic security check - ensure no script injection attempts
+    if (key.includes('<script') || key.includes('javascript:') || key.includes('onclick')) {
+      return false
+    }
+    return true
+  }
+
+  private checkRateLimit(service: string): boolean {
+    const now = Date.now()
+    const limit = this.rateLimits.get(service)
+    
+    if (!limit || now > limit.resetTime) {
+      // Reset or create new limit
+      this.rateLimits.set(service, {
+        count: 1,
+        resetTime: now + this.RATE_LIMIT_WINDOW
+      })
+      return true
+    }
+    
+    if (limit.count >= this.MAX_REQUESTS_PER_WINDOW) {
+      return false
+    }
+    
+    limit.count++
+    return true
   }
 
   async generateImage(request: TextToImageRequest): Promise<AIGeneratedImage> {
+    // Rate limiting check
+    if (!this.checkRateLimit('falai')) {
+      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+    }
+
     const falApiKey = this.getAPIKey('falai')
     
     if (!falApiKey) {
       throw new Error('Please configure your Fal.ai API key in Settings to generate images')
     }
+
+    // Sanitize prompt to prevent injection
+    const sanitizedPrompt = this.sanitizeInput(request.prompt)
 
     try {
       const response = await fetch('https://fal.run/fal-ai/flux-lora', {
@@ -26,7 +79,7 @@ class DirectAIService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          prompt: request.prompt,
+          prompt: sanitizedPrompt,
           image_size: {
             width: request.width || 1024,
             height: request.height || 1024
@@ -54,7 +107,7 @@ class DirectAIService {
         url: imageUrl,
         width: request.width || 1024,
         height: request.height || 1024,
-        prompt: request.prompt,
+        prompt: sanitizedPrompt,
         provider: 'fal' as AIServiceProvider,
         metadata: {
           timestamp: Date.now(),
@@ -69,11 +122,20 @@ class DirectAIService {
   }
 
   async imageToImage(request: ImageToImageRequest): Promise<AIGeneratedImage> {
+    // Rate limiting check
+    if (!this.checkRateLimit('falai')) {
+      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+    }
+
     const falApiKey = this.getAPIKey('falai')
     
     if (!falApiKey) {
       throw new Error('Please configure your Fal.ai API key in Settings to use image-to-image generation')
     }
+
+    // Sanitize inputs
+    const sanitizedPrompt = this.sanitizeInput(request.prompt)
+    const sanitizedImageUrl = this.sanitizeUrl(request.imageUrl)
 
     try {
       const response = await fetch('https://fal.run/fal-ai/creative-upscaler', {
@@ -83,8 +145,8 @@ class DirectAIService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          image_url: request.imageUrl,
-          prompt: request.prompt,
+          image_url: sanitizedImageUrl,
+          prompt: sanitizedPrompt,
           creativity: request.strength || 0.5,
           resemblance: 1 - (request.strength || 0.5),
           scale: 2
@@ -107,12 +169,12 @@ class DirectAIService {
         url: imageUrl,
         width: request.width || 1024,
         height: request.height || 1024,
-        prompt: request.prompt,
+        prompt: sanitizedPrompt,
         provider: 'fal' as AIServiceProvider,
         metadata: {
           timestamp: Date.now(),
           model: 'creative-upscaler',
-          originalImage: request.imageUrl
+          originalImage: sanitizedImageUrl
         }
       }
     } catch (error) {
@@ -122,11 +184,19 @@ class DirectAIService {
   }
 
   async generateVideo(prompt: string, imageUrl?: string, duration: number = 5): Promise<{ url: string }> {
+    // Rate limiting check
+    if (!this.checkRateLimit('falai')) {
+      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+    }
+
     const falApiKey = this.getAPIKey('falai')
     
     if (!falApiKey) {
       throw new Error('Please configure your Fal.ai API key in Settings to generate videos')
     }
+
+    // Sanitize inputs
+    const sanitizedImageUrl = imageUrl ? this.sanitizeUrl(imageUrl) : undefined
 
     try {
       const response = await fetch('https://fal.run/fal-ai/stable-video', {
@@ -136,7 +206,7 @@ class DirectAIService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          image_url: imageUrl,
+          image_url: sanitizedImageUrl,
           motion_bucket_id: 127,
           cond_aug: 0.02,
           fps: 25,
@@ -161,8 +231,17 @@ class DirectAIService {
   }
 
   async generateText(prompt: string, context?: string): Promise<string> {
+    // Rate limiting check
+    if (!this.checkRateLimit('text-generation')) {
+      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+    }
+
     const openaiKey = this.getAPIKey('openai')
     const anthropicKey = this.getAPIKey('anthropic')
+    
+    // Sanitize inputs
+    const sanitizedPrompt = this.sanitizeInput(prompt)
+    const sanitizedContext = context ? this.sanitizeInput(context) : undefined
     
     // Try OpenAI first, then Anthropic
     if (openaiKey) {
@@ -176,8 +255,8 @@ class DirectAIService {
           body: JSON.stringify({
             model: 'gpt-4-turbo-preview',
             messages: [
-              { role: 'system', content: context || 'You are a helpful assistant.' },
-              { role: 'user', content: prompt }
+              { role: 'system', content: sanitizedContext || 'You are a helpful assistant.' },
+              { role: 'user', content: sanitizedPrompt }
             ],
             max_tokens: 500,
             temperature: 0.7
@@ -211,7 +290,7 @@ class DirectAIService {
             messages: [
               { 
                 role: 'user', 
-                content: context ? `${context}\n\n${prompt}` : prompt 
+                content: sanitizedContext ? `${sanitizedContext}\n\n${sanitizedPrompt}` : sanitizedPrompt 
               }
             ]
           })
@@ -254,6 +333,35 @@ class DirectAIService {
   getConfiguredServices(): string[] {
     const apiKeys = useAPIKeyStore.getState().apiKeys
     return Object.keys(apiKeys).filter(key => !!apiKeys[key as keyof typeof apiKeys])
+  }
+
+  // Security: Input sanitization methods
+  private sanitizeInput(input: string): string {
+    // Remove any potential script tags or malicious content
+    return input
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '')
+      .trim()
+      .substring(0, 2000) // Limit length to prevent DoS
+  }
+
+  private sanitizeUrl(url: string): string {
+    // Validate URL format
+    try {
+      const parsed = new URL(url)
+      // Only allow http(s) and data URLs
+      if (!['http:', 'https:', 'data:'].includes(parsed.protocol)) {
+        throw new Error('Invalid URL protocol')
+      }
+      return url
+    } catch {
+      // If it's a data URL, validate it
+      if (url.startsWith('data:image/')) {
+        return url
+      }
+      throw new Error('Invalid image URL')
+    }
   }
 }
 
