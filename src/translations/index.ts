@@ -1,4 +1,5 @@
 import { Language } from '@store/languageStore'
+import { apiKeysTranslations } from './apiKeysTranslations'
 
 export interface Translations {
   // Language switcher
@@ -135,6 +136,42 @@ export interface Translations {
         characterRequired: string
         generationFailed: string
       }
+    }
+  }
+  
+  // Settings Panel
+  settings: {
+    title: string
+    apiConfiguration: string
+    importantNotice: {
+      title: string
+      description: string
+    }
+    apiKeys: {
+      title: string
+      services: {
+        openai: { name: string; description: string; placeholder: string }
+        anthropic: { name: string; description: string; placeholder: string }
+        falai: { name: string; description: string; placeholder: string }
+        replicate: { name: string; description: string; placeholder: string }
+        stabilityai: { name: string; description: string; placeholder: string }
+      }
+      required: string
+      optional: string
+      valid: string
+      invalid: string
+      current: string
+      save: string
+      openSettings: string
+      rateLimitExceeded: string
+    }
+    gettingStarted: {
+      title: string
+      steps: string[]
+    }
+    security: {
+      title: string
+      benefits: string[]
     }
   }
   
@@ -298,7 +335,8 @@ const en: Translations = {
     delete: 'Delete',
     edit: 'Edit',
     close: 'Close'
-  }
+  },
+  ...apiKeysTranslations.en
 }
 
 // Traditional Chinese translations
@@ -447,7 +485,8 @@ const zhTW: Translations = {
     delete: '刪除',
     edit: '編輯',
     close: '關閉'
-  }
+  },
+  ...apiKeysTranslations['zh-TW']
 }
 
 // Spanish translations
@@ -596,7 +635,8 @@ const es: Translations = {
     delete: 'Eliminar',
     edit: 'Editar',
     close: 'Cerrar'
-  }
+  },
+  ...apiKeysTranslations.es
 }
 
 // Japanese translations
@@ -745,7 +785,8 @@ const ja: Translations = {
     delete: '削除',
     edit: '編集',
     close: '閉じる'
-  }
+  },
+  ...apiKeysTranslations.ja
 }
 
 // French translations
@@ -894,7 +935,8 @@ const fr: Translations = {
     delete: 'Supprimer',
     edit: 'Modifier',
     close: 'Fermer'
-  }
+  },
+  ...apiKeysTranslations.fr
 }
 
 // Translation map

@@ -59,7 +59,10 @@ class DirectAIService {
   async generateImage(request: TextToImageRequest): Promise<AIGeneratedImage> {
     // Rate limiting check
     if (!this.checkRateLimit('falai')) {
-      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+      // Get current language for error message
+      const currentLang = useLanguageStore.getState().currentLanguage
+      const t = require('@translations/index').getTranslation(currentLang)
+      throw new Error(t.settings.apiKeys.rateLimitExceeded)
     }
 
     const falApiKey = this.getAPIKey('falai')
@@ -124,7 +127,10 @@ class DirectAIService {
   async imageToImage(request: ImageToImageRequest): Promise<AIGeneratedImage> {
     // Rate limiting check
     if (!this.checkRateLimit('falai')) {
-      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+      // Get current language for error message
+      const currentLang = useLanguageStore.getState().currentLanguage
+      const t = require('@translations/index').getTranslation(currentLang)
+      throw new Error(t.settings.apiKeys.rateLimitExceeded)
     }
 
     const falApiKey = this.getAPIKey('falai')
@@ -186,7 +192,10 @@ class DirectAIService {
   async generateVideo(prompt: string, imageUrl?: string, duration: number = 5): Promise<{ url: string }> {
     // Rate limiting check
     if (!this.checkRateLimit('falai')) {
-      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+      // Get current language for error message
+      const currentLang = useLanguageStore.getState().currentLanguage
+      const t = require('@translations/index').getTranslation(currentLang)
+      throw new Error(t.settings.apiKeys.rateLimitExceeded)
     }
 
     const falApiKey = this.getAPIKey('falai')
@@ -233,7 +242,10 @@ class DirectAIService {
   async generateText(prompt: string, context?: string): Promise<string> {
     // Rate limiting check
     if (!this.checkRateLimit('text-generation')) {
-      throw new Error('Rate limit exceeded. Please wait a moment before trying again.')
+      // Get current language for error message
+      const currentLang = useLanguageStore.getState().currentLanguage
+      const t = require('@translations/index').getTranslation(currentLang)
+      throw new Error(t.settings.apiKeys.rateLimitExceeded)
     }
 
     const openaiKey = this.getAPIKey('openai')

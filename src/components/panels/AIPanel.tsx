@@ -661,9 +661,9 @@ Apply the edit instructions while maintaining:
             <div className="flex items-start space-x-2">
               <Settings className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-amber-900 mb-1">API Keys Required</p>
+                <p className="text-sm font-medium text-amber-900 mb-1">{t.settings.apiKeys.required}</p>
                 <p className="text-xs text-amber-800">
-                  Please configure your API keys in Settings to use AI features. You need at least a Fal.ai API key to get started.
+                  {t.settings.importantNotice.description}
                 </p>
                 <button
                   onClick={() => {
@@ -672,7 +672,7 @@ Apply the edit instructions while maintaining:
                   }}
                   className="mt-2 text-xs px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
                 >
-                  Open Settings
+                  {t.settings.apiKeys.openSettings}
                 </button>
               </div>
             </div>

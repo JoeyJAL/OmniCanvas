@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Settings, Server, Check, X, Wifi, Shield, Key, Eye, EyeOff, AlertCircle, Save } from 'lucide-react'
 import { aiService } from '@services/aiService'
 import { useAPIKeyStore, APIKeys } from '@store/apiKeyStore'
+import { useLanguageStore } from '@store/languageStore'
+import { getTranslation } from '@translations/index'
 
 interface SettingsPanelProps {
   isOpen: boolean
@@ -9,6 +11,8 @@ interface SettingsPanelProps {
 }
 
 export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen }) => {
+  const { currentLanguage } = useLanguageStore()
+  const t = getTranslation(currentLanguage)
   const { apiKeys, setAPIKey, removeAPIKey, validateAPIKey, getObfuscatedKey, isConfigured } = useAPIKeyStore()
   const [localKeys, setLocalKeys] = useState<APIKeys>({})
   const [showKeys, setShowKeys] = useState<Record<keyof APIKeys, boolean>>({})
@@ -55,37 +59,37 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
   const apiKeyServices = [
     { 
       key: 'openai' as keyof APIKeys,
-      name: 'OpenAI',
-      placeholder: 'sk-...',
-      description: 'For GPT models and DALL-E image generation',
+      name: t.settings.apiKeys.services.openai.name,
+      placeholder: t.settings.apiKeys.services.openai.placeholder,
+      description: t.settings.apiKeys.services.openai.description,
       required: false
     },
     { 
       key: 'anthropic' as keyof APIKeys,
-      name: 'Anthropic Claude',
-      placeholder: 'sk-ant-...',
-      description: 'For Claude AI models',
+      name: t.settings.apiKeys.services.anthropic.name,
+      placeholder: t.settings.apiKeys.services.anthropic.placeholder,
+      description: t.settings.apiKeys.services.anthropic.description,
       required: false
     },
     { 
       key: 'falai' as keyof APIKeys,
-      name: 'Fal.ai',
-      placeholder: 'Your Fal.ai API key',
-      description: 'For advanced image and video generation',
+      name: t.settings.apiKeys.services.falai.name,
+      placeholder: t.settings.apiKeys.services.falai.placeholder,
+      description: t.settings.apiKeys.services.falai.description,
       required: true
     },
     { 
       key: 'replicate' as keyof APIKeys,
-      name: 'Replicate',
-      placeholder: 'Your Replicate API token',
-      description: 'For open-source AI models',
+      name: t.settings.apiKeys.services.replicate.name,
+      placeholder: t.settings.apiKeys.services.replicate.placeholder,
+      description: t.settings.apiKeys.services.replicate.description,
       required: false
     },
     { 
       key: 'stabilityai' as keyof APIKeys,
-      name: 'Stability AI',
-      placeholder: 'sk-...',
-      description: 'For Stable Diffusion models',
+      name: t.settings.apiKeys.services.stabilityai.name,
+      placeholder: t.settings.apiKeys.services.stabilityai.placeholder,
+      description: t.settings.apiKeys.services.stabilityai.description,
       required: false
     }
   ]
@@ -106,7 +110,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <Settings className="w-5 h-5 text-blue-600" />
-                <h2 className="text-lg font-semibold text-gray-900">API Configuration</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t.settings.title}</h2>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -122,9 +126,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                 <div className="flex items-start">
                   <AlertCircle className="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="text-sm font-medium text-amber-900 mb-1">Important: Use Your Own API Keys</h3>
+                    <h3 className="text-sm font-medium text-amber-900 mb-1">{t.settings.importantNotice.title}</h3>
                     <p className="text-xs text-amber-800">
-                      This application requires you to provide your own API keys. Your keys are stored locally in your browser and never sent to our servers. At minimum, you need a Fal.ai API key to use the core features.
+                      {t.settings.importantNotice.description}
                     </p>
                   </div>
                 </div>
@@ -134,7 +138,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-gray-900 flex items-center">
                   <Key className="w-4 h-4 mr-2" />
-                  API Keys Configuration
+                  {t.settings.apiKeys.title}
                 </h3>
                 
                 {apiKeyServices.map((service) => (
@@ -146,12 +150,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                       </label>
                       {validationStatus[service.key] === 'valid' && (
                         <span className="text-xs text-green-600 flex items-center">
-                          <Check className="w-3 h-3 mr-1" /> Valid
+                          <Check className="w-3 h-3 mr-1" /> {t.settings.apiKeys.valid}
                         </span>
                       )}
                       {validationStatus[service.key] === 'invalid' && (
                         <span className="text-xs text-red-600 flex items-center">
-                          <X className="w-3 h-3 mr-1" /> Invalid
+                          <X className="w-3 h-3 mr-1" /> {t.settings.apiKeys.invalid}
                         </span>
                       )}
                     </div>
@@ -182,7 +186,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                     </div>
                     {apiKeys[service.key] && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Current: {getObfuscatedKey(service.key)}
+                        {t.settings.apiKeys.current}: {getObfuscatedKey(service.key)}
                       </p>
                     )}
                   </div>
