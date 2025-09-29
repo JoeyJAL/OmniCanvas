@@ -5,36 +5,16 @@ export const apiKeysTranslations = {
       title: 'API Configuration',
       apiConfiguration: 'AI Service Configuration',
       importantNotice: {
-        title: 'Important: Use Your Own API Keys',
-        description: 'This application requires you to provide your own API keys. Your keys are stored locally in your browser and never sent to our servers. At minimum, you need a Fal.ai API key to use the core features.'
+        title: 'Important: Use Your Own Gemini API Key',
+        description: 'OmniCanvas uses Google Gemini for AI image generation. Your API key is stored securely and processed through our backend for better security.'
       },
       apiKeys: {
-        title: 'API Keys Configuration',
+        title: 'Gemini API Key Configuration',
         services: {
-          openai: {
-            name: 'OpenAI',
-            description: 'For GPT models and DALL-E image generation',
-            placeholder: 'sk-...'
-          },
-          anthropic: {
-            name: 'Anthropic Claude',
-            description: 'For Claude AI models',
-            placeholder: 'sk-ant-...'
-          },
-          falai: {
-            name: 'Fal.ai',
-            description: 'For advanced image and video generation',
-            placeholder: 'Your Fal.ai API key'
-          },
-          replicate: {
-            name: 'Replicate',
-            description: 'For open-source AI models',
-            placeholder: 'Your Replicate API token'
-          },
-          stabilityai: {
-            name: 'Stability AI',
-            description: 'For Stable Diffusion models',
-            placeholder: 'sk-...'
+          gemini: {
+            name: 'Google Gemini',
+            description: 'For AI image generation and creative tools',
+            placeholder: 'AIza...'
           }
         },
         required: 'Required',
@@ -49,20 +29,21 @@ export const apiKeysTranslations = {
       gettingStarted: {
         title: 'Getting Started:',
         steps: [
-          'Get your API keys from the respective platforms',
-          'Required: Sign up at fal.ai for image generation',
-          'Optional: Add other API keys for enhanced features',
-          'Save your keys and start creating!'
-        ]
+          'Visit Google AI Studio to get your free API key',
+          'Copy your Gemini API key from the dashboard',
+          'Paste it below and save your configuration',
+          'Start creating amazing AI-powered content!'
+        ],
+        getApiKeyButton: 'Get Free Gemini API Key'
       },
       security: {
         title: 'Security & Privacy',
         benefits: [
-          'Your API keys are stored locally in your browser',
-          'Keys are never sent to our servers',
-          'You have full control over your API usage and costs',
-          'Keys are obfuscated in local storage',
-          'Clear your browser data to remove stored keys'
+          'Your API key is encrypted and stored locally',
+          'All AI requests are processed securely through our backend',
+          'You maintain full control over your API usage and costs',
+          'No API keys are stored on our servers',
+          'Enhanced security compared to direct frontend API calls'
         ]
       }
     }
@@ -72,36 +53,16 @@ export const apiKeysTranslations = {
       title: 'API 設定',
       apiConfiguration: 'AI 服務設定',
       importantNotice: {
-        title: '重要：使用您自己的 API 金鑰',
-        description: '此應用程式需要您提供自己的 API 金鑰。您的金鑰僅儲存在瀏覽器本地，永不傳送到我們的伺服器。至少需要 Fal.ai API 金鑰才能使用核心功能。'
+        title: '重要：使用您自己的 Gemini API 金鑰',
+        description: 'OmniCanvas 使用 Google Gemini 進行 AI 圖片生成。您的 API 金鑰安全儲存並透過我們的後端處理，提供更佳的安全性。'
       },
       apiKeys: {
-        title: 'API 金鑰設定',
+        title: 'Gemini API 金鑰設定',
         services: {
-          openai: {
-            name: 'OpenAI',
-            description: '用於 GPT 模型和 DALL-E 圖片生成',
-            placeholder: 'sk-...'
-          },
-          anthropic: {
-            name: 'Anthropic Claude',
-            description: '用於 Claude AI 模型',
-            placeholder: 'sk-ant-...'
-          },
-          falai: {
-            name: 'Fal.ai',
-            description: '用於進階圖片和影片生成',
-            placeholder: '您的 Fal.ai API 金鑰'
-          },
-          replicate: {
-            name: 'Replicate',
-            description: '用於開源 AI 模型',
-            placeholder: '您的 Replicate API 令牌'
-          },
-          stabilityai: {
-            name: 'Stability AI',
-            description: '用於 Stable Diffusion 模型',
-            placeholder: 'sk-...'
+          gemini: {
+            name: 'Google Gemini',
+            description: '用於 AI 圖片生成和創意工具',
+            placeholder: 'AIza...'
           }
         },
         required: '必填',
@@ -116,20 +77,21 @@ export const apiKeysTranslations = {
       gettingStarted: {
         title: '開始使用：',
         steps: [
-          '從相應平台取得您的 API 金鑰',
-          '必要：在 fal.ai 註冊以進行圖片生成',
-          '選填：新增其他 API 金鑰以增強功能',
-          '儲存您的金鑰並開始創作！'
-        ]
+          '造訪 Google AI Studio 取得免費 API 金鑰',
+          '從控制台複製您的 Gemini API 金鑰',
+          '貼上並儲存您的設定',
+          '開始創作令人驚艷的 AI 內容！'
+        ],
+        getApiKeyButton: '取得免費 Gemini API 金鑰'
       },
       security: {
         title: '安全與隱私',
         benefits: [
-          '您的 API 金鑰儲存在瀏覽器本地',
-          '金鑰永不傳送到我們的伺服器',
+          '您的 API 金鑰加密儲存在本地',
+          '所有 AI 請求透過我們的後端安全處理',
           '您完全控制 API 使用和費用',
-          '金鑰在本地儲存中混淆處理',
-          '清除瀏覽器資料即可移除儲存的金鑰'
+          '我們的伺服器不儲存任何 API 金鑰',
+          '相較於直接前端 API 呼叫提供更強化的安全性'
         ]
       }
     }
@@ -139,36 +101,16 @@ export const apiKeysTranslations = {
       title: 'Configuración de API',
       apiConfiguration: 'Configuración de Servicios de IA',
       importantNotice: {
-        title: 'Importante: Use Sus Propias Claves de API',
-        description: 'Esta aplicación requiere que proporcione sus propias claves de API. Sus claves se almacenan localmente en su navegador y nunca se envían a nuestros servidores. Como mínimo, necesita una clave de API de Fal.ai para usar las funciones principales.'
+        title: 'Importante: Use Su Propia Clave API de Gemini',
+        description: 'OmniCanvas utiliza Google Gemini para la generación de imágenes con IA. Su clave API se almacena de forma segura y se procesa a través de nuestro backend para mayor seguridad.'
       },
       apiKeys: {
-        title: 'Configuración de Claves de API',
+        title: 'Configuración de Clave API de Gemini',
         services: {
-          openai: {
-            name: 'OpenAI',
-            description: 'Para modelos GPT y generación de imágenes DALL-E',
-            placeholder: 'sk-...'
-          },
-          anthropic: {
-            name: 'Anthropic Claude',
-            description: 'Para modelos de IA Claude',
-            placeholder: 'sk-ant-...'
-          },
-          falai: {
-            name: 'Fal.ai',
-            description: 'Para generación avanzada de imágenes y videos',
-            placeholder: 'Su clave de API de Fal.ai'
-          },
-          replicate: {
-            name: 'Replicate',
-            description: 'Para modelos de IA de código abierto',
-            placeholder: 'Su token de API de Replicate'
-          },
-          stabilityai: {
-            name: 'Stability AI',
-            description: 'Para modelos Stable Diffusion',
-            placeholder: 'sk-...'
+          gemini: {
+            name: 'Google Gemini',
+            description: 'Para generación de imágenes con IA y herramientas creativas',
+            placeholder: 'AIza...'
           }
         },
         required: 'Requerido',
@@ -183,20 +125,21 @@ export const apiKeysTranslations = {
       gettingStarted: {
         title: 'Primeros pasos:',
         steps: [
-          'Obtenga sus claves de API de las plataformas respectivas',
-          'Requerido: Regístrese en fal.ai para generación de imágenes',
-          'Opcional: Agregue otras claves de API para funciones mejoradas',
-          '¡Guarde sus claves y comience a crear!'
-        ]
+          'Visite Google AI Studio para obtener su clave API gratuita',
+          'Copie su clave API de Gemini desde el panel de control',
+          'Péguela abajo y guarde su configuración',
+          '¡Comience a crear contenido increible con IA!'
+        ],
+        getApiKeyButton: 'Obtener Clave API de Gemini Gratis'
       },
       security: {
         title: 'Seguridad y Privacidad',
         benefits: [
-          'Sus claves de API se almacenan localmente en su navegador',
-          'Las claves nunca se envían a nuestros servidores',
-          'Tiene control total sobre el uso y los costos de la API',
-          'Las claves están ofuscadas en el almacenamiento local',
-          'Borre los datos del navegador para eliminar las claves almacenadas'
+          'Su clave API se cifra y almacena localmente',
+          'Todas las solicitudes de IA se procesan de forma segura a través de nuestro backend',
+          'Mantiene control total sobre el uso y los costos de su API',
+          'No se almacenan claves API en nuestros servidores',
+          'Seguridad mejorada comparada con llamadas directas de API desde el frontend'
         ]
       }
     }
@@ -206,36 +149,16 @@ export const apiKeysTranslations = {
       title: 'API設定',
       apiConfiguration: 'AIサービス設定',
       importantNotice: {
-        title: '重要：独自のAPIキーを使用してください',
-        description: 'このアプリケーションでは、独自のAPIキーを提供していただく必要があります。キーはブラウザにローカルに保存され、当社のサーバーに送信されることはありません。コア機能を使用するには、最低でもFal.ai APIキーが必要です。'
+        title: '重要：独自のGemini APIキーを使用してください',
+        description: 'OmniCanvasはGoogle Geminiを使用してAI画像生成を行います。您のAPIキーは安全に保存され、より高いセキュリティのために当社のバックエンドで処理されます。'
       },
       apiKeys: {
-        title: 'APIキー設定',
+        title: 'Gemini APIキー設定',
         services: {
-          openai: {
-            name: 'OpenAI',
-            description: 'GPTモデルとDALL-E画像生成用',
-            placeholder: 'sk-...'
-          },
-          anthropic: {
-            name: 'Anthropic Claude',
-            description: 'Claude AIモデル用',
-            placeholder: 'sk-ant-...'
-          },
-          falai: {
-            name: 'Fal.ai',
-            description: '高度な画像・動画生成用',
-            placeholder: 'あなたのFal.ai APIキー'
-          },
-          replicate: {
-            name: 'Replicate',
-            description: 'オープンソースAIモデル用',
-            placeholder: 'あなたのReplicate APIトークン'
-          },
-          stabilityai: {
-            name: 'Stability AI',
-            description: 'Stable Diffusionモデル用',
-            placeholder: 'sk-...'
+          gemini: {
+            name: 'Google Gemini',
+            description: 'AI画像生成とクリエイティブツール用',
+            placeholder: 'AIza...'
           }
         },
         required: '必須',
@@ -250,20 +173,21 @@ export const apiKeysTranslations = {
       gettingStarted: {
         title: '始め方：',
         steps: [
-          '各プラットフォームからAPIキーを取得',
-          '必須：画像生成のためfal.aiに登録',
-          'オプション：機能強化のため他のAPIキーを追加',
-          'キーを保存して作成を開始！'
-        ]
+          'Google AI Studioで無料APIキーを取得',
+          'ダッシュボードからGemini APIキーをコピー',
+          '以下に貼り付けて設定を保存',
+          '素晴らしいAIコンテンツの作成を開始！'
+        ],
+        getApiKeyButton: '無料Gemini APIキーを取得'
       },
       security: {
         title: 'セキュリティとプライバシー',
         benefits: [
-          'APIキーはブラウザにローカルに保存されます',
-          'キーは当社のサーバーに送信されません',
+          'APIキーは暗号化されてローカルに保存されます',
+          'すべてのAIリクエストは当社のバックエンドで安全に処理されます',
           'APIの使用とコストを完全に制御できます',
-          'キーはローカルストレージで難読化されます',
-          'ブラウザデータをクリアして保存されたキーを削除'
+          '当社のサーバーにAPIキーは保存されません',
+          'フロントエンドからの直接API呼び出しと比較して強化されたセキュリティ'
         ]
       }
     }
@@ -273,36 +197,16 @@ export const apiKeysTranslations = {
       title: 'Configuration API',
       apiConfiguration: 'Configuration des Services IA',
       importantNotice: {
-        title: 'Important : Utilisez Vos Propres Clés API',
-        description: 'Cette application nécessite que vous fournissiez vos propres clés API. Vos clés sont stockées localement dans votre navigateur et ne sont jamais envoyées à nos serveurs. Au minimum, vous avez besoin d\'une clé API Fal.ai pour utiliser les fonctionnalités principales.'
+        title: 'Important : Utilisez Votre Propre Clé API Gemini',
+        description: 'OmniCanvas utilise Google Gemini pour la génération d\'images IA. Votre clé API est stockée en sécurité et traitée via notre backend pour une meilleure sécurité.'
       },
       apiKeys: {
-        title: 'Configuration des Clés API',
+        title: 'Configuration de la Clé API Gemini',
         services: {
-          openai: {
-            name: 'OpenAI',
-            description: 'Pour les modèles GPT et la génération d\'images DALL-E',
-            placeholder: 'sk-...'
-          },
-          anthropic: {
-            name: 'Anthropic Claude',
-            description: 'Pour les modèles IA Claude',
-            placeholder: 'sk-ant-...'
-          },
-          falai: {
-            name: 'Fal.ai',
-            description: 'Pour la génération avancée d\'images et de vidéos',
-            placeholder: 'Votre clé API Fal.ai'
-          },
-          replicate: {
-            name: 'Replicate',
-            description: 'Pour les modèles IA open source',
-            placeholder: 'Votre token API Replicate'
-          },
-          stabilityai: {
-            name: 'Stability AI',
-            description: 'Pour les modèles Stable Diffusion',
-            placeholder: 'sk-...'
+          gemini: {
+            name: 'Google Gemini',
+            description: 'Pour la génération d\'images IA et les outils créatifs',
+            placeholder: 'AIza...'
           }
         },
         required: 'Requis',
@@ -317,20 +221,21 @@ export const apiKeysTranslations = {
       gettingStarted: {
         title: 'Commencer :',
         steps: [
-          'Obtenez vos clés API des plateformes respectives',
-          'Requis : Inscrivez-vous sur fal.ai pour la génération d\'images',
-          'Optionnel : Ajoutez d\'autres clés API pour des fonctionnalités améliorées',
-          'Sauvegardez vos clés et commencez à créer !'
-        ]
+          'Visitez Google AI Studio pour obtenir votre clé API gratuite',
+          'Copiez votre clé API Gemini depuis le tableau de bord',
+          'Collez-la ci-dessous et sauvegardez votre configuration',
+          'Commencez à créer du contenu IA incroyable !'
+        ],
+        getApiKeyButton: 'Obtenir une Clé API Gemini Gratuite'
       },
       security: {
         title: 'Sécurité et Confidentialité',
         benefits: [
-          'Vos clés API sont stockées localement dans votre navigateur',
-          'Les clés ne sont jamais envoyées à nos serveurs',
-          'Vous avez un contrôle total sur l\'utilisation et les coûts de l\'API',
-          'Les clés sont obfusquées dans le stockage local',
-          'Effacez les données du navigateur pour supprimer les clés stockées'
+          'Votre clé API est chiffrée et stockée localement',
+          'Toutes les requêtes IA sont traitées en sécurité via notre backend',
+          'Vous maintenez un contrôle total sur l\'utilisation et les coûts de votre API',
+          'Aucune clé API n\'est stockée sur nos serveurs',
+          'Sécurité améliorée comparée aux appels API directs depuis le frontend'
         ]
       }
     }

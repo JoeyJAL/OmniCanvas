@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useImageStore } from '@store/imageStore'
 import { useCanvasStore } from '@store/canvasStore'
 import { useStoryShopStore } from '@store/storyShopStore'
-import { directAIService } from '@services/directAIService'
+import { aiService } from '@services/aiService'
 import { useAPIKeyStore } from '@store/apiKeyStore'
 import { useTranslation } from '@hooks/useTranslation'
 import { useLanguageStore } from '@store/languageStore'
@@ -108,7 +108,7 @@ export const AIPanel: React.FC = () => {
           if (selectedImages.length === 1) {
             console.log('📸 Single image generation with:', imageUrls[0].substring(0, 50) + '...')
             // Single image: Image-to-Image generation with Nano Banana
-            result = await directAIService.imageToImage({
+            result = await aiService.imageToImage({
               prompt: prompt,
               imageUrl: imageUrls[0],
               width: 512,
@@ -119,7 +119,7 @@ export const AIPanel: React.FC = () => {
             console.log('🔀 Multi-image merge with', selectedImages.length, 'images')
             // Multiple images: Merge with the prompt as instruction
             // Multiple images: Use first image as base for image-to-image
-            result = await directAIService.imageToImage({
+            result = await aiService.imageToImage({
               prompt: `Merge these ${selectedImages.length} images: ${prompt}`,
               imageUrl: imageUrls[0],
               width: 512,
@@ -132,7 +132,7 @@ export const AIPanel: React.FC = () => {
         } else {
           console.log('📝 Using Text-to-Image mode (no images selected)')
           // Text-to-Image mode: Original functionality
-          result = await directAIService.generateImage({
+          result = await aiService.generateImage({
             prompt: prompt,
             width: 512,
             height: 512
@@ -142,7 +142,7 @@ export const AIPanel: React.FC = () => {
         }
       } else {
         // Other tabs: Use standard text-to-image generation
-        result = await directAIService.generateImage({
+        result = await aiService.generateImage({
           prompt: prompt,
           width: 512,
           height: 512
@@ -180,7 +180,7 @@ export const AIPanel: React.FC = () => {
     try {
       const imageUrls = selectedImages.map(img => img.url)
       // Merge using image-to-image with first image as base
-      const result = await directAIService.imageToImage({
+      const result = await aiService.imageToImage({
         prompt: `Merge these ${selectedImages.length} images: ${prompt}`,
         imageUrl: imageUrls[0],
         width: 512,
@@ -216,7 +216,7 @@ export const AIPanel: React.FC = () => {
 
     setIsProcessing(true)
     try {
-      const result = await directAIService.transferStyle({
+      const result = await aiService.transferStyle({
         imageUrl: selectedImages[0].url,
         style: prompt
       })
@@ -339,7 +339,7 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
           // Both character and product: Merge them first, then use for generation
           console.log('🎭 Merging character and product for comprehensive reference')
           // Merge character and product using image-to-image
-          const mergedImage = await directAIService.imageToImage({
+          const mergedImage = await aiService.imageToImage({
             prompt: `Composite reference image combining the main character and the featured product. Keep both elements clearly visible.`,
             imageUrl: characterImage,
             width: 512,
@@ -348,7 +348,7 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
           }).then(r => r.url)
           
           console.log('🖼️ Using merged reference for image-to-image generation')
-          result = await directAIService.imageToImage({
+          result = await aiService.imageToImage({
             prompt: panelPrompt,
             imageUrl: mergedImage,
             width: 512,
@@ -358,7 +358,7 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
         } else if (characterImage) {
           // Only character: Use character for image-to-image
           console.log('🖼️ Using character reference for image-to-image generation')
-          result = await directAIService.imageToImage({
+          result = await aiService.imageToImage({
             prompt: panelPrompt,
             imageUrl: characterImage,
             width: 512,
@@ -368,7 +368,7 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
         } else if (productImage) {
           // Only product: Use product for image-to-image
           console.log('📦 Using product reference for image-to-image generation')
-          result = await directAIService.imageToImage({
+          result = await aiService.imageToImage({
             prompt: panelPrompt,
             imageUrl: productImage,
             width: 512,
@@ -378,7 +378,7 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
         } else {
           // No references: Use text-to-image
           console.log('📝 Using text-to-image generation')
-          result = await directAIService.generateImage({
+          result = await aiService.generateImage({
             prompt: panelPrompt,
             width: 512,
             height: 512
@@ -465,7 +465,7 @@ Apply the edit instructions while maintaining:
           // Both character and product: Merge them first
           console.log('🎭 Merging character and product for edit reference')
           // Merge character and product using image-to-image
-          const mergedImage = await directAIService.imageToImage({
+          const mergedImage = await aiService.imageToImage({
             prompt: `Composite reference image combining the main character and the featured product. Keep both elements clearly visible.`,
             imageUrl: characterImage,
             width: 512,
@@ -473,7 +473,7 @@ Apply the edit instructions while maintaining:
             strength: 0.5
           }).then(r => r.url)
           
-          result = await directAIService.imageToImage({
+          result = await aiService.imageToImage({
             prompt: editedPrompt,
             imageUrl: mergedImage,
             width: 512,
@@ -481,7 +481,7 @@ Apply the edit instructions while maintaining:
             strength: 0.5
           })
         } else if (characterImage) {
-          result = await directAIService.imageToImage({
+          result = await aiService.imageToImage({
             prompt: editedPrompt,
             imageUrl: characterImage,
             width: 512,
@@ -489,7 +489,7 @@ Apply the edit instructions while maintaining:
             strength: 0.7
           })
         } else if (productImage) {
-          result = await directAIService.imageToImage({
+          result = await aiService.imageToImage({
             prompt: editedPrompt,
             imageUrl: productImage,
             width: 512,
@@ -497,7 +497,7 @@ Apply the edit instructions while maintaining:
             strength: 0.5
           })
         } else {
-          result = await directAIService.generateImage({
+          result = await aiService.generateImage({
             prompt: editedPrompt,
             width: 512,
             height: 512
@@ -572,12 +572,13 @@ Apply the edit instructions while maintaining:
       console.log('📹 Using Fal.ai to create animated story video...')
       
       // Generate video from first panel
-      const videoResult = await directAIService.generateVideo(
-        storyPrompt || 'Create an animated story video',
-        panelUrls[0],
-        8
-      )
-      const videoUrl = videoResult.url
+      const videoResult = await aiService.generateVideoFromPanels({
+        panelUrls: panelUrls,
+        narrationText: storyPrompt || 'Create an animated story video',
+        voiceId: 'default',
+        duration: 8
+      })
+      const videoUrl = videoResult
       
       console.log('✅ Video generated successfully!')
       console.log('🎥 Video URL:', videoUrl)

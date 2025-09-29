@@ -42,7 +42,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
 }));
 // Custom middleware to handle large image requests by compressing them first
 app.use('/api/ai/merge-images', async (req, res, next) => {
@@ -79,15 +79,24 @@ app.use('/api/ai/merge-images', async (req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// 檢查必要的環境變數
-const requiredEnvVars = ['GEMINI_API_KEY'];
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    console.error(`❌ Missing required environment variable: ${envVar}`);
-    console.log('Please create a .env file with your API keys');
-    process.exit(1);
+// Helper function to get API key from headers or environment
+const getAPIKey = (req, service = 'GEMINI') => {
+  // First, try to get from request headers (user-provided)
+  const userKey = req.headers['x-api-key'];
+  if (userKey) {
+    console.log(`🔑 Using user-provided ${service} API key`);
+    return userKey;
   }
-}
+  
+  // Fallback to environment variable (server-provided)
+  const envKey = process.env[`${service}_API_KEY`];
+  if (envKey) {
+    console.log(`🔑 Using server ${service} API key`);
+    return envKey;
+  }
+  
+  throw new Error(`${service} API key not provided. Please configure your API key in the frontend settings.`);
+};
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -95,7 +104,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     services: {
-      gemini: !!process.env.GEMINI_API_KEY,
+      gemini: !!getAPIKey(req, 'GEMINI'),
       elevenlabs: !!process.env.ELEVENLABS_API_KEY,
       fal: !!process.env.FAL_AI_API_KEY
     }
@@ -354,7 +363,8 @@ CRITICAL REQUIREMENTS:
 Generate a high-quality, photorealistic result that maintains the person's identity.`;
       
       // Send both the image and the prompt to Gemini
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      const geminiApiKey = getAPIKey(req, 'GEMINI');
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${geminiApiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -435,7 +445,7 @@ IMPORTANT FORMATTING REQUIREMENTS:
 
 Generate a high-quality result with clean edges and no black frames.`;
       
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${getAPIKey(req, 'GEMINI')}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -571,7 +581,7 @@ Generate a high-quality result that looks professionally composed with clean edg
     console.log('🎨 Generating composed image with Gemini 2.5 Flash (Nano Banana)...');
     
     // Use Gemini 2.5 Flash (Nano Banana)
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${getAPIKey(req, 'GEMINI')}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -712,7 +722,7 @@ app.post('/api/ai/transfer-style', async (req, res) => {
     
     console.log('📝 Style prompt:', stylePrompt);
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${getAPIKey(req, 'GEMINI')}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -884,7 +894,7 @@ IMPORTANT: Generate a new, original image that captures the essence and style of
 
     console.log('🎯 Calling Gemini 2.5 Flash Image Preview API for similarity generation');
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${getAPIKey(req, 'GEMINI')}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -1288,7 +1298,7 @@ app.post('/api/ai/generate-text', async (req, res) => {
 
     console.log('🎯 Generating text for prompt:', prompt.substring(0, 100) + '...');
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getAPIKey(req, 'GEMINI')}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1353,7 +1363,7 @@ app.listen(PORT, () => {
   console.log(`🚀 OmniCanvas Backend API running on port ${PORT}`);
   console.log(`📡 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3005'}`);
   console.log(`🔑 API Keys configured:`, {
-    gemini: !!process.env.GEMINI_API_KEY,
+    gemini: !!getAPIKey(req, 'GEMINI'),
     elevenlabs: !!process.env.ELEVENLABS_API_KEY,
     fal: !!process.env.FAL_AI_API_KEY
   });

@@ -7,6 +7,7 @@ import type {
   AIServiceProvider 
 } from '@/types/ai'
 import { compressDataURLs, compressDataURL, getDataURLSize } from '@/utils/imageCompression'
+import { useAPIKeyStore } from '@store/apiKeyStore'
 
 interface BackendAPIConfig {
   baseUrl: string
@@ -51,13 +52,26 @@ class AIService {
     }
   }
 
+  private getGeminiAPIKey(): string {
+    const geminiKey = useAPIKeyStore.getState().apiKeys.gemini
+    if (!geminiKey) {
+      throw new Error('Please configure your Gemini API key in Settings to use AI features')
+    }
+    return geminiKey
+  }
+
+  private getRequestHeaders(): HeadersInit {
+    return {
+      'Content-Type': 'application/json',
+      'X-API-Key': this.getGeminiAPIKey()
+    }
+  }
+
   async generateImage(request: TextToImageRequest): Promise<AIGeneratedImage> {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateImage}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           prompt: request.prompt,
           width: request.width || 512,
@@ -125,9 +139,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateImage}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           prompt: request.prompt,
           imageUrl: processedImageUrl,  // Reference image (compressed if needed)
@@ -204,9 +216,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.mergeImages}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           imageUrls: processedUrls,
           prompt,
@@ -234,9 +244,7 @@ class AIService {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.transferStyle}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           imageUrl: request.imageUrl,
           style: request.style,
@@ -284,9 +292,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateSimilar}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           imageUrls: processedImages,
           prompt: request.prompt,
@@ -315,9 +321,7 @@ class AIService {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.elevenlabs}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           text,
           voiceId: voiceId || 'default',
@@ -381,9 +385,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateComic}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           storyPrompt: request.storyPrompt,
           characterImage: processedCharacterImage,
@@ -443,9 +445,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.editWithWords}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           imageUrl: processedImageUrl,
           editPrompt: request.editPrompt,
@@ -503,9 +503,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.blendProduct}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           sceneImageUrl: processedSceneUrl,
           productImageUrl: processedProductUrl,
@@ -569,9 +567,7 @@ class AIService {
       
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateVideo}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           panelUrls: processedPanelUrls,
           narrationText: request.narrationText,
@@ -601,9 +597,7 @@ class AIService {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.generateText}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: this.getRequestHeaders(),
         body: JSON.stringify({
           prompt: request.prompt,
           maxLength: request.maxLength || 100

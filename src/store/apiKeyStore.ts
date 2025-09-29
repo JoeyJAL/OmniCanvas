@@ -2,11 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export interface APIKeys {
-  openai?: string
-  anthropic?: string
-  falai?: string
-  replicate?: string
-  stabilityai?: string
+  gemini?: string
 }
 
 interface APIKeyStore {
@@ -37,18 +33,9 @@ const isValidKeyFormat = (service: keyof APIKeys, key: string): boolean => {
   if (!/^[a-zA-Z0-9\-_]+$/.test(key)) return false
   
   switch (service) {
-    case 'openai':
-      return /^sk-[a-zA-Z0-9]{48,}$/.test(key)
-    case 'anthropic':
-      return /^sk-ant-api[0-9]{2}-[a-zA-Z0-9\-]{32,}$/.test(key)
-    case 'falai':
-      // Fal.ai uses various key formats
-      return key.length >= 32 && key.length <= 128
-    case 'replicate':
-      // Replicate uses r8_ prefix
-      return /^r8_[a-zA-Z0-9]{39}$/.test(key) || key.length >= 40
-    case 'stabilityai':
-      return /^sk-[a-zA-Z0-9]{48,}$/.test(key)
+    case 'gemini':
+      // Google Gemini API keys start with AIza
+      return /^AIza[a-zA-Z0-9\-_]{35}$/.test(key)
     default:
       return false
   }

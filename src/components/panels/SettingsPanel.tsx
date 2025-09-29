@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, Server, Check, X, Wifi, Shield, Key, Eye, EyeOff, AlertCircle, Save } from 'lucide-react'
-import { aiService } from '@services/aiService'
+import { Settings, Check, X, Shield, Key, Eye, EyeOff, AlertCircle, Save, ExternalLink } from 'lucide-react'
 import { useAPIKeyStore, APIKeys } from '@store/apiKeyStore'
 import { useLanguageStore } from '@store/languageStore'
 import { getTranslation } from '@translations/index'
@@ -58,39 +57,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
 
   const apiKeyServices = [
     { 
-      key: 'openai' as keyof APIKeys,
-      name: t.settings.apiKeys.services.openai.name,
-      placeholder: t.settings.apiKeys.services.openai.placeholder,
-      description: t.settings.apiKeys.services.openai.description,
-      required: false
-    },
-    { 
-      key: 'anthropic' as keyof APIKeys,
-      name: t.settings.apiKeys.services.anthropic.name,
-      placeholder: t.settings.apiKeys.services.anthropic.placeholder,
-      description: t.settings.apiKeys.services.anthropic.description,
-      required: false
-    },
-    { 
-      key: 'falai' as keyof APIKeys,
-      name: t.settings.apiKeys.services.falai.name,
-      placeholder: t.settings.apiKeys.services.falai.placeholder,
-      description: t.settings.apiKeys.services.falai.description,
+      key: 'gemini' as keyof APIKeys,
+      name: t.settings.apiKeys.services.gemini.name,
+      placeholder: t.settings.apiKeys.services.gemini.placeholder,
+      description: t.settings.apiKeys.services.gemini.description,
       required: true
-    },
-    { 
-      key: 'replicate' as keyof APIKeys,
-      name: t.settings.apiKeys.services.replicate.name,
-      placeholder: t.settings.apiKeys.services.replicate.placeholder,
-      description: t.settings.apiKeys.services.replicate.description,
-      required: false
-    },
-    { 
-      key: 'stabilityai' as keyof APIKeys,
-      name: t.settings.apiKeys.services.stabilityai.name,
-      placeholder: t.settings.apiKeys.services.stabilityai.placeholder,
-      description: t.settings.apiKeys.services.stabilityai.description,
-      required: false
     }
   ]
 
@@ -195,12 +166,22 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
 
               {/* Getting Started Guide */}
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-blue-900 mb-2">Getting Started:</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-blue-900">{t.settings.gettingStarted.title}</h3>
+                  <a 
+                    href="https://aistudio.google.com/app/apikey" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+                  >
+                    {t.settings.gettingStarted.getApiKeyButton}
+                    <ExternalLink className="w-3 h-3 ml-1" />
+                  </a>
+                </div>
                 <ol className="text-xs text-blue-800 space-y-1">
-                  <li>1. Get your API keys from the respective platforms</li>
-                  <li>2. <strong>Required:</strong> Sign up at <a href="https://fal.ai" target="_blank" rel="noopener noreferrer" className="underline">fal.ai</a> for image generation</li>
-                  <li>3. <strong>Optional:</strong> Add other API keys for enhanced features</li>
-                  <li>4. Save your keys and start creating!</li>
+                  {t.settings.gettingStarted.steps.map((step, index) => (
+                    <li key={index}>{index + 1}. {step}</li>
+                  ))}
                 </ol>
               </div>
 
@@ -208,14 +189,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                 <h3 className="text-sm font-medium text-green-900 mb-2 flex items-center">
                   <Shield className="w-4 h-4 mr-2" />
-                  Security & Privacy
+                  {t.settings.security.title}
                 </h3>
                 <ul className="text-xs text-green-800 space-y-1">
-                  <li>• Your API keys are stored locally in your browser</li>
-                  <li>• Keys are never sent to our servers</li>
-                  <li>• You have full control over your API usage and costs</li>
-                  <li>• Keys are obfuscated in local storage</li>
-                  <li>• Clear your browser data to remove stored keys</li>
+                  {t.settings.security.benefits.map((benefit, index) => (
+                    <li key={index}>• {benefit}</li>
+                  ))}
                 </ul>
               </div>
 
