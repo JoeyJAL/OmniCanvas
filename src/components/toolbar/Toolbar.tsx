@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useCanvasStore } from '@store/canvasStore'
 import { useImageStore } from '@store/imageStore'
+import { aiService } from '@services/aiService'
 import type { DrawingTool } from '@/types/canvas'
 import {
   Undo,
@@ -15,10 +16,12 @@ const tools: Array<{
   label: string
   shortcut?: string
 }> = [
-  // No tools - selection only mode
+  // Magic eraser tool removed
 ]
 
 export const Toolbar: React.FC = () => {
+  const [isProcessing, setIsProcessing] = useState(false)
+
   const {
     tool,
     setTool,
@@ -26,7 +29,8 @@ export const Toolbar: React.FC = () => {
     redo,
     canUndo,
     canRedo,
-    clearCanvas
+    clearCanvas,
+    getSelectedImages
   } = useCanvasStore()
 
   const {
@@ -46,8 +50,8 @@ export const Toolbar: React.FC = () => {
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        await addImages(files, { 
-          autoArrange: true, 
+        await addImages(files, {
+          autoArrange: true,
           spacing: 20,
           maxWidth: 200,
           maxHeight: 200
@@ -57,18 +61,20 @@ export const Toolbar: React.FC = () => {
     input.click()
   }
 
+
   return (
-    <div className="tool-panel w-16 flex flex-col items-center py-4 space-y-2">
-      {/* Import Images - Top Priority */}
-      <div className="flex flex-col space-y-1">
-        <button
-          onClick={handleBatchImport}
-          className="w-10 h-10 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-600 flex items-center justify-center transition-all duration-200"
-          title="Import Multiple Images"
-        >
-          <Image className="w-5 h-5" />
-        </button>
-      </div>
+    <div className="tool-panel relative">
+      <div className="w-16 flex flex-col items-center py-4 space-y-2">
+        {/* Import Images - Top Priority */}
+        <div className="flex flex-col space-y-1">
+          <button
+            onClick={handleBatchImport}
+            className="w-10 h-10 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-600 flex items-center justify-center transition-all duration-200"
+            title="Import Multiple Images"
+          >
+            <Image className="w-5 h-5" />
+          </button>
+        </div>
 
       {/* Separator */}
       <div className="w-8 h-px bg-gray-300 my-2"></div>
@@ -144,6 +150,8 @@ export const Toolbar: React.FC = () => {
           <Trash2 className="w-5 h-5" />
         </button>
       </div>
+    </div>
+
     </div>
   )
 }

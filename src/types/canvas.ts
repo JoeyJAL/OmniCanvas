@@ -10,9 +10,9 @@ export interface CanvasState {
   historyIndex: number
 }
 
-export type DrawingTool = 
+export type DrawingTool =
   | 'select'
-  | 'brush' 
+  | 'brush'
   | 'pencil'
   | 'eraser'
   | 'rectangle'

@@ -9,23 +9,23 @@ interface CanvasStore extends CanvasState {
   setBrushSize: (size: number) => void
   setBrushColor: (color: string) => void
   setIsDrawing: (isDrawing: boolean) => void
-  
+
   // History management
   addToHistory: (data: string) => void
   undo: () => void
   redo: () => void
   canUndo: () => boolean
   canRedo: () => boolean
-  
+
   // Canvas operations
   clearCanvas: () => void
   exportCanvas: (format: 'png' | 'jpg' | 'pdf') => string | null
   importImage: (imageUrl: string, position?: { x?: number, y?: number }) => Promise<void>
   getSelectedImages: () => string[]
-  
+
   // Brush settings
   updateBrushSettings: (settings: Partial<BrushSettings>) => void
-  
+
   // Infinite canvas controls
   zoom: number
   panX: number
@@ -50,18 +50,21 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   panY: 0,
 
   setCanvas: (canvas) => set({ canvas }),
-  
+
   setTool: (tool) => {
-    const { canvas, brushSize, brushColor } = get()
+    const state = get()
+    const canvas = state.canvas
+    const brushSize = state.brushSize
+    const brushColor = state.brushColor
     if (!canvas) return
-    
+
     // Configure canvas based on selected tool
     switch (tool) {
       case 'select':
         canvas.isDrawingMode = false
         canvas.selection = true
         // Reset composite operation
-        (canvas.getContext() as any).globalCompositeOperation = 'source-over'
+        ;(canvas.getContext() as any).globalCompositeOperation = 'source-over'
         break
       case 'brush':
         canvas.isDrawingMode = true
@@ -70,7 +73,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         canvas.freeDrawingBrush.width = brushSize
         canvas.freeDrawingBrush.color = brushColor
         // Reset composite operation
-        (canvas.getContext() as any).globalCompositeOperation = 'source-over'
+        ;(canvas.getContext() as any).globalCompositeOperation = 'source-over'
         break
       case 'eraser':
         canvas.isDrawingMode = true
@@ -85,10 +88,10 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         canvas.isDrawingMode = false
         canvas.selection = true
     }
-    
+
     set({ tool })
   },
-  
+
   setBrushSize: (size) => {
     const { canvas, tool } = get()
     if (canvas && canvas.freeDrawingBrush) {
@@ -102,7 +105,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
     set({ brushSize: size })
   },
-  
+
   setBrushColor: (color) => {
     const { canvas, tool } = get()
     if (canvas && canvas.freeDrawingBrush && tool !== 'eraser') {
@@ -110,9 +113,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
     set({ brushColor: color })
   },
-  
+
   setIsDrawing: (isDrawing) => set({ isDrawing }),
-  
+
   addToHistory: (data) => {
     const { history, historyIndex } = get()
     const newHistory: CanvasHistory = {
@@ -120,29 +123,29 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       timestamp: Date.now(),
       data
     }
-    
+
     // Remove any history after current index (for when we add after undo)
     const truncatedHistory = history.slice(0, historyIndex + 1)
     const updatedHistory = [...truncatedHistory, newHistory]
-    
+
     // Keep only last 50 history states
     const finalHistory = updatedHistory.slice(-50)
-    
+
     set({
       history: finalHistory,
       historyIndex: finalHistory.length - 1
     })
   },
-  
+
   undo: () => {
     const { canvas, history, historyIndex } = get()
     if (!canvas || historyIndex <= 0) return
-    
+
     const previousState = history[historyIndex - 1]
-    
+
     // Set a flag to prevent history recording during undo
     ;(canvas as any)._skipHistory = true
-    
+
     canvas.loadFromJSON(previousState.data, () => {
       canvas.renderAll()
       // Remove the flag after a short delay
@@ -150,19 +153,19 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         delete (canvas as any)._skipHistory
       }, 100)
     })
-    
+
     set({ historyIndex: historyIndex - 1 })
   },
-  
+
   redo: () => {
     const { canvas, history, historyIndex } = get()
     if (!canvas || historyIndex >= history.length - 1) return
-    
+
     const nextState = history[historyIndex + 1]
-    
+
     // Set a flag to prevent history recording during redo
     ;(canvas as any)._skipHistory = true
-    
+
     canvas.loadFromJSON(nextState.data, () => {
       canvas.renderAll()
       // Remove the flag after a short delay
@@ -170,37 +173,37 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         delete (canvas as any)._skipHistory
       }, 100)
     })
-    
+
     set({ historyIndex: historyIndex + 1 })
   },
-  
+
   canUndo: () => {
     const { historyIndex } = get()
     return historyIndex > 0
   },
-  
+
   canRedo: () => {
     const { history, historyIndex } = get()
     return historyIndex < history.length - 1
   },
-  
+
   clearCanvas: () => {
     const { canvas } = get()
     if (canvas) {
       canvas.clear()
       canvas.backgroundColor = '#ffffff'
       canvas.renderAll()
-      
+
       // Add to history
       const data = JSON.stringify(canvas.toJSON())
       get().addToHistory(data)
     }
   },
-  
+
   exportCanvas: (format) => {
     const { canvas } = get()
     if (!canvas) return null
-    
+
     switch (format) {
       case 'png':
         return canvas.toDataURL({
@@ -222,34 +225,34 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         return null
     }
   },
-  
+
   importImage: async (imageUrl, position) => {
     const { canvas } = get()
     if (!canvas) return
-    
+
     console.log('🖼️ Importing image to canvas:', imageUrl.substring(0, 50) + '...')
-    
+
     return new Promise((resolve, reject) => {
       try {
         fabric.Image.fromURL(
-          imageUrl, 
+          imageUrl,
           (img) => {
             try {
               if (img && img.width && img.height) {
                 console.log('✅ Image loaded successfully:', img.width, 'x', img.height)
-                
+
                 // Apply same scaling logic as imageStore for consistency
                 const imgWidth = img.width || 1
                 const imgHeight = img.height || 1
                 const maxDimension = Math.max(imgWidth, imgHeight)
-                
+
                 console.log('📏 Original AI image size:', imgWidth, 'x', imgHeight)
-                
+
                 // Only scale down if image is too large to avoid blurriness
                 const maxReasonableSize = 600  // Same as imageStore
-                
+
                 let scale = 1
-                
+
                 if (maxDimension > maxReasonableSize) {
                   // Only scale down if too large
                   scale = maxReasonableSize / maxDimension
@@ -258,10 +261,10 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
                   // Keep original size if reasonable
                   console.log('✅ Using original AI image size (good quality)')
                 }
-                
+
                 img.scale(scale)
                 console.log('✅ Final AI image display size:', (imgWidth * scale).toFixed(0), 'x', (imgHeight * scale).toFixed(0))
-                
+
                 // Smart positioning: use provided position or auto-calculate
                 if (position?.x !== undefined && position?.y !== undefined) {
                   img.set({
@@ -274,7 +277,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
                   img.center()
                   console.log('📍 Centered image (no position specified)')
                 }
-                
+
                 // Add a unique identifier for AI-generated images
                 try {
                   if (imageUrl.startsWith('data:image/')) {
@@ -284,15 +287,15 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
                 } catch (metaError) {
                   console.warn('Failed to set metadata:', metaError)
                 }
-                
+
                 canvas.add(img)
                 canvas.renderAll()
                 console.log('✅ Image added to canvas and rendered')
-                
+
                 // Add to history
                 const data = JSON.stringify(canvas.toJSON())
                 get().addToHistory(data)
-                
+
                 resolve()
               } else {
                 console.error('❌ Failed to load image - img object is null or has no dimensions')
@@ -313,21 +316,21 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       }
     })
   },
-  
+
   updateBrushSettings: (settings) => {
     const { canvas, brushSize, brushColor } = get()
     const newSize = settings.size ?? brushSize
     const newColor = settings.color ?? brushColor
-    
+
     if (canvas && canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.width = newSize
       canvas.freeDrawingBrush.color = newColor
-      
+
       if (settings.opacity) {
         // TODO: Implement brush opacity
       }
     }
-    
+
     set({
       brushSize: newSize,
       brushColor: newColor
@@ -376,101 +379,32 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
   },
 
-  // Helper function to calculate smart layout positions for multiple images
-  calculateSmartLayout: (imageCount: number, imageSize: { width: number, height: number }) => {
-    const { canvas } = get()
-    if (!canvas) return []
-    
-    const canvasWidth = canvas.width || 800
-    const canvasHeight = canvas.height || 600
-    const padding = 20
-    const positions: Array<{ x: number, y: number }> = []
-    
-    console.log('🧮 Calculating smart layout for', imageCount, 'images')
-    console.log('📐 Canvas size:', canvasWidth, 'x', canvasHeight)
-    console.log('🖼️ Image size:', imageSize.width, 'x', imageSize.height)
-    
-    if (imageCount === 1) {
-      // Single image: center it
-      positions.push({
-        x: (canvasWidth - imageSize.width) / 2,
-        y: (canvasHeight - imageSize.height) / 2
-      })
-    } else if (imageCount === 2) {
-      // Two images: side by side
-      const totalWidth = imageSize.width * 2 + padding
-      const startX = (canvasWidth - totalWidth) / 2
-      const centerY = (canvasHeight - imageSize.height) / 2
-      
-      positions.push(
-        { x: startX, y: centerY },
-        { x: startX + imageSize.width + padding, y: centerY }
-      )
-    } else if (imageCount === 4) {
-      // Four images: 2x2 grid (perfect for story panels!)
-      const totalWidth = imageSize.width * 2 + padding
-      const totalHeight = imageSize.height * 2 + padding
-      const startX = (canvasWidth - totalWidth) / 2
-      const startY = (canvasHeight - totalHeight) / 2
-      
-      positions.push(
-        // Top row
-        { x: startX, y: startY },
-        { x: startX + imageSize.width + padding, y: startY },
-        // Bottom row
-        { x: startX, y: startY + imageSize.height + padding },
-        { x: startX + imageSize.width + padding, y: startY + imageSize.height + padding }
-      )
-    } else {
-      // Multiple images: flexible grid
-      const cols = Math.ceil(Math.sqrt(imageCount))
-      const rows = Math.ceil(imageCount / cols)
-      
-      const totalWidth = imageSize.width * cols + padding * (cols - 1)
-      const totalHeight = imageSize.height * rows + padding * (rows - 1)
-      const startX = Math.max(padding, (canvasWidth - totalWidth) / 2)
-      const startY = Math.max(padding, (canvasHeight - totalHeight) / 2)
-      
-      for (let i = 0; i < imageCount; i++) {
-        const row = Math.floor(i / cols)
-        const col = i % cols
-        positions.push({
-          x: startX + col * (imageSize.width + padding),
-          y: startY + row * (imageSize.height + padding)
-        })
-      }
-    }
-    
-    console.log('✅ Generated positions:', positions)
-    return positions
-  },
-  
   // Get selected images from canvas
   getSelectedImages: () => {
     const { canvas } = get()
     console.log('🎯 Canvas selection check:', { hasCanvas: !!canvas })
-    
+
     if (!canvas) return []
-    
+
     const activeObjects = canvas.getActiveObjects()
     console.log('📋 Active objects:', { count: activeObjects.length, objects: activeObjects })
-    
+
     const imageUrls: string[] = []
-    
+
     activeObjects.forEach((obj, index) => {
-      console.log(`🖼️ Object ${index}:`, { 
-        type: obj.type, 
-        hasElement: !!(obj as any)._element, 
+      console.log(`🖼️ Object ${index}:`, {
+        type: obj.type,
+        hasElement: !!(obj as any)._element,
         hasSrc: !!(obj as any)._element?.src,
         src: (obj as any)._element?.src?.substring(0, 50) + '...'
       })
-      
+
       if (obj.type === 'image' && (obj as any)._element?.src) {
         imageUrls.push((obj as any)._element.src)
       }
     })
-    
+
     console.log('✅ Selected image URLs:', { count: imageUrls.length })
     return imageUrls
-  }
+  },
 }))

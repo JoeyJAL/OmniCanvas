@@ -13,10 +13,7 @@ const defaultConfig: CanvasConfig = {
   selection: true,  // Enable selection
   renderOnAddRemove: true,
   centeredScaling: true,
-  centeredRotation: true,
-  // Enable multi-selection
-  preserveObjectStacking: true,
-  targetFindTolerance: 4
+  centeredRotation: true
 }
 
 export const Canvas: React.FC = () => {
@@ -59,7 +56,6 @@ export const Canvas: React.FC = () => {
     zoomOut,
     resetView,
     setZoom,
-    setPan
   } = useCanvasStore()
 
   const { setCanvas: setImageCanvas, selectImage, isMultiSelectMode } = useImageStore()
@@ -87,9 +83,7 @@ export const Canvas: React.FC = () => {
       stopContextMenu: false,
       selectionBorderColor: 'rgba(46, 115, 252, 0.8)',
       selectionLineWidth: 2,
-      selectionDashArray: [5, 5],
-      // Ensure objects can be selected
-      objectCaching: false  // This might help with selection detection
+      selectionDashArray: [5, 5]
     })
 
     // Enable infinite canvas functionality
@@ -110,7 +104,7 @@ export const Canvas: React.FC = () => {
       console.log('📦 Object added to canvas:', obj.type)
       
       // Ensure all objects support selection and multi-selection
-      if (obj) {
+      if (obj && typeof obj.set === 'function') {
         obj.set({
           selectable: true,
           evented: true,
@@ -154,7 +148,10 @@ export const Canvas: React.FC = () => {
       }, 300) // 300ms delay
     }
 
-    fabricCanvas.on('path:created', addToHistoryDebounced)
+    fabricCanvas.on('path:created', (e: any) => {
+      console.log('📝 Path created')
+      addToHistoryDebounced()
+    })
 
     fabricCanvas.on('object:modified', addToHistoryDebounced)
 
@@ -224,18 +221,18 @@ export const Canvas: React.FC = () => {
           selectedObjects
         })
       } else {
-        // Left click - handle pan vs selection
+        // Left click - handle pan vs selection vs drawing
         setContextMenu(prev => ({ ...prev, visible: false }))
-        
+
         // Check if we're clicking on an object vs empty canvas
         const target = fabricCanvas.findTarget(evt, false)
         console.log('🎯 Target found:', target?.type || 'none')
-        
+
         if (evt.shiftKey && !target) {
           // Shift+drag on empty space = pan canvas
           console.log('🖐️ Starting pan mode (Shift+drag on empty space)')
           isDragging = true
-          fabricCanvas.isDragging = true
+          ;(fabricCanvas as any).isDragging = true
           fabricCanvas.selection = false
           lastPosX = evt.clientX
           lastPosY = evt.clientY
@@ -243,8 +240,8 @@ export const Canvas: React.FC = () => {
           // Not panning - ensure selection is enabled for multi-selection
           console.log('✅ Ensuring selection is enabled for multi-selection')
           fabricCanvas.selection = true
-          fabricCanvas.isDragging = false
-          
+          ;(fabricCanvas as any).isDragging = false
+
           // Log modifier keys for debugging multi-selection
           if (evt.ctrlKey || evt.metaKey) {
             console.log('🔥 Ctrl/Cmd detected - multi-selection should work!')
@@ -255,11 +252,11 @@ export const Canvas: React.FC = () => {
 
     fabricCanvas.on('mouse:up', () => {
       setIsDrawing(false)
-      
+
       if (isDragging) {
         console.log('🖐️ Ending pan mode')
         isDragging = false
-        fabricCanvas.isDragging = false
+        ;(fabricCanvas as any).isDragging = false
         fabricCanvas.selection = true
       }
     })
@@ -361,13 +358,14 @@ export const Canvas: React.FC = () => {
     }
   }, [])
 
-  // Update brush settings when they change
+  // Update brush settings when they change (CanvasStore handles all tool settings)
   useEffect(() => {
     if (canvas && canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.width = brushSize
       canvas.freeDrawingBrush.color = brushColor
     }
-  }, [canvas, brushSize, brushColor])
+    console.log('🔧 Canvas tool changed to:', tool)
+  }, [canvas, brushSize, brushColor, tool])
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -683,7 +681,7 @@ export const Canvas: React.FC = () => {
   }
 
   // Helper function to create progress image on canvas
-  const createProgressImage = (message: string, stage: number = 0) => {
+  const createProgressImage = (message: string, stage: number = 0): any => {
     if (!canvas) return null
     
     // Create SVG progress indicator
@@ -751,7 +749,7 @@ export const Canvas: React.FC = () => {
             selectable: false,
             evented: false,
             isProgressImage: true
-          })
+          } as any)
           canvas.add(img)
           canvas.bringToFront(img)
           canvas.renderAll()
@@ -784,7 +782,7 @@ export const Canvas: React.FC = () => {
   const handleIntelligentCompose = async () => {
     if (contextMenu.selectedObjects.length < 2) return
     
-    let progressTimeout: NodeJS.Timeout
+    let progressTimeout: number
     let currentProgressImg: any = null
     
     try {

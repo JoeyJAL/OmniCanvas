@@ -19,7 +19,11 @@ import {
   Upload,
   Camera,
   FileImage,
-  Video
+  Video,
+  Eraser,
+  Scissors,
+  User,
+  Zap
 } from 'lucide-react'
 
 export const AIPanel: React.FC = () => {
@@ -30,7 +34,7 @@ export const AIPanel: React.FC = () => {
   const { importImage, getSelectedImages: getCanvasSelectedImages, calculateSmartLayout } = useCanvasStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const [prompt, setPrompt] = useState('')
-  const [activeTab, setActiveTab] = useState<'storyshop' | 'generate'>('storyshop')
+  const [activeTab, setActiveTab] = useState<'storyshop' | 'generate'>('generate')
   const [_lastResult, setLastResult] = useState<string | null>(null)
   
   // StoryShop state
@@ -44,10 +48,31 @@ export const AIPanel: React.FC = () => {
   const [activeEnhancements, setActiveEnhancements] = useState<string[]>([])
   const [editPrompt, setEditPrompt] = useState('')
   const [latestVideoUrl, setLatestVideoUrl] = useState<string | null>(null)
+  const [previewTemplate, setPreviewTemplate] = useState<string | null>(null)
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null)
 
   // Get selected images from canvas (higher priority) or image store
   const canvasSelectedImages = getCanvasSelectedImages()
   const imageStoreImages = getImageStoreImages()
+
+  // Debounced hover handlers to prevent flickering
+  const handleTemplateHover = (templateId: string) => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+    }
+    const timeout = setTimeout(() => {
+      setPreviewTemplate(templateId)
+    }, 200) // 200ms delay
+    setHoverTimeout(timeout)
+  }
+
+  const handleTemplateLeave = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+      setHoverTimeout(null)
+    }
+    setPreviewTemplate(null)
+  }
   const selectedImages = canvasSelectedImages.length > 0 ? 
     canvasSelectedImages.map(url => ({ url })) : 
     imageStoreImages
@@ -77,7 +102,7 @@ export const AIPanel: React.FC = () => {
       maxImages: 2, 
       message: 'Story can use up to 2 images (character + product)', 
       canUse: selectedImages.length <= 2 
-    }
+    },
   }
   
 
@@ -159,7 +184,7 @@ export const AIPanel: React.FC = () => {
       
     } catch (error) {
       console.error('Image generation failed:', error)
-      alert('Image generation failed: ' + error)
+      alert(t.alerts.imageGenerationFailed + error)
     } finally {
       setIsProcessing(false)
     }
@@ -167,12 +192,12 @@ export const AIPanel: React.FC = () => {
 
   const handleMergeImages = async () => {
     if (selectedImages.length < 2) {
-      alert('Please select at least 2 images to merge')
+      alert(t.alerts.mergeSelectMinImages)
       return
     }
     
     if (!prompt.trim()) {
-      alert('Please enter merge instructions, e.g., "Blend these images into an artistic collage"')
+      alert(t.alerts.mergeEnterInstructions)
       return
     }
 
@@ -194,47 +219,15 @@ export const AIPanel: React.FC = () => {
       setPrompt('')
       
       console.log('Merged images added to canvas')
-      alert(`Successfully merged ${selectedImages.length} images!`)
+      alert(t.alerts.mergedImagesSuccess.replace('{count}', selectedImages.length.toString()))
     } catch (error) {
       console.error('Image merging failed:', error)
-      alert('Image merging failed: ' + error)
+      alert(t.alerts.mergeFailed + error)
     } finally {
       setIsProcessing(false)
     }
   }
 
-  const handleStyleTransfer = async () => {
-    if (selectedImages.length === 0) {
-      alert('Please select an image to apply style')
-      return
-    }
-    
-    if (!prompt.trim()) {
-      alert('Please enter style description, e.g., "Van Gogh Starry Night style"')
-      return
-    }
-
-    setIsProcessing(true)
-    try {
-      const result = await aiService.transferStyle({
-        imageUrl: selectedImages[0].url,
-        style: prompt
-      })
-      
-      // Add styled image to canvas (single image - center it)
-      await importImage(result)
-      setLastResult(result)
-      setPrompt('')
-      
-      console.log('Style transfer result added to canvas')
-      alert('Style transfer complete!')
-    } catch (error) {
-      console.error('Style transfer failed:', error)
-      alert('Style transfer failed: ' + error)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
 
 
   // StoryShop handlers
@@ -405,7 +398,7 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
       console.log('🎉 4-panel comic generated successfully with character consistency!')
     } catch (error) {
       console.error('❌ Comic generation failed:', error)
-      alert('Comic generation failed. Please try again!')
+      alert(t.alerts.comicGenerationFailed)
     } finally {
       setIsProcessing(false)
     }
@@ -413,12 +406,12 @@ Generate panel ${i + 1}: ${panelStages[i]} of the story "${storyPrompt}"`
 
   const handleEditAllPanels = async () => {
     if (!editPrompt.trim()) {
-      alert('Please enter edit instructions!')
+      alert(t.alerts.enterEditInstructions)
       return
     }
     
     if (comicPanels.length === 0) {
-      alert('Generate a comic first!')
+      alert(t.alerts.generateComicFirst)
       return
     }
 
@@ -517,7 +510,7 @@ Apply the edit instructions while maintaining:
       console.log('🎉 All panels edited successfully!')
     } catch (error) {
       console.error('❌ Panel editing failed:', error)
-      alert('Panel editing failed. Please try again!')
+      alert(t.alerts.panelEditingFailed)
     } finally {
       setIsProcessing(false)
     }
@@ -541,7 +534,7 @@ Apply the edit instructions while maintaining:
       console.log('✅ Story idea generated:', storyIdeas[category])
     } catch (error) {
       console.error('❌ Story idea generation failed:', error)
-      alert('Story idea generation failed. Please try again!')
+      alert(t.alerts.storyGenerationFailed)
     } finally {
       setIsProcessing(false)
     }
@@ -562,7 +555,7 @@ Apply the edit instructions while maintaining:
       panelUrls = comicPanels
       console.log('🎬 Using', comicPanels.length, 'generated comic panels for video')
     } else {
-      alert('Please select images on the canvas or generate a comic first!')
+      alert(t.alerts.selectImagesFirst)
       return
     }
 
@@ -601,9 +594,39 @@ Apply the edit instructions while maintaining:
     }
   }
 
+  const handleMagicEraser = async (objectDescription?: string) => {
+    if (selectedImages.length === 0) {
+      alert(t.alerts.magicEraserSelectImage)
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      console.log('🪄 Using Magic Eraser on image:', selectedImages[0].url.substring(0, 50))
+      
+      const result = await aiService.magicEraser({
+        imageUrl: selectedImages[0].url,
+        objectDescription: objectDescription || prompt || 'Remove unwanted objects'
+      })
+      
+      await importImage(result)
+      setPrompt('')
+      
+      console.log('✅ Magic Eraser complete!')
+      alert(t.alerts.magicEraserComplete)
+    } catch (error) {
+      console.error('Magic eraser failed:', error)
+      alert(t.alerts.magicEraserFailed + error)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+
+
   const tabs = [
-    { id: 'storyshop' as const, label: t.aiPanel.tabs.storyMaker, icon: BookOpen },
     { id: 'generate' as const, label: t.aiPanel.tabs.generate, icon: Sparkles },
+    { id: 'storyshop' as const, label: t.aiPanel.tabs.storyMaker, icon: BookOpen },
   ]
 
   return (
@@ -747,11 +770,12 @@ Apply the edit instructions while maintaining:
               </div>
             )}
             
+
             {/* Popular Templates - With Categories */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-purple-700 flex items-center">
-                  🔥 {t.aiPanel.generate.templates.title}
+                  ✨ {t.aiPanel.generate.templates.title}
                 </p>
                 {hasSelection && (
                   <span className="text-xs text-blue-600 font-medium">{t.aiPanel.generate.templates.withSelection}</span>
@@ -887,20 +911,14 @@ Apply the edit instructions while maintaining:
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>
-                    {hasSelection 
-                      ? `${t.aiPanel.generate.generating} (${selectedImages.length} ${t.aiPanel.generate.selectedImages})`
-                      : t.aiPanel.generate.generating
-                    }
+                    {t.aiPanel.generate.generating}
                   </span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
                   <span>
-                    {hasSelection 
-                      ? `${t.aiPanel.generate.generateButton} (${selectedImages.length} ${t.aiPanel.generate.selectedImages})`
-                      : t.aiPanel.generate.generateButton
-                    }
+                    {t.aiPanel.generate.generateButton}
                   </span>
                 </>
               )}
@@ -981,50 +999,7 @@ Apply the edit instructions while maintaining:
           </div>
         )}
 
-        {false && (
-          <div className="space-y-3">
-            <p className="text-xs text-gray-600">
-              Apply artistic styles to selected images.
-            </p>
 
-            {selectedImages.length === 0 && (
-              <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
-                Select an image to apply style transfer.
-              </p>
-            )}
-
-            {/* Quick Style Buttons */}
-            <div className="grid grid-cols-2 gap-1 text-xs">
-              {['Van Gogh', 'Picasso', 'Anime', 'Cartoon', 'Oil Painting', 'Watercolor'].map(style => (
-                <button
-                  key={style}
-                  onClick={() => setPrompt(style)}
-                  className="py-1 px-2 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 transition-colors"
-                >
-                  {style}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={handleStyleTransfer}
-              disabled={isProcessing || !tabValidation[activeTab]?.canUse || !prompt.trim()}
-              className="w-full py-2 px-3 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white text-sm rounded-lg transition-colors flex items-center justify-center space-x-2"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                  <span>Styling...</span>
-                </>
-              ) : (
-                <>
-                  <Palette className="w-4 h-4" />
-                  <span>Apply Style</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
 
         {activeTab === 'storyshop' && (
           <div className="space-y-4">
@@ -1395,6 +1370,75 @@ Apply the edit instructions while maintaining:
         )}
 
       </div>
+
+      {/* Template Preview Modal */}
+      {previewTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setPreviewTemplate(null)}>
+          <div className="bg-white rounded-xl p-4 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            {(() => {
+              const template = templatePrompts.find(t => t.id === previewTemplate);
+              if (!template) return null;
+              
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="text-2xl">{template.icon}</div>
+                      <h3 className="text-lg font-bold text-gray-800">
+                        {t.aiPanel.generate.templates.items[template.id as keyof typeof t.aiPanel.generate.templates.items]?.title}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setPreviewTemplate(null)}
+                      className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  {template.previewImage && (
+                    <div className="mb-3">
+                      <img 
+                        src={template.previewImage} 
+                        alt={`${template.id} preview`}
+                        className="w-full h-48 object-cover rounded-lg shadow-lg"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    </div>
+                  )}
+                  
+                  <p className="text-sm text-gray-600 mb-4">
+                    {t.aiPanel.generate.templates.items[template.id as keyof typeof t.aiPanel.generate.templates.items]?.description}
+                  </p>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const templatePrompt = getTemplatePrompt(template.id, hasSelection, currentLanguage);
+                        setPrompt(templatePrompt);
+                        setSelectedTemplate(template.id);
+                        setPreviewTemplate(null);
+                      }}
+                      className="flex-1 py-2 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm rounded-lg transition-all font-medium"
+                    >
+                      Use Template
+                    </button>
+                    <button
+                      onClick={() => setPreviewTemplate(null)}
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm rounded-lg transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
     </div>
   )

@@ -41,7 +41,7 @@ class AIService {
         editWithWords: '/ai/edit-with-words',
         blendProduct: '/ai/blend-product',
         generateVideo: '/ai/generate-video',
-        generateText: '/ai/generate-text'
+        generateText: '/ai/generate-text',
       }
     }
   }
@@ -616,6 +616,8 @@ class AIService {
       throw error
     }
   }
+
+
 
   async testConnection(): Promise<boolean> {
     try {

@@ -174,7 +174,7 @@ export interface Translations {
       benefits: string[]
     }
   }
-  
+
   // Common
   common: {
     loading: string
@@ -186,6 +186,34 @@ export interface Translations {
     delete: string
     edit: string
     close: string
+    settings: string
+  }
+
+  // Alert Messages
+  alerts: {
+    imageGenerationFailed: string
+    mergeSelectMinImages: string
+    mergeEnterInstructions: string
+    mergeFailed: string
+    styleSelectImage: string
+    styleEnterDescription: string
+    styleTransferComplete: string
+    styleTransferFailed: string
+    comicGenerationFailed: string
+    enterEditInstructions: string
+    generateComicFirst: string
+    panelEditingFailed: string
+    storyGenerationFailed: string
+    selectImagesFirst: string
+    magicEraserSelectImage: string
+    magicEraserComplete: string
+    magicEraserFailed: string
+    backgroundRemovalSelectImage: string
+    backgroundRemovalComplete: string
+    backgroundRemovalFailed: string
+    avatarSelectPhoto: string
+    avatarGenerationFailed: string
+    mergedImagesSuccess: string
   }
 }
 
@@ -202,7 +230,7 @@ const en: Translations = {
     title: 'AI Assistant',
     tabs: {
       storyMaker: 'Story Maker',
-      generate: 'Generate'
+      generate: 'Generate',
     },
     generate: {
       templates: {
@@ -323,7 +351,7 @@ const en: Translations = {
         characterRequired: 'Please upload or select a character image!',
         generationFailed: 'Comic generation failed. Please try again.'
       }
-    }
+    },
   },
   common: {
     loading: 'Loading...',
@@ -334,7 +362,30 @@ const en: Translations = {
     save: 'Save',
     delete: 'Delete',
     edit: 'Edit',
-    close: 'Close'
+    close: 'Close',
+    settings: 'Settings'
+  },
+  alerts: {
+    imageGenerationFailed: 'Image generation failed: ',
+    mergeSelectMinImages: 'Please select at least 2 images to merge',
+    mergeEnterInstructions: 'Please enter merge instructions, e.g., "Blend these images into an artistic collage"',
+    mergeFailed: 'Image merging failed: ',
+    styleSelectImage: 'Please select an image to apply style',
+    styleEnterDescription: 'Please enter style description, e.g., "Van Gogh Starry Night style"',
+    styleTransferComplete: 'Style transfer complete!',
+    styleTransferFailed: 'Style transfer failed: ',
+    comicGenerationFailed: 'Comic generation failed. Please try again!',
+    enterEditInstructions: 'Please enter edit instructions!',
+    generateComicFirst: 'Generate a comic first!',
+    panelEditingFailed: 'Panel editing failed. Please try again!',
+    storyGenerationFailed: 'Story idea generation failed. Please try again!',
+    selectImagesFirst: 'Please select images on the canvas or generate a comic first!',
+    backgroundRemovalSelectImage: 'Please select an image to remove background',
+    backgroundRemovalComplete: '✂️ Background removed successfully!',
+    backgroundRemovalFailed: 'Background removal failed: ',
+    avatarSelectPhoto: 'Please select a photo to generate avatar',
+    avatarGenerationFailed: 'Avatar generation failed: ',
+    mergedImagesSuccess: 'Successfully merged {count} images!'
   },
   ...apiKeysTranslations.en
 }
@@ -352,7 +403,7 @@ const zhTW: Translations = {
     title: 'AI 助手',
     tabs: {
       storyMaker: '故事創作',
-      generate: '生成'
+      generate: '生成',
     },
     generate: {
       templates: {
@@ -473,7 +524,7 @@ const zhTW: Translations = {
         characterRequired: '請上傳或選擇角色圖片！',
         generationFailed: '漫畫生成失敗，請重試。'
       }
-    }
+    },
   },
   common: {
     loading: '載入中...',
@@ -484,7 +535,30 @@ const zhTW: Translations = {
     save: '儲存',
     delete: '刪除',
     edit: '編輯',
-    close: '關閉'
+    close: '關閉',
+    settings: '設定'
+  },
+  alerts: {
+    imageGenerationFailed: '圖片生成失敗：',
+    mergeSelectMinImages: '請選擇至少 2 張圖片進行合併',
+    mergeEnterInstructions: '請輸入合併指令，例如：「將這些圖片融合成藝術拼貼」',
+    mergeFailed: '圖片合併失敗：',
+    styleSelectImage: '請選擇一張圖片來套用風格',
+    styleEnterDescription: '請輸入風格描述，例如：「梵谷星夜風格」',
+    styleTransferComplete: '風格轉換完成！',
+    styleTransferFailed: '風格轉換失敗：',
+    comicGenerationFailed: '漫畫生成失敗，請重試！',
+    enterEditInstructions: '請輸入編輯指令！',
+    generateComicFirst: '請先生成漫畫！',
+    panelEditingFailed: '分鏡編輯失敗，請重試！',
+    storyGenerationFailed: '故事構思生成失敗，請重試！',
+    selectImagesFirst: '請先在畫布上選擇圖片或生成漫畫！',
+    backgroundRemovalSelectImage: '請選擇一張圖片來移除背景',
+    backgroundRemovalComplete: '✂️ 背景移除成功！',
+    backgroundRemovalFailed: '背景移除失敗：',
+    avatarSelectPhoto: '請選擇一張照片來生成頭像',
+    avatarGenerationFailed: '頭像生成失敗：',
+    mergedImagesSuccess: '成功合併 {count} 張圖片！'
   },
   ...apiKeysTranslations['zh-TW']
 }
@@ -502,7 +576,7 @@ const es: Translations = {
     title: 'Asistente IA',
     tabs: {
       storyMaker: 'Creador de Historias',
-      generate: 'Generar'
+      generate: 'Generar',
     },
     generate: {
       templates: {
@@ -623,7 +697,7 @@ const es: Translations = {
         characterRequired: '¡Por favor sube o selecciona una imagen de personaje!',
         generationFailed: 'La generación del cómic falló. Por favor intenta de nuevo.'
       }
-    }
+    },
   },
   common: {
     loading: 'Cargando...',
@@ -634,7 +708,33 @@ const es: Translations = {
     save: 'Guardar',
     delete: 'Eliminar',
     edit: 'Editar',
-    close: 'Cerrar'
+    close: 'Cerrar',
+    settings: 'Configuración'
+  },
+  alerts: {
+    imageGenerationFailed: 'La generación de imágenes falló: ',
+    mergeSelectMinImages: 'Por favor selecciona al menos 2 imágenes para fusionar',
+    mergeEnterInstructions: 'Por favor ingresa instrucciones de fusión, ej: "Mezcla estas imágenes en un collage artístico"',
+    mergeFailed: 'La fusión de imágenes falló: ',
+    styleSelectImage: 'Por favor selecciona una imagen para aplicar estilo',
+    styleEnterDescription: 'Por favor ingresa descripción de estilo, ej: "Estilo Noche Estrellada de Van Gogh"',
+    styleTransferComplete: '¡Transferencia de estilo completa!',
+    styleTransferFailed: 'La transferencia de estilo falló: ',
+    comicGenerationFailed: '¡La generación del cómic falló. Por favor inténtalo de nuevo!',
+    enterEditInstructions: '¡Por favor ingresa instrucciones de edición!',
+    generateComicFirst: '¡Genera un cómic primero!',
+    panelEditingFailed: '¡La edición del panel falló. Por favor inténtalo de nuevo!',
+    storyGenerationFailed: '¡La generación de historia falló. Por favor inténtalo de nuevo!',
+    selectImagesFirst: '¡Por favor selecciona imágenes en el lienzo o genera un cómic primero!',
+    magicEraserSelectImage: 'Por favor selecciona una imagen para usar la Goma Mágica',
+    magicEraserComplete: '🪄 ¡Goma Mágica completa! Objetos no deseados eliminados.',
+    magicEraserFailed: 'La goma mágica falló: ',
+    backgroundRemovalSelectImage: 'Por favor selecciona una imagen para quitar el fondo',
+    backgroundRemovalComplete: '✂️ ¡Fondo eliminado exitosamente!',
+    backgroundRemovalFailed: 'La eliminación del fondo falló: ',
+    avatarSelectPhoto: 'Por favor selecciona una foto para generar avatar',
+    avatarGenerationFailed: 'La generación del avatar falló: ',
+    mergedImagesSuccess: '¡Fusionadas exitosamente {count} imágenes!'
   },
   ...apiKeysTranslations.es
 }
@@ -652,7 +752,7 @@ const ja: Translations = {
     title: 'AIアシスタント',
     tabs: {
       storyMaker: 'ストーリーメーカー',
-      generate: '生成'
+      generate: '生成',
     },
     generate: {
       templates: {
@@ -773,7 +873,7 @@ const ja: Translations = {
         characterRequired: 'キャラクター画像をアップロードまたは選択してください！',
         generationFailed: 'コミック生成に失敗しました。もう一度お試しください。'
       }
-    }
+    },
   },
   common: {
     loading: '読み込み中...',
@@ -784,7 +884,33 @@ const ja: Translations = {
     save: '保存',
     delete: '削除',
     edit: '編集',
-    close: '閉じる'
+    close: '閉じる',
+    settings: '設定'
+  },
+  alerts: {
+    imageGenerationFailed: '画像生成に失敗しました：',
+    mergeSelectMinImages: '結合するには少なくとも2つの画像を選択してください',
+    mergeEnterInstructions: '結合指示を入力してください、例：「これらの画像をアートコラージュに混合」',
+    mergeFailed: '画像結合に失敗しました：',
+    styleSelectImage: 'スタイルを適用する画像を選択してください',
+    styleEnterDescription: 'スタイル説明を入力してください、例：「ゴッホの星月夜スタイル」',
+    styleTransferComplete: 'スタイル転送完了！',
+    styleTransferFailed: 'スタイル転送に失敗しました：',
+    comicGenerationFailed: 'コミック生成に失敗しました。もう一度試してください！',
+    enterEditInstructions: '編集指示を入力してください！',
+    generateComicFirst: '最初にコミックを生成してください！',
+    panelEditingFailed: 'パネル編集に失敗しました。もう一度試してください！',
+    storyGenerationFailed: 'ストーリー生成に失敗しました。もう一度試してください！',
+    selectImagesFirst: 'キャンバス上の画像を選択するか、最初にコミックを生成してください！',
+    magicEraserSelectImage: 'マジック消しゴムを使用する画像を選択してください',
+    magicEraserComplete: '🪄 マジック消しゴム完了！不要なオブジェクトが削除されました。',
+    magicEraserFailed: 'マジック消しゴムに失敗しました：',
+    backgroundRemovalSelectImage: '背景を削除する画像を選択してください',
+    backgroundRemovalComplete: '✂️ 背景削除が成功しました！',
+    backgroundRemovalFailed: '背景削除に失敗しました：',
+    avatarSelectPhoto: 'アバターを生成する写真を選択してください',
+    avatarGenerationFailed: 'アバター生成に失敗しました：',
+    mergedImagesSuccess: '{count}枚の画像を正常に結合しました！'
   },
   ...apiKeysTranslations.ja
 }
@@ -802,7 +928,7 @@ const fr: Translations = {
     title: 'Assistant IA',
     tabs: {
       storyMaker: 'Créateur d\'Histoires',
-      generate: 'Générer'
+      generate: 'Générer',
     },
     generate: {
       templates: {
@@ -923,7 +1049,7 @@ const fr: Translations = {
         characterRequired: 'Veuillez télécharger ou sélectionner une image de personnage !',
         generationFailed: 'La génération de la BD a échoué. Veuillez réessayer.'
       }
-    }
+    },
   },
   common: {
     loading: 'Chargement...',
@@ -934,7 +1060,33 @@ const fr: Translations = {
     save: 'Sauvegarder',
     delete: 'Supprimer',
     edit: 'Modifier',
-    close: 'Fermer'
+    close: 'Fermer',
+    settings: 'Paramètres'
+  },
+  alerts: {
+    imageGenerationFailed: 'La génération d\'image a échoué : ',
+    mergeSelectMinImages: 'Veuillez sélectionner au moins 2 images à fusionner',
+    mergeEnterInstructions: 'Veuillez entrer des instructions de fusion, ex : "Mélanger ces images en collage artistique"',
+    mergeFailed: 'La fusion d\'images a échoué : ',
+    styleSelectImage: 'Veuillez sélectionner une image pour appliquer un style',
+    styleEnterDescription: 'Veuillez entrer une description de style, ex : "Style Nuit Étoilée de Van Gogh"',
+    styleTransferComplete: 'Transfert de style terminé !',
+    styleTransferFailed: 'Le transfert de style a échoué : ',
+    comicGenerationFailed: 'La génération de BD a échoué. Veuillez réessayer !',
+    enterEditInstructions: 'Veuillez entrer des instructions d\'édition !',
+    generateComicFirst: 'Générez d\'abord une BD !',
+    panelEditingFailed: 'L\'édition du panneau a échoué. Veuillez réessayer !',
+    storyGenerationFailed: 'La génération d\'histoire a échoué. Veuillez réessayer !',
+    selectImagesFirst: 'Veuillez sélectionner des images sur le canevas ou générer une BD d\'abord !',
+    magicEraserSelectImage: 'Veuillez sélectionner une image pour utiliser la Gomme Magique',
+    magicEraserComplete: '🪄 Gomme Magique terminée ! Objets indésirables supprimés.',
+    magicEraserFailed: 'La gomme magique a échoué : ',
+    backgroundRemovalSelectImage: 'Veuillez sélectionner une image pour supprimer l\'arrière-plan',
+    backgroundRemovalComplete: '✂️ Arrière-plan supprimé avec succès !',
+    backgroundRemovalFailed: 'La suppression de l\'arrière-plan a échoué : ',
+    avatarSelectPhoto: 'Veuillez sélectionner une photo pour générer un avatar',
+    avatarGenerationFailed: 'La génération d\'avatar a échoué : ',
+    mergedImagesSuccess: '{count} images fusionnées avec succès !'
   },
   ...apiKeysTranslations.fr
 }

@@ -6,6 +6,7 @@ export interface TemplatePrompt {
   icon: string
   withSelection: Record<Language, string>
   withoutSelection: Record<Language, string>
+  previewImage?: string
 }
 
 export const templatePrompts: TemplatePrompt[] = [
@@ -14,6 +15,7 @@ export const templatePrompts: TemplatePrompt[] = [
     id: 'figurine',
     category: 'creative',
     icon: '🎎',
+    previewImage: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop&q=80',
     withSelection: {
       en: 'Transform the person from the reference image into a hyper-realistic 1/7 scale figurine, placed on an iMac computer desk with a white Apple keyboard. The figurine perfectly captures the person\'s appearance, clothing, and personality. The figurine stands on a transparent acrylic base. The iMac screen shows the ZBrush modeling process. Next to it is a packaging box designed to match the person\'s style theme.',
       'zh-TW': '將參考圖片中的人物轉換成超寫實的1/7比例模型，放置在iMac電腦桌上，旁邊有白色Apple鍵盤。模型完美捕捉人物的外觀、服裝和個性。模型站在透明壓克力底座上。iMac螢幕顯示ZBrush建模過程。旁邊放置包裝盒，盒子設計配合人物風格主題。',
@@ -33,6 +35,7 @@ export const templatePrompts: TemplatePrompt[] = [
     id: 'handDrawn',
     category: 'creative',
     icon: '✏️',
+    previewImage: 'https://images.unsplash.com/photo-1609845234176-c1b46ccc3ecc?w=600&h=400&fit=crop&q=80',
     withSelection: {
       en: 'Transform the image into a 4-stage hand-drawn illustration process: 1. Pencil sketch outline 2. Add basic lines 3. Add details and shadows 4. Complete color illustration. Show the drawing steps from sketch to finished artwork.',
       'zh-TW': '將圖片轉換成4階段手繪插畫過程：1.鉛筆草稿輪廓 2.加入基本線條 3.添加細節和陰影 4.完成的彩色插畫。展示從草圖到完成品的繪畫步驟。',
@@ -71,6 +74,7 @@ export const templatePrompts: TemplatePrompt[] = [
     id: 'restoration',
     category: 'creative',
     icon: '📸',
+    previewImage: 'https://images.unsplash.com/photo-1579952363873-27d3bfad9c0d?w=600&h=400&fit=crop&q=80',
     withSelection: {
       en: 'Restore and colorize this old photo, remove scratches, stains and fading, enhance details, add natural colors, maintain original composition and character features',
       'zh-TW': '修復並上色這張老照片，去除刮痕、污漬和褪色，增強細節，添加自然色彩，保持原始構圖和人物特徵',
@@ -92,6 +96,7 @@ export const templatePrompts: TemplatePrompt[] = [
     id: 'idPhoto',
     category: 'professional',
     icon: '📷',
+    previewImage: 'https://images.unsplash.com/photo-1607706189992-eae578626c86?w=600&h=400&fit=crop&q=80',
     withSelection: {
       en: 'Transform the person into a professional ID photo: white background, formal attire, confident expression, ID photo format, professional studio lighting, maintain person\'s facial features',
       'zh-TW': '將人物轉換成專業證件照：白色背景、正裝、自信表情、證件照規格、專業攝影棚燈光、保持人物臉部特徵',
