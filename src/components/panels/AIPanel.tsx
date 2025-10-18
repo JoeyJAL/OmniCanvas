@@ -12,7 +12,11 @@ import {
   Settings
 } from 'lucide-react'
 
-export const AIPanel: React.FC = () => {
+interface AIPanelProps {
+  onOpenSettings: () => void
+}
+
+export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const t = useTranslation()
   const { currentLanguage } = useLanguageStore()
   const { isConfigured } = useAPIKeyStore()
@@ -221,10 +225,7 @@ export const AIPanel: React.FC = () => {
                   {t.settings.importantNotice.description}
                 </p>
                 <button
-                  onClick={() => {
-                    const settingsButton = document.querySelector('[onclick*="setIsSettingsOpen"]') as HTMLElement;
-                    settingsButton?.click();
-                  }}
+                  onClick={onOpenSettings}
                   className="mt-2 text-xs px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
                 >
                   {t.settings.apiKeys.openSettings}
