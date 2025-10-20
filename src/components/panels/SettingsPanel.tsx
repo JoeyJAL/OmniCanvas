@@ -137,8 +137,20 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                           type={showKeys[service.key] ? 'text' : 'password'}
                           value={localKeys[service.key] || ''}
                           onChange={(e) => handleKeyChange(service.key, e.target.value)}
+                          onKeyDown={(e) => {
+                            if ((e.metaKey || e.ctrlKey) && e.key === 'v') {
+                              e.preventDefault()
+                              navigator.clipboard.readText().then(text => {
+                                handleKeyChange(service.key, text)
+                              }).catch(() => {
+                                // Fallback: let browser handle paste normally
+                                e.preventDefault = () => {}
+                              })
+                            }
+                          }}
                           placeholder={service.placeholder}
                           className="w-full text-sm border border-gray-300 rounded px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          autoComplete="off"
                         />
                         <button
                           type="button"
@@ -203,7 +215,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                   onClick={() => setIsOpen(false)}
                   className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors"
                 >
-                  Close
+                  {t.common.close}
                 </button>
               </div>
             </div>

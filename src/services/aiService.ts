@@ -30,7 +30,7 @@ class AIService {
 
   constructor() {
     this.config = {
-      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'https://omnicanvas-backend.vercel.app/api',
+      baseUrl: import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:3004/api',
       endpoints: {
         generateImage: '/ai/generate-image',
         mergeImages: '/ai/merge-images',
@@ -42,6 +42,8 @@ class AIService {
         blendProduct: '/ai/blend-product',
         generateVideo: '/ai/generate-video',
         generateText: '/ai/generate-text',
+        nanoBananaPhotoToVideo: '/ai/nano-banana-photo-to-video',
+        nanoBananaImageFusion: '/ai/nano-banana-image-fusion',
       }
     }
   }
@@ -110,8 +112,8 @@ class AIService {
     try {
       console.log('🎨 Frontend AI Image-to-Image called!')
       console.log('📝 Request details:', {
-        prompt: request.prompt.substring(0, 100) + '...',
-        imageUrl: request.imageUrl.substring(0, 50) + '...',
+        prompt: typeof request.prompt === 'string' ? request.prompt.substring(0, 100) + '...' : request.prompt,
+        imageUrl: typeof request.imageUrl === 'string' ? request.imageUrl.substring(0, 50) + '...' : request.imageUrl,
         width: request.width,
         height: request.height,
         strength: request.strength
@@ -157,9 +159,37 @@ class AIService {
       }
 
       const data = await response.json()
-      
+
+      console.log('📦 Backend response received:', {
+        hasImageUrl: !!data.imageUrl,
+        hasUrl: !!data.url,
+        imageUrlType: typeof data.imageUrl,
+        urlType: typeof data.url,
+        dataKeys: Object.keys(data)
+      })
+
+      // Enhanced URL extraction with detailed logging
+      let resultUrl = data.imageUrl || data.url
+
+      if (!resultUrl) {
+        console.error('❌ No imageUrl or url found in response:', data)
+        throw new Error('Backend did not return a valid image URL')
+      }
+
+      if (typeof resultUrl !== 'string') {
+        console.error('❌ imageUrl is not a string:', typeof resultUrl, resultUrl)
+        throw new Error(`Invalid imageUrl type: expected string, got ${typeof resultUrl}`)
+      }
+
+      if (resultUrl.length === 0) {
+        console.error('❌ imageUrl is empty string')
+        throw new Error('Backend returned empty imageUrl')
+      }
+
+      console.log('✅ Successfully extracted imageUrl:', resultUrl.substring(0, 50) + '...')
+
       return {
-        url: data.imageUrl || data.url,
+        url: resultUrl,
         width: data.width || request.width || 512,
         height: data.height || request.height || 512,
         prompt: request.prompt,
@@ -232,8 +262,36 @@ class AIService {
 
       const data = await response.json()
       console.log('✅ Backend merge successful:', data)
-      
-      return data.imageUrl || data.url
+
+      console.log('📦 Merge response received:', {
+        hasImageUrl: !!data.imageUrl,
+        hasUrl: !!data.url,
+        imageUrlType: typeof data.imageUrl,
+        urlType: typeof data.url,
+        dataKeys: Object.keys(data)
+      })
+
+      // Enhanced URL extraction with detailed logging
+      let resultUrl = data.imageUrl || data.url
+
+      if (!resultUrl) {
+        console.error('❌ No imageUrl or url found in merge response:', data)
+        throw new Error('Backend merge did not return a valid image URL')
+      }
+
+      if (typeof resultUrl !== 'string') {
+        console.error('❌ Merge imageUrl is not a string:', typeof resultUrl, resultUrl)
+        throw new Error(`Invalid merge imageUrl type: expected string, got ${typeof resultUrl}`)
+      }
+
+      if (resultUrl.length === 0) {
+        console.error('❌ Merge imageUrl is empty string')
+        throw new Error('Backend merge returned empty imageUrl')
+      }
+
+      console.log('✅ Successfully extracted merge imageUrl:', resultUrl.substring(0, 50) + '...')
+
+      return resultUrl
     } catch (error) {
       console.error('Backend merge failed:', error)
       throw error
@@ -613,6 +671,115 @@ class AIService {
       return data.text
     } catch (error) {
       console.error('Text generation error:', error)
+      throw error
+    }
+  }
+
+  // Nano Banana specific methods
+  async nanoBananaPhotoToVideo(request: {
+    imageUrl: string
+    prompt?: string
+    duration?: number
+    quality?: string
+  }): Promise<string> {
+    try {
+      console.log('🍌 Nano Banana: Converting photo to 8-second video...')
+
+      // Compress image if it's a data URL
+      let processedImageUrl = request.imageUrl
+      if (request.imageUrl.startsWith('data:')) {
+        console.log('🔧 Compressing image for Nano Banana video generation...')
+        const compressionResult = await compressDataURL(request.imageUrl, {
+          maxWidth: 720,
+          maxHeight: 720,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 2000
+        })
+        processedImageUrl = compressionResult.dataURL
+        console.log(`✅ Compressed for video: ${Math.round(compressionResult.compressedSize / 1024)}KB`)
+      }
+
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.nanoBananaPhotoToVideo}`, {
+        method: 'POST',
+        headers: this.getRequestHeaders(),
+        body: JSON.stringify({
+          imageUrl: processedImageUrl,
+          prompt: request.prompt || 'Create an 8-second animated video with natural movement and depth',
+          duration: request.duration || 8,
+          quality: request.quality || '720p',
+          provider: 'gemini-nano-banana'
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Nano Banana photo to video error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log('✅ Nano Banana video generated successfully!')
+      return data.videoUrl || data.url
+    } catch (error) {
+      console.error('Nano Banana photo to video error:', error)
+      throw error
+    }
+  }
+
+  async nanoBananaImageFusion(request: {
+    imageUrls: string[]
+    prompt?: string
+    style?: string
+  }): Promise<string> {
+    try {
+      console.log('🍌 Nano Banana: Fusing', request.imageUrls.length, 'images...')
+
+      // Compress images if they are data URLs
+      const dataUrls = request.imageUrls.filter(url => url.startsWith('data:'))
+      const regularUrls = request.imageUrls.filter(url => !url.startsWith('data:'))
+
+      let processedUrls = [...regularUrls]
+
+      if (dataUrls.length > 0) {
+        console.log('🔧 Compressing', dataUrls.length, 'images for Nano Banana fusion...')
+
+        const compressionResults = await compressDataURLs(dataUrls, {
+          maxWidth: 512,
+          maxHeight: 512,
+          quality: 0.8,
+          format: 'jpeg',
+          maxSizeKB: 1500
+        })
+
+        const compressedUrls = compressionResults.map(result => result.dataURL)
+        processedUrls = [...regularUrls, ...compressedUrls]
+
+        const totalCompressedSize = compressionResults.reduce((sum, result) => sum + result.compressedSize, 0)
+        console.log(`✅ Compressed for fusion: ${Math.round(totalCompressedSize / 1024)}KB total`)
+      }
+
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.nanoBananaImageFusion}`, {
+        method: 'POST',
+        headers: this.getRequestHeaders(),
+        body: JSON.stringify({
+          imageUrls: processedUrls,
+          prompt: request.prompt || 'Create a natural and seamless fusion blending all images harmoniously',
+          style: request.style || 'natural',
+          maxImages: 8,
+          provider: 'gemini-nano-banana'
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Nano Banana image fusion error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log('✅ Nano Banana image fusion completed successfully!')
+      return data.imageUrl || data.url
+    } catch (error) {
+      console.error('Nano Banana image fusion error:', error)
       throw error
     }
   }

@@ -50,8 +50,10 @@ export const Toolbar: React.FC = () => {
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
+        // Only use autoArrange for multiple images
+        // Single images should go directly to viewport center
         await addImages(files, {
-          autoArrange: true,
+          autoArrange: files.length > 1,
           spacing: 20,
           maxWidth: 200,
           maxHeight: 200

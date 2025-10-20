@@ -1,9 +1,9 @@
 import React from 'react'
-import { 
-  Palette, 
-  Copy, 
-  Trash2, 
-  Move, 
+import {
+  Palette,
+  Copy,
+  Trash2,
+  Move,
   RotateCw,
   Sparkles,
   Download,
@@ -12,7 +12,9 @@ import {
   Brain,
   Camera,
   Glasses,
-  Play
+  Play,
+  Mic,
+  MessageCircle
 } from 'lucide-react'
 
 interface NewContextMenuProps {
@@ -39,6 +41,8 @@ interface NewContextMenuProps {
   // Video playback function
   onPlayVideo?: () => void
   hasVideoThumbnail?: boolean
+  // Voice prompt function
+  onVoicePrompt?: () => void
 }
 
 export const NewContextMenu: React.FC<NewContextMenuProps> = ({
@@ -62,7 +66,8 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
   onSceneCompose,
   onCreativeBlend,
   onPlayVideo,
-  hasVideoThumbnail
+  hasVideoThumbnail,
+  onVoicePrompt
 }) => {
   if (!visible) return null
 
@@ -112,6 +117,17 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
         label: '🌟 Generate Similar',
         onClick: onGenerateSimilar,
         className: 'text-green-600 hover:bg-green-50',
+        separator: false
+      }
+    ] : []),
+
+    // Voice prompt function (Nano Banana feature)
+    ...(selectedCount >= 1 && onVoicePrompt ? [
+      {
+        icon: Mic,
+        label: '🎤 Nano Banana 語音指令',
+        onClick: onVoicePrompt,
+        className: 'text-purple-600 hover:bg-purple-50 font-semibold',
         separator: true
       }
     ] : []),
