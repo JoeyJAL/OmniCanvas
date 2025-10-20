@@ -19,6 +19,22 @@ export interface Translations {
       generate: string
     }
     generate: {
+      tabs: {
+        generate: string
+        enhance: string
+        video: string
+      }
+      validation: {
+        generateMessage: string
+        styleMessage: string
+        mergeMessage: string
+      }
+      processing: {
+        analyzing: string
+        composing: string
+        rendering: string
+        finalizing: string
+      }
       templates: {
         title: string
         withSelection: string
@@ -93,6 +109,45 @@ export interface Translations {
       selectedImages: string
       invalidForTab: string
     }
+    enhance: {
+      selectImages: string
+      selectImagesDescription: string
+      enhancementReady: string
+      willBeProcessed: string
+      enhancementOptions: string
+      aiUpscale: string
+      upscaleDescription: string
+      backgroundRemoval: string
+      backgroundRemovalDescription: string
+      qualityEnhancement: string
+      qualityEnhancementDescription: string
+      enhancementSummary: string
+      upscaleTo: string
+      removeBackground: string
+      enhancedQuality: string
+      processing: string
+      enhanceButton: string
+      enhancing: string
+      resolutions: {
+        '2x': string
+        '4x': string
+        '8x': string
+      }
+    }
+    selected: string
+    selectedFromCanvas: string
+    invalidFor: string
+    selectedImagesNote: string
+    generateBasedOn: string
+    selectedImage: string
+    generateWithGemini: string
+    imageToImageMode: string
+    active: string
+    selectedImagesCombined: string
+    useTemplate: string
+    close: string
+    image: string
+    images: string
     storyMaker: {
       title: string
       description: string
@@ -295,6 +350,22 @@ const en: Translations = {
       generate: 'Generate',
     },
     generate: {
+      tabs: {
+        generate: 'Generate',
+        enhance: 'Enhance',
+        video: 'Video'
+      },
+      validation: {
+        generateMessage: 'Generate supports any number of reference images or none for fresh creation',
+        styleMessage: 'Style transfer requires exactly 1 image',
+        mergeMessage: 'Merge requires 2+ images'
+      },
+      processing: {
+        analyzing: 'Analyzing your request...',
+        composing: 'Creating beautiful compositions...',
+        rendering: 'Rendering high-quality images...',
+        finalizing: 'Adding final touches...'
+      },
       templates: {
         title: 'Popular Nano Banana Templates (Click to use)',
         withSelection: '+ Selected Images',
@@ -366,6 +437,45 @@ const en: Translations = {
       selectedImages: 'images selected from canvas',
       invalidForTab: 'Invalid for'
     },
+    enhance: {
+      selectImages: 'Select Images to Enhance',
+      selectImagesDescription: 'Please select one or more images from the canvas to enhance',
+      enhancementReady: 'Enhancement Ready',
+      willBeProcessed: 'Your selected images will be processed and enhanced with AI technology.',
+      enhancementOptions: 'Enhancement Options',
+      aiUpscale: 'AI Upscale',
+      upscaleDescription: 'Increase image resolution using AI upscaling technology',
+      backgroundRemoval: 'Background Removal',
+      backgroundRemovalDescription: 'Automatically remove background and create transparent PNG',
+      qualityEnhancement: 'Quality Enhancement',
+      qualityEnhancementDescription: 'Improve overall image quality, reduce noise and artifacts',
+      enhancementSummary: 'Enhancement Summary',
+      upscaleTo: 'Upscale to',
+      removeBackground: 'Remove background (transparent PNG)',
+      enhancedQuality: 'Enhanced quality and noise reduction',
+      processing: 'Processing',
+      enhanceButton: 'Enhance Images',
+      enhancing: 'Enhancing...',
+      resolutions: {
+        '2x': '2x Resolution',
+        '4x': '4x Resolution',
+        '8x': '8x Resolution'
+      }
+    },
+    selected: 'selected',
+    selectedFromCanvas: 'selected from canvas',
+    invalidFor: 'Invalid for',
+    selectedImagesNote: 'Selected images will be automatically included in the AI request',
+    generateBasedOn: 'Generate new images based on your',
+    selectedImage: 'selected image',
+    generateWithGemini: 'Generate images with Gemini 2.5 Flash (Nano Banana)',
+    imageToImageMode: 'Image-to-Image Mode',
+    active: 'ACTIVE',
+    selectedImagesCombined: 'Your selected images will be combined with your prompt/template to generate new images.',
+    useTemplate: 'Use Template',
+    close: 'Close',
+    image: 'image',
+    images: 'images',
     storyMaker: {
       title: 'Story Maker',
       description: 'Create 4-panel comic stories with consistent characters',
@@ -534,6 +644,22 @@ const zhTW: Translations = {
       generate: '生成',
     },
     generate: {
+      tabs: {
+        generate: '生成',
+        enhance: '增強',
+        video: '視頻'
+      },
+      validation: {
+        generateMessage: '生成功能支援任意數量的參考圖片，或無圖片全新創作',
+        styleMessage: '風格轉換需要恰好 1 張圖片',
+        mergeMessage: '合併功能需要 2 張以上圖片'
+      },
+      processing: {
+        analyzing: '正在分析您的需求...',
+        composing: '正在創作精美構圖...',
+        rendering: '正在渲染高品質圖像...',
+        finalizing: '正在添加最後潤飾...'
+      },
       templates: {
         title: 'Nano Banana 熱門模板 (點擊使用)',
         withSelection: '+ 已選圖片',
@@ -605,6 +731,45 @@ const zhTW: Translations = {
       selectedImages: '張圖片已從畫布選取',
       invalidForTab: '不適用於'
     },
+    enhance: {
+      selectImages: '選擇要增強的圖片',
+      selectImagesDescription: '請從畫布選擇一張或多張圖片進行增強',
+      enhancementReady: '增強準備就緒',
+      willBeProcessed: '您選擇的圖片將使用 AI 技術進行處理和增強。',
+      enhancementOptions: '增強選項',
+      aiUpscale: 'AI 放大',
+      upscaleDescription: '使用 AI 放大技術提升圖片解析度',
+      backgroundRemoval: '背景移除',
+      backgroundRemovalDescription: '自動移除背景並創建透明 PNG',
+      qualityEnhancement: '品質增強',
+      qualityEnhancementDescription: '提升整體圖片品質，減少噪點和瑕疵',
+      enhancementSummary: '增強摘要',
+      upscaleTo: '放大至',
+      removeBackground: '移除背景 (透明 PNG)',
+      enhancedQuality: '增強品質和降噪',
+      processing: '處理',
+      enhanceButton: '增強圖片',
+      enhancing: '增強中...',
+      resolutions: {
+        '2x': '2 倍解析度',
+        '4x': '4 倍解析度',
+        '8x': '8 倍解析度'
+      }
+    },
+    selected: '已選擇',
+    selectedFromCanvas: '從畫布選擇',
+    invalidFor: '不適用於',
+    selectedImagesNote: '選擇的圖片將自動包含在 AI 請求中',
+    generateBasedOn: '基於您的',
+    selectedImage: '選擇的圖片',
+    generateWithGemini: '使用 Gemini 2.5 Flash 生成圖片 (Nano Banana)',
+    imageToImageMode: '圖像到圖像模式',
+    active: '啟用',
+    selectedImagesCombined: '您選擇的圖片將與提示詞/模板結合來生成新圖片。',
+    useTemplate: '使用模板',
+    close: '關閉',
+    image: '圖片',
+    images: '圖片',
     storyMaker: {
       title: '故事創作',
       description: '創建具有一致角色的四格漫畫故事',
@@ -773,6 +938,22 @@ const es: Translations = {
       generate: 'Generar',
     },
     generate: {
+      tabs: {
+        generate: 'Generar',
+        enhance: 'Mejorar',
+        video: 'Video'
+      },
+      validation: {
+        generateMessage: 'Generar soporta cualquier número de imágenes de referencia o ninguna para creación nueva',
+        styleMessage: 'Transferencia de estilo requiere exactamente 1 imagen',
+        mergeMessage: 'Fusionar requiere 2+ imágenes'
+      },
+      processing: {
+        analyzing: 'Analizando tu solicitud...',
+        composing: 'Creando composiciones hermosas...',
+        rendering: 'Renderizando imágenes de alta calidad...',
+        finalizing: 'Añadiendo toques finales...'
+      },
       templates: {
         title: 'Plantillas Populares de Nano Banana (Clic para usar)',
         withSelection: '+ Imágenes Seleccionadas',
@@ -844,6 +1025,45 @@ const es: Translations = {
       selectedImages: 'imágenes seleccionadas del lienzo',
       invalidForTab: 'No válido para'
     },
+    enhance: {
+      selectImages: 'Seleccionar Imágenes para Mejorar',
+      selectImagesDescription: 'Por favor selecciona una o más imágenes del lienzo para mejorar',
+      enhancementReady: 'Mejora Lista',
+      willBeProcessed: 'Tus imágenes seleccionadas serán procesadas y mejoradas con tecnología IA.',
+      enhancementOptions: 'Opciones de Mejora',
+      aiUpscale: 'Escalado IA',
+      upscaleDescription: 'Aumentar resolución de imagen usando tecnología de escalado IA',
+      backgroundRemoval: 'Eliminación de Fondo',
+      backgroundRemovalDescription: 'Remover automáticamente el fondo y crear PNG transparente',
+      qualityEnhancement: 'Mejora de Calidad',
+      qualityEnhancementDescription: 'Mejorar la calidad general de imagen, reducir ruido y artefactos',
+      enhancementSummary: 'Resumen de Mejora',
+      upscaleTo: 'Escalar a',
+      removeBackground: 'Remover fondo (PNG transparente)',
+      enhancedQuality: 'Calidad mejorada y reducción de ruido',
+      processing: 'Procesando',
+      enhanceButton: 'Mejorar Imágenes',
+      enhancing: 'Mejorando...',
+      resolutions: {
+        '2x': 'Resolución 2x',
+        '4x': 'Resolución 4x',
+        '8x': 'Resolución 8x'
+      }
+    },
+    selected: 'seleccionado',
+    selectedFromCanvas: 'seleccionado del lienzo',
+    invalidFor: 'No válido para',
+    selectedImagesNote: 'Las imágenes seleccionadas se incluirán automáticamente en la solicitud de IA',
+    generateBasedOn: 'Generar nuevas imágenes basadas en tu',
+    selectedImage: 'imagen seleccionada',
+    generateWithGemini: 'Generar imágenes con Gemini 2.5 Flash (Nano Banana)',
+    imageToImageMode: 'Modo Imagen a Imagen',
+    active: 'ACTIVO',
+    selectedImagesCombined: 'Tus imágenes seleccionadas se combinarán con tu prompt/plantilla para generar nuevas imágenes.',
+    useTemplate: 'Usar Plantilla',
+    close: 'Cerrar',
+    image: 'imagen',
+    images: 'imágenes',
     storyMaker: {
       title: 'Creador de Historias',
       description: 'Crea historias de cómic de 4 paneles con personajes consistentes',
@@ -1012,6 +1232,22 @@ const ja: Translations = {
       generate: '生成',
     },
     generate: {
+      tabs: {
+        generate: '生成',
+        enhance: '強化',
+        video: 'ビデオ'
+      },
+      validation: {
+        generateMessage: '生成は任意の数の参照画像をサポート、または画像なしで新規作成',
+        styleMessage: 'スタイル転送は正確に1枚の画像が必要',
+        mergeMessage: 'マージには2枚以上の画像が必要'
+      },
+      processing: {
+        analyzing: 'リクエストを分析中...',
+        composing: '美しい構図を作成中...',
+        rendering: '高品質画像をレンダリング中...',
+        finalizing: '最終仕上げを追加中...'
+      },
       templates: {
         title: 'Nano Banana 人気テンプレート（クリックで使用）',
         withSelection: '+ 選択画像',
@@ -1083,6 +1319,45 @@ const ja: Translations = {
       selectedImages: '枚の画像をキャンバスから選択',
       invalidForTab: '無効：'
     },
+    enhance: {
+      selectImages: '強化する画像を選択',
+      selectImagesDescription: 'キャンバスから強化する画像を1つ以上選択してください',
+      enhancementReady: '強化準備完了',
+      willBeProcessed: '選択した画像はAI技術で処理・強化されます。',
+      enhancementOptions: '強化オプション',
+      aiUpscale: 'AIアップスケール',
+      upscaleDescription: 'AIアップスケール技術で画像解像度を向上',
+      backgroundRemoval: '背景除去',
+      backgroundRemovalDescription: '自動的に背景を除去し透明PNGを作成',
+      qualityEnhancement: '品質強化',
+      qualityEnhancementDescription: '全体的な画像品質を改善、ノイズとアーティファクトを削減',
+      enhancementSummary: '強化概要',
+      upscaleTo: 'アップスケール先',
+      removeBackground: '背景除去（透明PNG）',
+      enhancedQuality: '品質強化とノイズ削減',
+      processing: '処理中',
+      enhanceButton: '画像強化',
+      enhancing: '強化中...',
+      resolutions: {
+        '2x': '2倍解像度',
+        '4x': '4倍解像度',
+        '8x': '8倍解像度'
+      }
+    },
+    selected: '選択済み',
+    selectedFromCanvas: 'キャンバスから選択',
+    invalidFor: '無効：',
+    selectedImagesNote: '選択した画像は自動的にAIリクエストに含まれます',
+    generateBasedOn: 'あなたの',
+    selectedImage: '選択した画像',
+    generateWithGemini: 'Gemini 2.5 Flash で画像生成 (Nano Banana)',
+    imageToImageMode: '画像から画像モード',
+    active: 'アクティブ',
+    selectedImagesCombined: '選択した画像がプロンプト/テンプレートと組み合わされて新しい画像を生成します。',
+    useTemplate: 'テンプレート使用',
+    close: '閉じる',
+    image: '画像',
+    images: '画像',
     storyMaker: {
       title: 'ストーリーメーカー',
       description: '一貫したキャラクターで4コマ漫画ストーリーを作成',
@@ -1251,6 +1526,22 @@ const fr: Translations = {
       generate: 'Générer',
     },
     generate: {
+      tabs: {
+        generate: 'Générer',
+        enhance: 'Améliorer',
+        video: 'Vidéo'
+      },
+      validation: {
+        generateMessage: 'Générer supporte n\'importe quel nombre d\'images de référence ou aucune pour une création fraîche',
+        styleMessage: 'Le transfert de style nécessite exactement 1 image',
+        mergeMessage: 'Fusionner nécessite 2+ images'
+      },
+      processing: {
+        analyzing: 'Analyse de votre demande...',
+        composing: 'Création de belles compositions...',
+        rendering: 'Rendu d\'images haute qualité...',
+        finalizing: 'Ajout des touches finales...'
+      },
       templates: {
         title: 'Modèles Populaires Nano Banana (Cliquer pour utiliser)',
         withSelection: '+ Images Sélectionnées',
@@ -1322,6 +1613,45 @@ const fr: Translations = {
       selectedImages: 'images sélectionnées du canevas',
       invalidForTab: 'Non valide pour'
     },
+    enhance: {
+      selectImages: 'Sélectionner Images à Améliorer',
+      selectImagesDescription: 'Veuillez sélectionner une ou plusieurs images du canevas à améliorer',
+      enhancementReady: 'Amélioration Prête',
+      willBeProcessed: 'Vos images sélectionnées seront traitées et améliorées avec la technologie IA.',
+      enhancementOptions: 'Options d\'Amélioration',
+      aiUpscale: 'Mise à l\'Échelle IA',
+      upscaleDescription: 'Augmenter la résolution d\'image en utilisant la technologie de mise à l\'échelle IA',
+      backgroundRemoval: 'Suppression d\'Arrière-plan',
+      backgroundRemovalDescription: 'Supprimer automatiquement l\'arrière-plan et créer un PNG transparent',
+      qualityEnhancement: 'Amélioration de Qualité',
+      qualityEnhancementDescription: 'Améliorer la qualité générale de l\'image, réduire le bruit et les artefacts',
+      enhancementSummary: 'Résumé d\'Amélioration',
+      upscaleTo: 'Mise à l\'échelle vers',
+      removeBackground: 'Supprimer l\'arrière-plan (PNG transparent)',
+      enhancedQuality: 'Qualité améliorée et réduction du bruit',
+      processing: 'Traitement',
+      enhanceButton: 'Améliorer Images',
+      enhancing: 'Amélioration...',
+      resolutions: {
+        '2x': 'Résolution 2x',
+        '4x': 'Résolution 4x',
+        '8x': 'Résolution 8x'
+      }
+    },
+    selected: 'sélectionné',
+    selectedFromCanvas: 'sélectionné du canevas',
+    invalidFor: 'Non valide pour',
+    selectedImagesNote: 'Les images sélectionnées seront automatiquement incluses dans la demande IA',
+    generateBasedOn: 'Générer de nouvelles images basées sur votre',
+    selectedImage: 'image sélectionnée',
+    generateWithGemini: 'Générer des images avec Gemini 2.5 Flash (Nano Banana)',
+    imageToImageMode: 'Mode Image vers Image',
+    active: 'ACTIF',
+    selectedImagesCombined: 'Vos images sélectionnées seront combinées avec votre prompt/modèle pour générer de nouvelles images.',
+    useTemplate: 'Utiliser le Modèle',
+    close: 'Fermer',
+    image: 'image',
+    images: 'images',
     storyMaker: {
       title: 'Créateur d\'Histoires',
       description: 'Créez des histoires de bande dessinée à 4 panneaux avec des personnages cohérents',
