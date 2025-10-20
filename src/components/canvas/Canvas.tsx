@@ -618,24 +618,25 @@ export const Canvas: React.FC = () => {
     console.log('🖼️ Exporting selected objects:', contextMenu.selectedObjects.length)
 
     try {
-      // 創建選中物件的群組來計算整體邊界
-      const group = new fabric.Group(contextMenu.selectedObjects, {
-        left: 0,
-        top: 0
+      // 直接計算所有選中物件的邊界框
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+
+      contextMenu.selectedObjects.forEach(obj => {
+        const bounds = obj.getBoundingRect(true) // true 參數確保包含所有變換
+        minX = Math.min(minX, bounds.left)
+        minY = Math.min(minY, bounds.top)
+        maxX = Math.max(maxX, bounds.left + bounds.width)
+        maxY = Math.max(maxY, bounds.top + bounds.height)
       })
 
-      // 獲取群組的實際邊界（包括所有變換）
-      const groupBounds = group.getBoundingRect(true)
       const padding = 20
-
-      const exportWidth = groupBounds.width + padding * 2
-      const exportHeight = groupBounds.height + padding * 2
+      const exportWidth = maxX - minX + padding * 2
+      const exportHeight = maxY - minY + padding * 2
 
       console.log('📐 Export bounds:', {
-        width: groupBounds.width,
-        height: groupBounds.height,
-        exportWidth,
-        exportHeight
+        minX, minY, maxX, maxY,
+        exportWidth, exportHeight,
+        objectCount: contextMenu.selectedObjects.length
       })
 
       // 創建臨時畫布
@@ -648,47 +649,52 @@ export const Canvas: React.FC = () => {
       tempCanvas.setHeight(exportHeight)
       tempCanvas.backgroundColor = 'transparent'
 
-      // 分解群組並複製每個物件到臨時畫布
-      const clonePromises = group.getObjects().map((obj: fabric.Object) => {
+      // 直接複製每個物件到臨時畫布
+      const clonePromises = contextMenu.selectedObjects.map((obj: fabric.Object) => {
         return new Promise<void>((resolve) => {
           obj.clone((cloned: fabric.Object) => {
-            // 計算物件在群組中的相對位置
-            const objCoords = fabric.util.transformPoint(
-              { x: obj.left || 0, y: obj.top || 0 },
-              group.calcTransformMatrix()
-            )
+            // 獲取原物件的邊界框
+            const objBounds = obj.getBoundingRect(true)
 
-            // 設定物件在新畫布上的位置
+            // 計算物件在新畫布上的位置（相對於邊界框左上角）
+            const newLeft = objBounds.left - minX + padding
+            const newTop = objBounds.top - minY + padding
+
+            // 計算物件中心點的偏移
+            const objCenterX = obj.left || 0
+            const objCenterY = obj.top || 0
+            const boundsCenterX = objBounds.left + objBounds.width / 2
+            const boundsCenterY = objBounds.top + objBounds.height / 2
+
+            // 調整到新位置，保持物件內部結構
             cloned.set({
-              left: objCoords.x - groupBounds.left + padding,
-              top: objCoords.y - groupBounds.top + padding,
-              // 保持原始的變換屬性
+              left: newLeft + (objCenterX - boundsCenterX) + objBounds.width / 2,
+              top: newTop + (objCenterY - boundsCenterY) + objBounds.height / 2,
+              // 保持所有原始變換
               scaleX: obj.scaleX,
               scaleY: obj.scaleY,
               angle: obj.angle,
               flipX: obj.flipX,
               flipY: obj.flipY,
               skewX: obj.skewX,
-              skewY: obj.skewY
+              skewY: obj.skewY,
+              opacity: obj.opacity
             })
 
             tempCanvas.add(cloned)
-            console.log('📦 Cloned object:', cloned.type, 'at', cloned.left, cloned.top)
+            console.log('📦 Cloned object:', cloned.type, 'from', obj.left, obj.top, 'to', cloned.left, cloned.top)
             resolve()
           })
         })
       })
 
-      // 清理群組（不影響原始物件）
-      group.destroy()
-
       // 等待所有複製完成
       await Promise.all(clonePromises)
 
-      // 強制渲染
+      // 強制渲染並等待
       tempCanvas.renderAll()
 
-      // 等待渲染完成後匯出
+      // 增加更長的等待時間確保複雜物件完全渲染
       setTimeout(() => {
         const dataUrl = tempCanvas.toDataURL({
           format: 'png',
@@ -712,7 +718,7 @@ export const Canvas: React.FC = () => {
         }
 
         tempCanvas.dispose()
-      }, 300) // 增加等待時間確保渲染完成
+      }, 500) // 增加等待時間確保渲染完成
 
     } catch (error) {
       console.error('❌ Export error:', error)
