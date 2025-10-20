@@ -724,26 +724,26 @@ export const Canvas: React.FC = () => {
   const createProgressImage = (message: string, stage: number = 0): any => {
     if (!canvas) return null
 
-    // Get current viewport center using fabric.js transform utilities
+    // Use fabric.js utility to get the proper viewport center
     const vpt = canvas.viewportTransform!
-    const canvasEl = canvas.getElement()
+    const zoom = canvas.getZoom()
 
-    // Get the center point of the viewport in canvas coordinates
-    // Calculate viewport center directly from transform matrix
-    const viewportCenterX = (canvasEl.width / 2 - vpt[4]) / vpt[0]
-    const viewportCenterY = (canvasEl.height / 2 - vpt[5]) / vpt[3]
+    // Get canvas container dimensions
+    const canvasContainer = canvas.getElement().parentElement
+    const containerWidth = canvasContainer?.clientWidth || canvas.getWidth()
+    const containerHeight = canvasContainer?.clientHeight || canvas.getHeight()
 
-    console.log('📐 PROGRESS INDICATOR at viewport center:', {
-      finalPosition: { x: viewportCenterX.toFixed(0), y: viewportCenterY.toFixed(0) },
-      centerPoint: { x: canvasEl.width / 2, y: canvasEl.height / 2 },
-      vpt: {
-        full: vpt,
-        scaleX: vpt[0], scaleY: vpt[3],
-        translateX: vpt[4], translateY: vpt[5]
-      },
-      zoom: canvas.getZoom(),
-      canvasSize: { width: canvasEl.width, height: canvasEl.height },
-      directCalculation: { x: viewportCenterX, y: viewportCenterY }
+    // Calculate true center point of the visible viewport
+    const centerPoint = fabric.util.transformPoint(
+      { x: containerWidth / 2, y: containerHeight / 2 },
+      fabric.util.invertTransform(vpt)
+    )
+
+    console.log('📐 PROGRESS INDICATOR optimized center:', {
+      centerPoint: { x: centerPoint.x.toFixed(0), y: centerPoint.y.toFixed(0) },
+      containerSize: { width: containerWidth, height: containerHeight },
+      zoom: zoom,
+      vpt: vpt
     })
 
     // Create modern, elegant progress indicator
@@ -802,13 +802,16 @@ export const Canvas: React.FC = () => {
       fabric.Image.fromURL(dataUrl, (img) => {
         if (img) {
           img.set({
-            left: viewportCenterX,
-            top: viewportCenterY,
+            left: centerPoint.x,
+            top: centerPoint.y,
             originX: 'center',
             originY: 'center',
             selectable: false,
             evented: false,
-            isProgressImage: true
+            isProgressImage: true,
+            // Ensure loading indicator is always visible at proper scale
+            scaleX: 1 / zoom,
+            scaleY: 1 / zoom
           } as any)
           canvas.add(img)
           canvas.bringToFront(img)
