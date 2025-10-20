@@ -649,6 +649,12 @@ export const Canvas: React.FC = () => {
       tempCanvas.setHeight(exportHeight)
       tempCanvas.backgroundColor = 'transparent'
 
+      // 確保畫布支持透明度
+      const ctx = tempCanvasEl.getContext('2d')
+      if (ctx) {
+        ctx.clearRect(0, 0, exportWidth, exportHeight)
+      }
+
       // 直接複製每個物件到臨時畫布
       const clonePromises = contextMenu.selectedObjects.map((obj: fabric.Object) => {
         return new Promise<void>((resolve) => {
@@ -681,6 +687,34 @@ export const Canvas: React.FC = () => {
               opacity: obj.opacity
             })
 
+            // 特別處理圖片物件的透明度
+            if (cloned.type === 'image') {
+              const imgObj = cloned as fabric.Image
+              // 確保圖片支持透明背景
+              if (imgObj._originalElement) {
+                const canvas = document.createElement('canvas')
+                const ctx = canvas.getContext('2d')
+                if (ctx && imgObj._originalElement) {
+                  canvas.width = imgObj._originalElement.width || imgObj.width || 100
+                  canvas.height = imgObj._originalElement.height || imgObj.height || 100
+                  ctx.clearRect(0, 0, canvas.width, canvas.height)
+                  ctx.drawImage(imgObj._originalElement, 0, 0)
+
+                  // 創建新的圖片元素保持透明度
+                  const newImg = new Image()
+                  newImg.crossOrigin = 'anonymous'
+                  newImg.onload = () => {
+                    imgObj.setElement(newImg)
+                    tempCanvas.add(cloned)
+                    console.log('📦 Cloned image with transparency preserved:', cloned.type, 'from', obj.left, obj.top, 'to', cloned.left, cloned.top)
+                    resolve()
+                  }
+                  newImg.src = canvas.toDataURL('image/png')
+                  return
+                }
+              }
+            }
+
             tempCanvas.add(cloned)
             console.log('📦 Cloned object:', cloned.type, 'from', obj.left, obj.top, 'to', cloned.left, cloned.top)
             resolve()
@@ -699,7 +733,11 @@ export const Canvas: React.FC = () => {
         const dataUrl = tempCanvas.toDataURL({
           format: 'png',
           quality: 1,
-          multiplier: 2  // Export at 2x resolution for better quality
+          multiplier: 2,  // Export at 2x resolution for better quality
+          enableRetinaScaling: false,
+          withoutTransform: false,
+          // 明確指定透明背景
+          backgroundColor: 'transparent'
         })
 
         // 檢查是否成功生成圖片

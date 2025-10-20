@@ -31,7 +31,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const [loadingStage, setLoadingStage] = useState<'analyzing' | 'composing' | 'rendering' | 'finalizing'>('composing')
   const [loadingMessage, setLoadingMessage] = useState('')
   const [prompt, setPrompt] = useState('')
-  const [activeTab, setActiveTab] = useState<'generate' | 'enhance' | 'video'>('generate')
+  const [activeTab, setActiveTab] = useState<'generate' | 'enhance'>('generate')
   const [_lastResult, setLastResult] = useState<string | null>(null)
   
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
@@ -63,24 +63,29 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const tabValidation = {
     generate: {
       maxImages: 10,
-      message: 'Generate supports any number of reference images or none for fresh creation',
+      message: t.aiPanel.generate.validation.generateMessage,
       canUse: true  // Generate tab always available
+    },
+    enhance: {
+      maxImages: 10,
+      message: t.aiPanel.enhance.selectImagesDescription,
+      canUse: selectedImages.length > 0  // Enhance requires at least 1 image
     },
     style: {
       maxImages: 1,
-      message: 'Style transfer requires exactly 1 image',
+      message: t.aiPanel.generate.validation.styleMessage,
       canUse: selectedImages.length === 1
     },
     merge: {
       maxImages: 10,
-      message: 'Merge requires 2+ images',
+      message: t.aiPanel.generate.validation.mergeMessage,
       canUse: selectedImages.length >= 2
     }
   }
   
 
   const handleGenerateImage = async () => {
-    if (!prompt.trim()) return
+    if (!prompt.trim() && activeTab === 'generate') return
 
     console.log('🚀 Starting generation process...')
     console.log('📊 State check:', {
@@ -94,34 +99,34 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
 
     setIsProcessing(true)
     setLoadingStage('analyzing')
-    setLoadingMessage('Analyzing your request...')
+    setLoadingMessage(t.aiPanel.generate.processing.analyzing)
 
     try {
       // Simulate different stages of processing
       setTimeout(() => {
         setLoadingStage('composing')
-        setLoadingMessage('AI is composing your masterpiece...')
+        setLoadingMessage(t.aiPanel.generate.processing.composing)
       }, 1000)
 
       setTimeout(() => {
         setLoadingStage('rendering')
-        setLoadingMessage('Rendering high-quality result...')
+        setLoadingMessage(t.aiPanel.generate.processing.rendering)
       }, 3000)
 
       setTimeout(() => {
         setLoadingStage('finalizing')
-        setLoadingMessage('Adding final magical touches...')
+        setLoadingMessage(t.aiPanel.generate.processing.finalizing)
       }, 5000)
 
       let result
-      
+
       if (activeTab === 'generate') {
         // Generate Tab: Smart image generation mode
         if (hasSelection && selectedImages.length > 0) {
           console.log('🎯 Using Image-to-Image mode!')
           // Image-to-Image mode: Use selected images as reference with Nano Banana
           const imageUrls = selectedImages.map(img => img.url)
-          
+
           if (selectedImages.length === 1) {
             console.log('📸 Single image generation with:', typeof imageUrls[0] === 'string' ? imageUrls[0].substring(0, 50) + '...' : imageUrls[0])
             // Single image: Image-to-Image generation with Nano Banana
@@ -144,7 +149,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
               strength: 0.5
             })
           }
-          
+
           console.log(`✅ Generated ${selectedImages.length === 1 ? 'image-to-image' : 'merged'} result based on selection`)
         } else {
           console.log('📝 Using Text-to-Image mode (no images selected)')
@@ -154,8 +159,53 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
             width: 512,
             height: 512
           })
-          
+
           console.log('✅ Generated image from text prompt:', result)
+        }
+      } else if (activeTab === 'enhance') {
+        // Enhancement Tab: Process selected images
+        console.log('🔧 Enhancement mode with settings:', enhanceSettings)
+        const imageUrls = selectedImages.map(img => img.url)
+
+        // For now, simulate enhancement by upscaling the first image
+        // In a real implementation, you would call specific enhancement APIs
+        if (imageUrls.length > 0) {
+          console.log('📈 Enhancing images with settings:', enhanceSettings)
+
+          // Create enhancement prompt based on settings - more conservative
+          let enhancementPrompt = ''
+
+          if (enhanceSettings.enhanceQuality && !enhanceSettings.removeBackground) {
+            // Quality enhancement only - very conservative
+            enhancementPrompt = 'preserve original appearance, enhance clarity, reduce noise, maintain exact same composition and features'
+          } else if (enhanceSettings.removeBackground && !enhanceSettings.enhanceQuality) {
+            // Background removal only - use stronger removal prompt
+            enhancementPrompt = 'REMOVE ALL BACKGROUND completely, make background fully transparent, isolate main subject only, cutout style, PNG with alpha channel, white background becomes transparent, solid subject with clean edges, preserve subject 100% unchanged'
+          } else if (enhanceSettings.enhanceQuality && enhanceSettings.removeBackground) {
+            // Both enhancements - prioritize background removal
+            enhancementPrompt = 'REMOVE ALL BACKGROUND make fully transparent, isolate main subject, enhance subject clarity slightly while preserving original appearance exactly, cutout style PNG with alpha transparency'
+          } else {
+            // Upscale only - minimal change
+            enhancementPrompt = 'upscale image, preserve original appearance completely, no changes to subject'
+          }
+
+          // Adjust strength based on enhancement type
+          let strength = 0.15  // Default low strength for preservation
+          if (enhanceSettings.removeBackground) {
+            strength = 0.8  // High strength needed for background removal
+          } else if (enhanceSettings.enhanceQuality) {
+            strength = 0.3  // Medium strength for quality enhancement
+          }
+
+          result = await aiService.imageToImage({
+            prompt: enhancementPrompt,
+            imageUrl: imageUrls[0],
+            width: parseInt(enhanceSettings.upscaleLevel) * 128, // Base 512px * multiplier
+            height: parseInt(enhanceSettings.upscaleLevel) * 128,
+            strength: strength
+          })
+
+          console.log('✅ Enhanced image:', result)
         }
       } else {
         // Other tabs: Use standard text-to-image generation
@@ -164,19 +214,21 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
           width: 512,
           height: 512
         })
-        
+
         console.log('Generated image from text prompt in', activeTab, 'tab:', result)
       }
-      
+
       // Add generated image to canvas (single image - center it)
       const imageUrl = typeof result === 'string' ? result : result.url
       await importImage(imageUrl)
       setLastResult(imageUrl)
-      
-      setPrompt('')
-      
+
+      if (activeTab === 'generate') {
+        setPrompt('')
+      }
+
     } catch (error) {
-      console.error('Image generation failed:', error)
+      console.error('Image processing failed:', error)
       alert(t.alerts.imageGenerationFailed + error)
     } finally {
       setIsProcessing(false)
@@ -208,7 +260,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
             <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
               <Wand2 className="w-4 h-4 text-white" />
             </div>
-            <h3 className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">AI Assistant</h3>
+            <h3 className="text-sm font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{t.aiPanel.title}</h3>
           </div>
           <div className="flex items-center space-x-1">
             {hasSelection && (
@@ -217,12 +269,40 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
                   ? 'bg-blue-100 text-blue-700' 
                   : 'bg-orange-100 text-orange-700'
               }`}>
-                🖼️ {selectedImages.length} selected
+                🖼️ {selectedImages.length} {t.aiPanel.selected}
               </span>
             )}
           </div>
         </div>
 
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
+        <div className="flex space-x-1 p-2">
+          <button
+            onClick={() => setActiveTab('generate')}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'generate'
+                ? 'bg-purple-100 text-purple-700 border border-purple-300'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>{t.aiPanel.generate.tabs.generate}</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('enhance')}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'enhance'
+                ? 'bg-green-100 text-green-700 border border-green-300'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <Zap className="w-4 h-4" />
+            <span>{t.aiPanel.generate.tabs.enhance}</span>
+          </button>
+        </div>
       </div>
 
       {/* Content - 可滾動區域 */}
@@ -257,11 +337,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
           }`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-gray-700">
-                🖼️ {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} selected from canvas
+                🖼️ {selectedImages.length} {selectedImages.length !== 1 ? t.aiPanel.images : t.aiPanel.image} {t.aiPanel.selectedFromCanvas}
               </span>
               {!tabValidation[activeTab]?.canUse && (
                 <span className="text-xs text-orange-600 font-medium">
-                  ⚠️ Invalid for {activeTab}
+                  ⚠️ {t.aiPanel.invalidFor} {activeTab}
                 </span>
               )}
             </div>
@@ -287,7 +367,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
             />
             {hasSelection && (
               <p className="text-xs text-purple-600 mt-1">
-                💡 Selected images will be automatically included in the AI request
+                💡 {t.aiPanel.selectedImagesNote}
               </p>
             )}
           </div>
@@ -297,9 +377,9 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
         {activeTab === 'generate' && (
           <div className="space-y-3">
             <p className="text-xs text-gray-600">
-              {hasSelection 
-                ? `Generate new images based on your ${selectedImages.length} selected image${selectedImages.length !== 1 ? 's' : ''}`
-                : 'Generate images with Gemini 2.5 Flash (Nano Banana)'
+              {hasSelection
+                ? `${t.aiPanel.generateBasedOn} ${selectedImages.length} ${selectedImages.length !== 1 ? t.aiPanel.selectedImages : t.aiPanel.selectedImage}`
+                : t.aiPanel.generateWithGemini
               }
             </p>
             
@@ -307,11 +387,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
             {hasSelection && (
               <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 mb-3">
                 <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-sm font-bold text-blue-700">🎨 Image-to-Image Mode</span>
-                  <span className="text-xs px-2 py-0.5 bg-blue-200 text-blue-800 rounded-full">ACTIVE</span>
+                  <span className="text-sm font-bold text-blue-700">🎨 {t.aiPanel.imageToImageMode}</span>
+                  <span className="text-xs px-2 py-0.5 bg-blue-200 text-blue-800 rounded-full">{t.aiPanel.active}</span>
                 </div>
                 <p className="text-xs text-blue-700">
-                  Your selected image{selectedImages.length !== 1 ? 's' : ''} will be combined with your prompt/template to generate new images.
+                  {t.aiPanel.selectedImagesCombined}
                 </p>
               </div>
             )}
@@ -449,28 +529,155 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
               </div>
           </div>
         )}
+
+        {/* Enhance Tab Content */}
+        {activeTab === 'enhance' && (
+          <div className="space-y-4">
+            {/* Image Selection Required */}
+            {!hasSelection ? (
+              <div className="text-center py-8">
+                <ZoomIn className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="text-sm font-medium text-gray-900 mb-2">{t.aiPanel.enhance.selectImages}</h3>
+                <p className="text-xs text-gray-600">{t.aiPanel.enhance.selectImagesDescription}</p>
+              </div>
+            ) : (
+              <>
+                {/* Selected Images Info */}
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="text-sm font-bold text-green-700">🎨 {t.aiPanel.enhance.enhancementReady}</span>
+                    <span className="text-xs px-2 py-0.5 bg-green-200 text-green-800 rounded-full">
+                      {selectedImages.length} {selectedImages.length !== 1 ? t.aiPanel.images : t.aiPanel.image}
+                    </span>
+                  </div>
+                  <p className="text-xs text-green-700">
+                    {t.aiPanel.enhance.willBeProcessed}
+                  </p>
+                </div>
+
+                {/* Enhancement Options */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-gray-800">{t.aiPanel.enhance.enhancementOptions}</h4>
+
+                  {/* Upscale Option */}
+                  <div className="p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <ZoomIn className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-800">{t.aiPanel.enhance.aiUpscale}</span>
+                      </div>
+                      <select
+                        value={enhanceSettings.upscaleLevel}
+                        onChange={(e) => setEnhanceSettings(prev => ({ ...prev, upscaleLevel: e.target.value }))}
+                        className="text-xs border border-gray-300 rounded px-2 py-1"
+                      >
+                        <option value="2x">{t.aiPanel.enhance.resolutions['2x']}</option>
+                        <option value="4x">{t.aiPanel.enhance.resolutions['4x']}</option>
+                        <option value="8x">{t.aiPanel.enhance.resolutions['8x']}</option>
+                      </select>
+                    </div>
+                    <p className="text-xs text-gray-600">{t.aiPanel.enhance.upscaleDescription}</p>
+                  </div>
+
+                  {/* Background Removal */}
+                  <div className="p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Scissors className="w-4 h-4 text-purple-600" />
+                        <span className="text-sm font-medium text-gray-800">{t.aiPanel.enhance.backgroundRemoval}</span>
+                      </div>
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={enhanceSettings.removeBackground}
+                          onChange={(e) => setEnhanceSettings(prev => ({ ...prev, removeBackground: e.target.checked }))}
+                          className="sr-only"
+                        />
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          enhanceSettings.removeBackground
+                            ? 'bg-purple-600 border-purple-600'
+                            : 'border-gray-300'
+                        }`}>
+                          {enhanceSettings.removeBackground && (
+                            <div className="w-2 h-2 bg-white rounded-sm"></div>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-600">{t.aiPanel.enhance.backgroundRemovalDescription}</p>
+                  </div>
+
+                  {/* Quality Enhancement */}
+                  <div className="p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Sparkles className="w-4 h-4 text-amber-600" />
+                        <span className="text-sm font-medium text-gray-800">{t.aiPanel.enhance.qualityEnhancement}</span>
+                      </div>
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={enhanceSettings.enhanceQuality}
+                          onChange={(e) => setEnhanceSettings(prev => ({ ...prev, enhanceQuality: e.target.checked }))}
+                          className="sr-only"
+                        />
+                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          enhanceSettings.enhanceQuality
+                            ? 'bg-amber-600 border-amber-600'
+                            : 'border-gray-300'
+                        }`}>
+                          {enhanceSettings.enhanceQuality && (
+                            <div className="w-2 h-2 bg-white rounded-sm"></div>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-600">{t.aiPanel.enhance.qualityEnhancementDescription}</p>
+                  </div>
+                </div>
+
+                {/* Enhancement Preview */}
+                <div className="p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
+                  <h4 className="text-sm font-bold text-gray-800 mb-2">{t.aiPanel.enhance.enhancementSummary}</h4>
+                  <div className="space-y-1 text-xs text-gray-700">
+                    <div>• {t.aiPanel.enhance.upscaleTo} {enhanceSettings.upscaleLevel} {t.aiPanel.enhance.resolutions[enhanceSettings.upscaleLevel as keyof typeof t.aiPanel.enhance.resolutions]}</div>
+                    {enhanceSettings.removeBackground && <div>• {t.aiPanel.enhance.removeBackground}</div>}
+                    {enhanceSettings.enhanceQuality && <div>• {t.aiPanel.enhance.enhancedQuality}</div>}
+                    <div className="text-green-700 font-medium mt-2">
+                      {t.aiPanel.enhance.processing} {selectedImages.length} {selectedImages.length !== 1 ? t.aiPanel.images : t.aiPanel.image}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
         </div>
 
-        {/* 固定生成按鈕區域 */}
-        {activeTab === 'generate' && (
+        {/* 固定按鈕區域 */}
+        {(activeTab === 'generate' || (activeTab === 'enhance' && hasSelection)) && (
           <div className="p-4 border-t border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
             <button
               onClick={handleGenerateImage}
-              disabled={isProcessing || !prompt.trim() || !tabValidation[activeTab]?.canUse}
-              className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-300 disabled:to-gray-400 text-white text-sm rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:scale-100"
+              disabled={isProcessing || (activeTab === 'generate' && (!prompt.trim() || !tabValidation[activeTab]?.canUse)) || (activeTab === 'enhance' && !hasSelection)}
+              className={`w-full py-3 px-4 bg-gradient-to-r ${
+                activeTab === 'enhance'
+                  ? 'from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+                  : 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+              } disabled:from-gray-300 disabled:to-gray-400 text-white text-sm rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:scale-100`}
             >
               {isProcessing ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>
-                    {t.aiPanel.generate.generating}
+                    {activeTab === 'enhance' ? t.aiPanel.enhance.enhancing : t.aiPanel.generate.generating}
                   </span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  {activeTab === 'enhance' ? <Zap className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   <span>
-                    {t.aiPanel.generate.generateButton}
+                    {activeTab === 'enhance' ? t.aiPanel.enhance.enhanceButton : t.aiPanel.generate.generateButton}
                   </span>
                 </>
               )}
@@ -532,13 +739,13 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
                       }}
                       className="flex-1 py-2 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm rounded-lg transition-all font-medium"
                     >
-                      Use Template
+                      {t.aiPanel.useTemplate}
                     </button>
                     <button
                       onClick={() => setPreviewTemplate(null)}
                       className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm rounded-lg transition-colors"
                     >
-                      Close
+                      {t.aiPanel.close}
                     </button>
                   </div>
                 </>
