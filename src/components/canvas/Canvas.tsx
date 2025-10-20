@@ -4,6 +4,7 @@ import { useCanvasStore } from '@store/canvasStore'
 import { useImageStore } from '@store/imageStore'
 import { aiService } from '@services/aiService'
 import { NewContextMenu } from './NewContextMenu'
+import { VoicePromptModal } from './VoicePromptModal'
 import type { CanvasConfig } from '@/types/canvas'
 
 const defaultConfig: CanvasConfig = {
@@ -24,6 +25,11 @@ export const Canvas: React.FC = () => {
     visible: false,
     x: 0,
     y: 0,
+    selectedObjects: [] as fabric.Object[]
+  })
+
+  const [voicePromptModal, setVoicePromptModal] = useState({
+    visible: false,
     selectedObjects: [] as fabric.Object[]
   })
 
@@ -555,8 +561,20 @@ export const Canvas: React.FC = () => {
       for (const obj of contextMenu.selectedObjects) {
         if (obj.type === 'image') {
           const imgObj = obj as fabric.Image
-          if (imgObj.getSrc) {
-            imageUrls.push(imgObj.getSrc())
+          let imageUrl: string | undefined
+
+          // Try different methods to get the image URL
+          if (imgObj.getSrc && typeof imgObj.getSrc === 'function') {
+            imageUrl = imgObj.getSrc()
+          } else if ((obj as any)._originalElement?.src) {
+            imageUrl = (obj as any)._originalElement.src
+          } else if ((obj as any).src) {
+            imageUrl = (obj as any).src
+          }
+
+          // Ensure it's a valid string URL
+          if (typeof imageUrl === 'string' && imageUrl.length > 0) {
+            imageUrls.push(imageUrl)
           }
         }
       }
@@ -683,67 +701,87 @@ export const Canvas: React.FC = () => {
   // Helper function to create progress image on canvas
   const createProgressImage = (message: string, stage: number = 0): any => {
     if (!canvas) return null
-    
-    // Create SVG progress indicator
+
+    // Get current viewport center using fabric.js transform utilities
+    const vpt = canvas.viewportTransform!
+    const canvasEl = canvas.getElement()
+
+    // Get the center point of the viewport in canvas coordinates
+    // Calculate viewport center directly from transform matrix
+    const viewportCenterX = (canvasEl.width / 2 - vpt[4]) / vpt[0]
+    const viewportCenterY = (canvasEl.height / 2 - vpt[5]) / vpt[3]
+
+    console.log('📐 PROGRESS INDICATOR at viewport center:', {
+      finalPosition: { x: viewportCenterX.toFixed(0), y: viewportCenterY.toFixed(0) },
+      centerPoint: { x: canvasEl.width / 2, y: canvasEl.height / 2 },
+      vpt: {
+        full: vpt,
+        scaleX: vpt[0], scaleY: vpt[3],
+        translateX: vpt[4], translateY: vpt[5]
+      },
+      zoom: canvas.getZoom(),
+      canvasSize: { width: canvasEl.width, height: canvasEl.height },
+      directCalculation: { x: viewportCenterX, y: viewportCenterY }
+    })
+
+    // Create modern, elegant progress indicator
     const progressSvg = `
-      <svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+      <svg width="300" height="120" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="progress-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.9" />
-            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.9" />
+            <stop offset="0%" style="stop-color:#1e293b;stop-opacity:0.95" />
+            <stop offset="100%" style="stop-color:#334155;stop-opacity:0.95" />
           </linearGradient>
           <linearGradient id="progress-bar" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color:#4ade80;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
           </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
-        
-        <!-- Background -->
-        <rect width="100%" height="100%" rx="12" fill="url(#progress-bg)" stroke="#ffffff" stroke-width="2"/>
-        
-        <!-- Progress bar background -->
-        <rect x="30" y="140" width="340" height="8" rx="4" fill="rgba(255,255,255,0.2)"/>
-        
-        <!-- Progress bar -->
-        <rect x="30" y="140" width="${Math.max(10, stage * 85)}" height="8" rx="4" fill="url(#progress-bar)">
-          <animate attributeName="width" values="${stage * 85};${(stage + 0.2) * 85};${stage * 85}" dur="2s" repeatCount="indefinite"/>
-        </rect>
-        
-        <!-- Icon -->
-        <circle cx="200" cy="80" r="25" fill="rgba(255,255,255,0.2)" stroke="#ffffff" stroke-width="2">
-          <animate attributeName="r" values="25;30;25" dur="2s" repeatCount="indefinite"/>
+
+        <!-- Background with modern styling -->
+        <rect width="100%" height="100%" rx="16" fill="url(#progress-bg)" stroke="#64748b" stroke-width="1"/>
+
+        <!-- Spinner -->
+        <circle cx="60" cy="60" r="18" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+        <circle cx="60" cy="60" r="18" fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="56.5" stroke-dashoffset="56.5">
+          <animate attributeName="stroke-dasharray" values="0 56.5;42 14.5;42 14.5;0 56.5" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dashoffset" values="0;-14.5;-28.5;-42.5" dur="1.5s" repeatCount="indefinite"/>
         </circle>
-        <text x="200" y="88" text-anchor="middle" fill="#ffffff" font-size="24">✨</text>
-        
+
         <!-- Message -->
-        <text x="200" y="125" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+        <text x="110" y="55" fill="#f1f5f9" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500">
           ${message}
         </text>
-        
-        <!-- Dots animation -->
-        <text x="330" y="125" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">
-          <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
-          .
-        </text>
-        <text x="340" y="125" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">
-          <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
-          .
-        </text>
-        <text x="350" y="125" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">
-          <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="1s" repeatCount="indefinite"/>
-          .
+
+        <!-- Progress bar -->
+        <rect x="110" y="70" width="160" height="6" rx="3" fill="rgba(255,255,255,0.1)"/>
+        <rect x="110" y="70" width="${Math.max(6, stage * 160)}" height="6" rx="3" fill="url(#progress-bar)" filter="url(#glow)">
+          <animate attributeName="width" values="${stage * 160};${Math.min(160, (stage + 0.1) * 160)};${stage * 160}" dur="2s" repeatCount="indefinite"/>
+        </rect>
+
+        <!-- Percentage -->
+        <text x="280" y="85" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="11" text-anchor="end">
+          ${Math.round(stage * 100)}%
         </text>
       </svg>
     `
-    
+
     const dataUrl = `data:image/svg+xml,${encodeURIComponent(progressSvg)}`
-    
+
     return new Promise((resolve) => {
       fabric.Image.fromURL(dataUrl, (img) => {
         if (img) {
           img.set({
-            left: canvas.width! / 2,
-            top: canvas.height! / 2,
+            left: viewportCenterX,
+            top: viewportCenterY,
             originX: 'center',
             originY: 'center',
             selectable: false,
@@ -921,16 +959,198 @@ export const Canvas: React.FC = () => {
 
   const handleGroupSelection = () => {
     if (!canvas || contextMenu.selectedObjects.length <= 1) return
-    
+
     const group = new fabric.Group(contextMenu.selectedObjects, {
       left: Math.min(...contextMenu.selectedObjects.map(obj => obj.left || 0)),
       top: Math.min(...contextMenu.selectedObjects.map(obj => obj.top || 0))
     })
-    
+
     contextMenu.selectedObjects.forEach(obj => canvas.remove(obj))
     canvas.add(group)
     canvas.setActiveObject(group)
     canvas.renderAll()
+  }
+
+  // 🎤 Voice Prompt Handlers
+  const handleVoicePrompt = () => {
+    if (contextMenu.selectedObjects.length === 0) return
+
+    console.log('🎤 Opening voice prompt modal for', contextMenu.selectedObjects.length, 'objects')
+
+    setVoicePromptModal({
+      visible: true,
+      selectedObjects: [...contextMenu.selectedObjects]
+    })
+
+    setContextMenu(prev => ({ ...prev, visible: false }))
+  }
+
+  const handleVoicePromptSubmit = async (prompt: string, isVoice: boolean) => {
+    if (!prompt.trim() || voicePromptModal.selectedObjects.length === 0) return
+
+    let progressImg: any = null
+
+    try {
+      console.log('🎤 Processing voice/text prompt:', prompt)
+      console.log('🖼️ Selected objects:', voicePromptModal.selectedObjects.length)
+
+      // Create progress indicator
+      progressImg = await createProgressImage(
+        isVoice ? '🎤 Processing voice command...' : '📝 Processing text command...',
+        0.1
+      )
+
+      // Extract image URLs from selected objects
+      const imageUrls = voicePromptModal.selectedObjects
+        .filter(obj => obj.type === 'image')
+        .map(obj => {
+          const imgObj = obj as fabric.Image
+          let imageUrl: string | undefined
+
+          // Try different methods to get the image URL
+          if (imgObj.getSrc && typeof imgObj.getSrc === 'function') {
+            imageUrl = imgObj.getSrc()
+          } else if ((obj as any)._originalElement?.src) {
+            imageUrl = (obj as any)._originalElement.src
+          } else if ((obj as any).src) {
+            imageUrl = (obj as any).src
+          }
+
+          // Ensure it's a valid string URL and validate it
+          if (typeof imageUrl === 'string' && imageUrl.length > 0) {
+            // Additional validation to prevent indexOf errors in backend
+            try {
+              // Test that the string supports indexOf before sending to backend
+              if (typeof imageUrl.indexOf === 'function') {
+                return imageUrl
+              } else {
+                console.warn('String URL does not support indexOf method:', typeof imageUrl)
+                return null
+              }
+            } catch (err) {
+              console.warn('Error validating image URL:', err)
+              return null
+            }
+          }
+
+          console.warn('無法提取圖片URL，物件:', obj)
+          return null
+        })
+        .filter((url): url is string => typeof url === 'string' && url.length > 0)
+
+      console.log('🎤 提取的圖片URLs:', imageUrls)
+
+      if (imageUrls.length === 0) {
+        removeProgressImage()
+        alert('請選擇至少一張圖片來執行語音指令')
+        return
+      }
+
+      // Update progress
+      if (progressImg) {
+        progressImg = await updateProgressImage(progressImg, 'AI 正在理解您的指令...', 0.4)
+      }
+
+      // Use imageToImage for single image with prompt, or mergeImages for multiple
+      let result: string
+
+      if (imageUrls.length === 1) {
+        console.log('🎯 Single image voice command processing')
+
+        // Additional safety check for debugging
+        const imageUrl = imageUrls[0]
+        console.log('🔍 Debug - imageUrl type:', typeof imageUrl, 'value:', imageUrl)
+
+        if (typeof imageUrl !== 'string') {
+          throw new Error(`Invalid imageUrl type: expected string, got ${typeof imageUrl}`)
+        }
+
+        result = await aiService.imageToImage({
+          imageUrl: imageUrl,
+          prompt: `${prompt}. IMPORTANT: Preserve the exact features, identity, and characteristics of ALL main subjects and objects in the image (people, furniture, vehicles, animals, products, etc.). Maintain the original style, quality, shape, texture, color, and distinctive details of all important elements while making only the requested changes naturally. Keep the core identity and recognizable features of every main object completely consistent.`,
+          strength: 0.5, // 降低強度以維持所有主要物件穩定性
+          width: 512,
+          height: 512
+        })
+      } else {
+        console.log('🎯 Multi-image voice command processing')
+
+        // Additional safety check for multi-image case
+        console.log('🔍 Debug - imageUrls types:', imageUrls.map((url, i) => `[${i}]: ${typeof url}`))
+        console.log('🔍 Debug - imageUrls values:', imageUrls.map((url, i) => `[${i}]: ${url}`))
+
+        // Validate all URLs are strings
+        const invalidUrls = imageUrls.filter(url => typeof url !== 'string')
+        if (invalidUrls.length > 0) {
+          throw new Error(`Invalid imageUrl types in array: ${invalidUrls.map(url => typeof url).join(', ')}`)
+        }
+
+        result = await aiService.mergeImages(
+          imageUrls,
+          `${prompt}. IMPORTANT: Preserve the exact features, identity, and characteristics of ALL main subjects and objects in all images (people, furniture, vehicles, animals, products, etc.). Maintain consistent shape, texture, color, distinctive details, and core identity of every important element. Apply this instruction to combine and edit the images naturally while keeping all main subjects and objects completely recognizable and stable.`
+        )
+      }
+
+      // Update progress
+      if (progressImg) {
+        progressImg = await updateProgressImage(progressImg, '🎨 Finalizing your creation...', 0.9)
+      }
+
+      // Import the result - extract URL from object if needed
+      const imageUrl = typeof result === 'string' ? result : result.url
+      console.log('🔍 Debug - final imageUrl type:', typeof imageUrl, 'value:', typeof imageUrl === 'string' ? imageUrl.substring(0, 50) + '...' : imageUrl)
+
+      if (typeof imageUrl !== 'string') {
+        throw new Error(`Invalid final imageUrl type: expected string, got ${typeof imageUrl}`)
+      }
+
+      await importImage(imageUrl)
+
+      // Remove progress and show success
+      removeProgressImage()
+
+      console.log('✅ Voice/text command completed successfully!')
+
+      const successMessage = isVoice
+        ? `🎤 語音指令「${prompt}」執行完成！`
+        : `📝 文字指令「${prompt}」執行完成！`
+
+      // Show brief success notification
+      setTimeout(() => {
+        alert(successMessage)
+      }, 500)
+
+    } catch (error) {
+      console.error('❌ Voice/text prompt failed:', error)
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+      removeProgressImage()
+
+      // More detailed error message
+      let errorMessage = isVoice
+        ? `語音指令處理失敗`
+        : `文字指令處理失敗`
+
+      if (error.message && error.message.includes('indexOf')) {
+        errorMessage += ': 圖片格式處理錯誤，請重新嘗試'
+      } else if (error.message) {
+        errorMessage += `: ${error.message}`
+      } else {
+        errorMessage += `: ${error}`
+      }
+
+      alert(errorMessage)
+    }
+  }
+
+  const handleCloseVoicePrompt = () => {
+    setVoicePromptModal({
+      visible: false,
+      selectedObjects: []
+    })
   }
 
   return (
@@ -1058,6 +1278,15 @@ export const Canvas: React.FC = () => {
         onSceneCompose={handleSceneCompose}
         onCreativeBlend={handleCreativeBlend}
         onGroupSelection={handleGroupSelection}
+        onVoicePrompt={handleVoicePrompt}
+      />
+
+      {/* Voice Prompt Modal */}
+      <VoicePromptModal
+        visible={voicePromptModal.visible}
+        selectedCount={voicePromptModal.selectedObjects.length}
+        onClose={handleCloseVoicePrompt}
+        onSubmit={handleVoicePromptSubmit}
       />
     </div>
   )

@@ -230,7 +230,18 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const { canvas } = get()
     if (!canvas) return
 
-    console.log('🖼️ Importing image to canvas:', imageUrl.substring(0, 50) + '...')
+    console.log('🖼️ Importing image to canvas:', typeof imageUrl === 'string' ? imageUrl.substring(0, 50) + '...' : imageUrl)
+
+    // Validate imageUrl is a string before passing to fabric.js
+    if (typeof imageUrl !== 'string') {
+      console.error('❌ Invalid imageUrl type:', typeof imageUrl, imageUrl)
+      throw new Error(`Invalid imageUrl: expected string, got ${typeof imageUrl}`)
+    }
+
+    if (!imageUrl || imageUrl.length === 0) {
+      console.error('❌ Empty imageUrl provided')
+      throw new Error('Empty imageUrl provided')
+    }
 
     return new Promise((resolve, reject) => {
       try {
@@ -273,9 +284,89 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
                   })
                   console.log('📍 Positioned image at:', position.x, position.y)
                 } else {
-                  // Default to center if no position specified
-                  img.center()
-                  console.log('📍 Centered image (no position specified)')
+                  // Default to current viewport center using manual matrix calculation
+                  const vpt = canvas.viewportTransform!
+                  const canvasEl = canvas.getElement()
+
+                  console.log('🤖 AI IMAGE POSITIONING - TIMESTAMP:', new Date().toISOString())
+
+                  // Manual calculation: Convert screen center to canvas coordinates
+                  // Use actual viewport size, not canvas element size
+                  // Check if right panel is visible and subtract its width
+                  // Try multiple selectors to find the right panel
+                  const panelSelectors = [
+                    'div',  // Try all divs first
+                    '[class*="panel"]',
+                    '[class*="sidebar"]',
+                    '[class*="assistant"]',
+                    '.ai-assistant-panel',
+                    '.right-panel',
+                    '[data-panel]',
+                    'aside',
+                    'section',
+                    '[style*="position: fixed"]',
+                    '[style*="position: absolute"]'
+                  ]
+
+                  let rightPanel = null
+                  let panelWidth = 0
+
+                  for (const selector of panelSelectors) {
+                    const panels = document.querySelectorAll(selector)
+                    for (const panel of panels) {
+                      const rect = panel.getBoundingClientRect()
+                      // STRICT check - must be a reasonable panel size, not full window width
+                      const isReasonablePanel = rect.width > 250 && rect.width < window.innerWidth * 0.6 // Max 60% of window width
+                      const isOnRightSide = rect.right >= window.innerWidth - 100
+                      const isNotFullWidth = rect.width < window.innerWidth - 100 // Must not be full width
+                      const isTallEnough = rect.height > 300
+
+                      if (isReasonablePanel && isOnRightSide && isNotFullWidth && isTallEnough) {
+                        rightPanel = panel
+                        panelWidth = rect.width
+                        console.log('🤖 AI - Found right panel:', selector, 'class:', panel.className, 'width:', panelWidth)
+                        break
+                      }
+                    }
+                    if (rightPanel) break
+                  }
+
+                  if (!rightPanel) {
+                    console.log('🤖 AI - No right panel detected, using full viewport')
+                  }
+
+                  const viewportWidth = window.innerWidth - panelWidth
+                  const viewportHeight = window.innerHeight
+                  const screenCenterX = viewportWidth / 2
+                  const screenCenterY = viewportHeight / 2
+                  const scaleX = vpt[0]
+                  const scaleY = vpt[3]
+                  const translateX = vpt[4]
+                  const translateY = vpt[5]
+
+                  const viewportCenterX = (screenCenterX - translateX) / scaleX
+                  const viewportCenterY = (screenCenterY - translateY) / scaleY
+
+                  console.log('🤖 AI CALCULATION RESULT:', viewportCenterX.toFixed(0), viewportCenterY.toFixed(0))
+                  console.log('🤖 AI Transform values: scale=', scaleX.toFixed(2), scaleY.toFixed(2), 'translate=', translateX.toFixed(0), translateY.toFixed(0))
+                  console.log('🤖 AI VIEWPORT vs CANVAS SIZE:')
+                  console.log('   - Window size:', window.innerWidth, 'x', window.innerHeight, '(full window)')
+                  console.log('   - Right panel width:', panelWidth, '(detected panel)')
+                  console.log('   - Available viewport size:', viewportWidth, 'x', viewportHeight, '(available canvas area)')
+                  console.log('   - Viewport center:', screenCenterX, screenCenterY)
+
+                  img.set({
+                    left: viewportCenterX,
+                    top: viewportCenterY,
+                    originX: 'center',
+                    originY: 'center'
+                  })
+                  console.log('📍 AI Image positioned at viewport center:', {
+                    finalPosition: { x: viewportCenterX.toFixed(0), y: viewportCenterY.toFixed(0) },
+                    vpt: canvas.viewportTransform,
+                    canvasSize: { width: canvasEl.width, height: canvasEl.height },
+                    zoom: canvas.getZoom()
+                  })
                 }
 
                 // Add a unique identifier for AI-generated images
@@ -396,7 +487,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
         type: obj.type,
         hasElement: !!(obj as any)._element,
         hasSrc: !!(obj as any)._element?.src,
-        src: (obj as any)._element?.src?.substring(0, 50) + '...'
+        src: typeof (obj as any)._element?.src === 'string' ? (obj as any)._element?.src?.substring(0, 50) + '...' : (obj as any)._element?.src
       })
 
       if (obj.type === 'image' && (obj as any)._element?.src) {

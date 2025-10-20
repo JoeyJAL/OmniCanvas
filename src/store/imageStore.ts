@@ -32,7 +32,7 @@ export const useImageStore = create<ImageStore>((set, get) => ({
 
   setCanvas: (canvas) => set({ canvas }),
 
-  addImages: async (files, options = { autoArrange: true, spacing: 20 }) => {
+  addImages: async (files, options = { autoArrange: false, spacing: 20 }) => {
     const { canvas, images } = get()
     if (!canvas) return
 
@@ -94,18 +94,180 @@ export const useImageStore = create<ImageStore>((set, get) => ({
         fabricImage.scale(scale)
         console.log('✅ Final display size:', (imgWidth * scale).toFixed(0), 'x', (imgHeight * scale).toFixed(0))
 
-        // Position image
+        // Position image based on current viewport center
         const finalWidth = imgWidth * scale
         const finalHeight = imgHeight * scale
         const spacing = options.spacing || 100
-        
-        let x = 100 + (i % 2) * (finalWidth + spacing)
-        let y = 100 + Math.floor(i / 2) * (finalHeight + spacing)
 
-        if (options.autoArrange) {
-          fabricImage.set({ left: x, top: y })
+        // Calculate current viewport center using a more direct approach
+        const zoom = canvas.getZoom()
+        const vpt = canvas.viewportTransform!
+        const canvasEl = canvas.getElement()
+
+        // 🔥 MANUAL TRANSFORM MATRIX CALCULATION! 🔥
+        console.log('🚨 EXECUTING MANUAL MATRIX CALCULATION - TIMESTAMP:', new Date().toISOString())
+
+        // MANUAL METHOD: Calculate viewport center using transform matrix math
+        // Transform matrix: [scaleX, skewY, skewX, scaleY, translateX, translateY]
+        // To convert screen point to canvas point: (screenX - translateX) / scaleX, (screenY - translateY) / scaleY
+
+        // Get actual VIEWPORT size, not canvas element size
+        // Check if right panel is visible and subtract its width
+        // First, scan all elements on the right side for debugging
+        const allElements = document.querySelectorAll('*')
+        const rightSideElements = []
+        for (const el of allElements) {
+          const rect = el.getBoundingClientRect()
+          if (rect.width > 250 && rect.right >= window.innerWidth - 100 && rect.height > 300) {
+            rightSideElements.push({
+              tag: el.tagName,
+              className: el.className,
+              id: el.id,
+              width: rect.width,
+              height: rect.height,
+              right: rect.right,
+              left: rect.left
+            })
+          }
+        }
+        console.log('🔍 All potential right-side panels found:', rightSideElements)
+
+        // Try multiple selectors to find the right panel
+        const panelSelectors = [
+          'div',  // Try all divs first
+          '[class*="panel"]',
+          '[class*="sidebar"]',
+          '[class*="assistant"]',
+          '.ai-assistant-panel',
+          '.right-panel',
+          '[data-panel]',
+          'aside',
+          'section',
+          '[style*="position: fixed"]',
+          '[style*="position: absolute"]'
+        ]
+
+        let rightPanel = null
+        let panelWidth = 0
+
+        for (const selector of panelSelectors) {
+          const panels = document.querySelectorAll(selector)
+          for (const panel of panels) {
+            const rect = panel.getBoundingClientRect()
+            // STRICT check - must be a reasonable panel size, not full window width
+            const isReasonablePanel = rect.width > 250 && rect.width < window.innerWidth * 0.6 // Max 60% of window width
+            const isOnRightSide = rect.right >= window.innerWidth - 100
+            const isNotFullWidth = rect.width < window.innerWidth - 100 // Must not be full width
+            const isTallEnough = rect.height > 300
+
+            if (isReasonablePanel && isOnRightSide && isNotFullWidth && isTallEnough) {
+              rightPanel = panel
+              panelWidth = rect.width
+              console.log('🎯 Found right panel:', selector, 'class:', panel.className, 'width:', panelWidth, 'rect:', rect)
+              break
+            }
+          }
+          if (rightPanel) break
+        }
+
+        if (!rightPanel) {
+          console.log('⚠️ No right panel detected, using full viewport')
+          console.log('   - Window dimensions:', window.innerWidth, 'x', window.innerHeight)
+          console.log('   - Checked', rightSideElements.length, 'potential elements')
+        }
+
+        const viewportWidth = window.innerWidth - panelWidth
+        const viewportHeight = window.innerHeight
+        const screenCenterX = viewportWidth / 2
+        const screenCenterY = viewportHeight / 2
+
+        const scaleX = vpt[0]
+        const scaleY = vpt[3]
+        const translateX = vpt[4]
+        const translateY = vpt[5]
+
+        // Convert screen center to canvas coordinates
+        const viewportCenterX = (screenCenterX - translateX) / scaleX
+        const viewportCenterY = (screenCenterY - translateY) / scaleY
+
+        console.log('🔥 MANUAL CALCULATION RESULT:', viewportCenterX.toFixed(0), viewportCenterY.toFixed(0))
+        console.log('📊 Transform values: scale=', scaleX.toFixed(2), scaleY.toFixed(2), 'translate=', translateX.toFixed(0), translateY.toFixed(0))
+        console.log('🔍 VIEWPORT vs CANVAS SIZE:')
+        console.log('   - Window size:', window.innerWidth, 'x', window.innerHeight, '(full window)')
+        console.log('   - Right panel width:', panelWidth, '(detected panel)')
+        console.log('   - Available viewport size:', viewportWidth, 'x', viewportHeight, '(available canvas area)')
+        console.log('   - Canvas element size:', canvasEl.width, 'x', canvasEl.height, '(canvas element)')
+        console.log('   - Viewport center:', screenCenterX, screenCenterY)
+
+        console.log('✅ USING FABRIC.JS BUILT-IN TRANSFORMATION - SHOULD BE CORRECT NOW!')
+
+        // Show the difference
+        console.log('🎯 Using Method 2 (direct calculation) for positioning')
+        console.log('📏 Transform matrix details:')
+        console.log('   - Canvas size:', canvasEl.width, 'x', canvasEl.height)
+        console.log('   - Screen center:', canvasEl.width / 2, canvasEl.height / 2)
+        console.log('   - Transform scale:', vpt[0], vpt[3])
+        console.log('   - Transform translate:', vpt[4], vpt[5])
+
+        console.log('📐 DETAILED Viewport center calculation:', {
+          zoom,
+          canvasSize: { width: canvasEl.width, height: canvasEl.height },
+          vpt: {
+            full: vpt,
+            scaleX: vpt[0], scaleY: vpt[3],
+            translateX: vpt[4], translateY: vpt[5]
+          },
+          screenCenter: { x: canvasEl.width / 2, y: canvasEl.height / 2 },
+          invertedTransform: fabric.util.invertTransform(vpt),
+          finalCalculatedCenter: { x: viewportCenterX.toFixed(0), y: viewportCenterY.toFixed(0) },
+          fileArrayLength: fileArray.length,
+          autoArrangeEnabled: options.autoArrange,
+          willUseGridLayout: options.autoArrange && fileArray.length > 1
+        })
+
+        if (options.autoArrange && fileArray.length > 1) {
+          // Arrange multiple images in a grid starting from viewport center
+          const colCount = Math.ceil(Math.sqrt(fileArray.length)) // Dynamic grid based on number of images
+          const row = Math.floor(i / colCount)
+          const col = i % colCount
+
+          // Calculate grid start position (top-left of the grid)
+          const gridWidth = colCount * (finalWidth + spacing) - spacing
+          const gridHeight = Math.ceil(fileArray.length / colCount) * (finalHeight + spacing) - spacing
+          const startX = viewportCenterX - gridWidth / 2
+          const startY = viewportCenterY - gridHeight / 2
+
+          const x = startX + col * (finalWidth + spacing)
+          const y = startY + row * (finalHeight + spacing)
+
+          fabricImage.set({
+            left: x + finalWidth / 2,
+            top: y + finalHeight / 2,
+            originX: 'center',
+            originY: 'center'
+          })
+          console.log(`📍 Positioned image ${i + 1} at viewport-centered grid:`, x.toFixed(0), y.toFixed(0))
         } else {
-          fabricImage.center()
+          // Center single image at viewport center (both autoArrange=false or single image)
+          // Position the image so its visual center appears at viewport center
+          fabricImage.set({
+            left: viewportCenterX,
+            top: viewportCenterY,
+            originX: 'center',
+            originY: 'center'
+          })
+          console.log('📍 Centered image at viewport center:', viewportCenterX.toFixed(0), viewportCenterY.toFixed(0))
+        console.log('🔍 Raw viewport transform values:', {
+          vpt_array: vpt,
+          scaleX: vpt[0],
+          skewY: vpt[1],
+          skewX: vpt[2],
+          scaleY: vpt[3],
+          translateX: vpt[4],
+          translateY: vpt[5]
+        })
+        console.log('🔍 Canvas element size:', { width: canvasEl.width, height: canvasEl.height })
+        console.log('🔍 Center point calculation:', { x: canvasEl.width / 2, y: canvasEl.height / 2 })
         }
 
         // Add to canvas
