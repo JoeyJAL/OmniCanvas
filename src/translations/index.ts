@@ -197,6 +197,31 @@ export interface Translations {
     }
   }
 
+  // Nano Banana Prompt Input
+  nanoBananaPrompt: {
+    title: string
+    selectedObjects: string
+    stabilityTip: {
+      title: string
+      description: string
+    }
+    inputModes: {
+      text: string
+      voice: string
+    }
+    voiceNotSupported: string
+    voiceStatus: {
+      listening: string
+      clickToStart: string
+    }
+    promptLabel: string
+    promptPlaceholder: string
+    quickExamples: string
+    examples: string[]
+    submit: string
+    cancel: string
+  }
+
   // Common
   common: {
     loading: string
@@ -395,6 +420,36 @@ const en: Translations = {
       }
     }
   },
+  nanoBananaPrompt: {
+    title: '🎤 Nano Banana Prompt Input',
+    selectedObjects: 'objects selected',
+    stabilityTip: {
+      title: 'Object Stability Tip',
+      description: 'We recommend including phrases like "keep main objects unchanged" or "maintain original features" in your prompt to ensure all important elements like people, furniture, and products remain stable and consistent.'
+    },
+    inputModes: {
+      text: '📝 Text Input',
+      voice: '🎤 Voice Input'
+    },
+    voiceNotSupported: '⚠️ Your browser does not support voice recognition',
+    voiceStatus: {
+      listening: '🎤 Listening, please speak...',
+      clickToStart: 'Click the microphone to start voice input'
+    },
+    promptLabel: 'Prompt Content',
+    promptPlaceholder: 'For example: Change the background to a beach, keep main objects unchanged; Move the sofa to the living room, maintain sofa features...',
+    quickExamples: 'Quick Examples',
+    examples: [
+      'Change the background to a beach, keep main objects unchanged',
+      'Move the sofa to the living room, maintain sofa features',
+      'Add stars to the sky, keep all objects consistent',
+      'Change to snowy background, furniture features unchanged',
+      'Make the room brighter, keep items as they are',
+      'Change to wooden floor, object appearance stable'
+    ],
+    submit: 'Execute Command',
+    cancel: 'Cancel'
+  },
   common: {
     loading: 'Loading...',
     error: 'Error',
@@ -590,6 +645,36 @@ const zhTW: Translations = {
         description: '最後潤飾'
       }
     }
+  },
+  nanoBananaPrompt: {
+    title: '🎤 Nano Banana 提示詞輸入',
+    selectedObjects: '個物件已選擇',
+    stabilityTip: {
+      title: '物件穩定性提示',
+      description: '建議在指令中加入「保持主要物件不變」、「維持原本特徵」等字句，確保人物、傢具、產品等所有重要元素的特徵穩定一致。'
+    },
+    inputModes: {
+      text: '📝 文字輸入',
+      voice: '🎤 語音輸入'
+    },
+    voiceNotSupported: '⚠️ 您的瀏覽器不支援語音識別功能',
+    voiceStatus: {
+      listening: '🎤 正在聆聽中，請說話...',
+      clickToStart: '點擊麥克風開始語音輸入'
+    },
+    promptLabel: '指令內容',
+    promptPlaceholder: '例如：把背景換成海灘，保持主要物件不變、讓沙發移到客廳，維持沙發特徵...',
+    quickExamples: '快速範例',
+    examples: [
+      '把背景換成海灘，保持主要物件不變',
+      '讓沙發移到客廳，維持沙發特徵',
+      '加入星星到天空，所有物件保持一致',
+      '換成雪景背景，傢具特徵不變',
+      '讓房間更明亮，保持物品原貌',
+      '改成木質地板，物件外觀穩定'
+    ],
+    submit: '執行指令',
+    cancel: '取消'
   },
   common: {
     loading: '載入中...',
@@ -787,6 +872,36 @@ const es: Translations = {
       }
     }
   },
+  nanoBananaPrompt: {
+    title: '🎤 Entrada de Comando Nano Banana',
+    selectedObjects: 'objetos seleccionados',
+    stabilityTip: {
+      title: 'Consejo de Estabilidad de Objetos',
+      description: 'Recomendamos incluir frases como "mantener objetos principales sin cambios" o "conservar características originales" en tu comando para asegurar que todos los elementos importantes como personas, muebles y productos permanezcan estables y consistentes.'
+    },
+    inputModes: {
+      text: '📝 Entrada de Texto',
+      voice: '🎤 Entrada de Voz'
+    },
+    voiceNotSupported: '⚠️ Tu navegador no soporta reconocimiento de voz',
+    voiceStatus: {
+      listening: '🎤 Escuchando, por favor habla...',
+      clickToStart: 'Haz clic en el micrófono para iniciar entrada de voz'
+    },
+    promptLabel: 'Contenido del Comando',
+    promptPlaceholder: 'Por ejemplo: Cambiar el fondo a una playa, mantener objetos principales sin cambios; Mover el sofá a la sala, conservar características del sofá...',
+    quickExamples: 'Ejemplos Rápidos',
+    examples: [
+      'Cambiar el fondo a una playa, mantener objetos principales sin cambios',
+      'Mover el sofá a la sala, conservar características del sofá',
+      'Agregar estrellas al cielo, mantener todos los objetos consistentes',
+      'Cambiar a fondo nevado, características de muebles sin cambios',
+      'Hacer la habitación más brillante, mantener elementos como están',
+      'Cambiar a piso de madera, apariencia de objetos estable'
+    ],
+    submit: 'Ejecutar Comando',
+    cancel: 'Cancelar'
+  },
   common: {
     loading: 'Cargando...',
     error: 'Error',
@@ -983,6 +1098,36 @@ const ja: Translations = {
       }
     }
   },
+  nanoBananaPrompt: {
+    title: '🎤 Nano Banana プロンプト入力',
+    selectedObjects: 'つのオブジェクトが選択されています',
+    stabilityTip: {
+      title: 'オブジェクト安定性のヒント',
+      description: 'プロンプトに「主要オブジェクトを変更しない」や「元の特徴を維持する」などのフレーズを含めることをお勧めします。これにより、人物、家具、製品などのすべての重要な要素が安定して一貫性を保てます。'
+    },
+    inputModes: {
+      text: '📝 テキスト入力',
+      voice: '🎤 音声入力'
+    },
+    voiceNotSupported: '⚠️ お使いのブラウザは音声認識をサポートしていません',
+    voiceStatus: {
+      listening: '🎤 聞いています、話してください...',
+      clickToStart: 'マイクをクリックして音声入力を開始してください'
+    },
+    promptLabel: 'コマンド内容',
+    promptPlaceholder: '例：背景をビーチに変更、主要オブジェクトは変更しない；ソファをリビングに移動、ソファの特徴を維持...',
+    quickExamples: 'クイック例',
+    examples: [
+      '背景をビーチに変更、主要オブジェクトは変更しない',
+      'ソファをリビングに移動、ソファの特徴を維持',
+      '空に星を追加、すべてのオブジェクトの一貫性を保つ',
+      '雪景色の背景に変更、家具の特徴は変更しない',
+      '部屋をより明るくする、アイテムはそのままに',
+      '木製の床に変更、オブジェクトの外観は安定'
+    ],
+    submit: 'コマンド実行',
+    cancel: 'キャンセル'
+  },
   common: {
     loading: '読み込み中...',
     error: 'エラー',
@@ -1178,6 +1323,36 @@ const fr: Translations = {
         description: 'Touches finales'
       }
     }
+  },
+  nanoBananaPrompt: {
+    title: '🎤 Saisie de Commande Nano Banana',
+    selectedObjects: 'objets sélectionnés',
+    stabilityTip: {
+      title: 'Astuce de Stabilité d\'Objets',
+      description: 'Nous recommandons d\'inclure des phrases comme "maintenir les objets principaux inchangés" ou "conserver les caractéristiques originales" dans votre commande pour assurer que tous les éléments importants comme les personnes, meubles et produits restent stables et cohérents.'
+    },
+    inputModes: {
+      text: '📝 Saisie Texte',
+      voice: '🎤 Saisie Vocale'
+    },
+    voiceNotSupported: '⚠️ Votre navigateur ne supporte pas la reconnaissance vocale',
+    voiceStatus: {
+      listening: '🎤 Écoute en cours, veuillez parler...',
+      clickToStart: 'Cliquez sur le microphone pour commencer la saisie vocale'
+    },
+    promptLabel: 'Contenu de la Commande',
+    promptPlaceholder: 'Par exemple : Changer l\'arrière-plan en plage, garder les objets principaux inchangés ; Déplacer le canapé au salon, maintenir les caractéristiques du canapé...',
+    quickExamples: 'Exemples Rapides',
+    examples: [
+      'Changer l\'arrière-plan en plage, garder les objets principaux inchangés',
+      'Déplacer le canapé au salon, maintenir les caractéristiques du canapé',
+      'Ajouter des étoiles au ciel, garder tous les objets cohérents',
+      'Changer en arrière-plan neigeux, caractéristiques des meubles inchangées',
+      'Rendre la pièce plus lumineuse, garder les éléments comme ils sont',
+      'Changer en sol en bois, apparence des objets stable'
+    ],
+    submit: 'Exécuter la Commande',
+    cancel: 'Annuler'
   },
   common: {
     loading: 'Chargement...',

@@ -4,7 +4,7 @@ import { useCanvasStore } from '@store/canvasStore'
 import { useImageStore } from '@store/imageStore'
 import { aiService } from '@services/aiService'
 import { NewContextMenu } from './NewContextMenu'
-import { VoicePromptModal } from './VoicePromptModal'
+import { PromptInputModal } from './PromptInputModal'
 import type { CanvasConfig } from '@/types/canvas'
 
 const defaultConfig: CanvasConfig = {
@@ -1282,7 +1282,7 @@ export const Canvas: React.FC = () => {
       />
 
       {/* Voice Prompt Modal */}
-      <VoicePromptModal
+      <PromptInputModal
         visible={voicePromptModal.visible}
         selectedCount={voicePromptModal.selectedObjects.length}
         onClose={handleCloseVoicePrompt}

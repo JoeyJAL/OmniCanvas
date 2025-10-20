@@ -160,7 +160,7 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
             {/* 選擇的物件數量 */}
             <div className="text-sm text-gray-600 bg-blue-50 p-2 rounded">
-              已選擇 {selectedCount} 個物件
+              {selectedCount} {t.nanoBananaPrompt.selectedObjects}
             </div>
 
             {/* 物件穩定性提示 */}
@@ -168,8 +168,8 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
               <div className="flex items-start space-x-2">
                 <span className="text-purple-500">💡</span>
                 <div>
-                  <div className="font-medium mb-1">物件穩定性提示</div>
-                  <div className="text-xs">建議在指令中加入「保持主要物件不變」、「維持原本特徵」等字句，確保人物、傢具、產品等所有重要元素的特徵穩定一致。</div>
+                  <div className="font-medium mb-1">{t.nanoBananaPrompt.stabilityTip.title}</div>
+                  <div className="text-xs">{t.nanoBananaPrompt.stabilityTip.description}</div>
                 </div>
               </div>
             </div>
@@ -184,7 +184,7 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
                     : 'bg-gray-50 border-gray-200 text-gray-600'
                 }`}
               >
-                📝 文字輸入
+                {t.nanoBananaPrompt.inputModes.text}
               </button>
               <button
                 onClick={() => setInputMode('voice')}
@@ -197,13 +197,13 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
                       : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                🎤 語音輸入
+                {t.nanoBananaPrompt.inputModes.voice}
               </button>
             </div>
 
             {!speechSupported && (
               <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
-                ⚠️ 您的瀏覽器不支援語音識別功能
+                {t.nanoBananaPrompt.voiceNotSupported}
               </div>
             )}
 
@@ -224,7 +224,7 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
                 </div>
 
                 <p className="text-center text-sm text-gray-600">
-                  {isListening ? '🎤 正在聆聽中，請說話...' : '點擊麥克風開始語音輸入'}
+                  {isListening ? t.nanoBananaPrompt.voiceStatus.listening : t.nanoBananaPrompt.voiceStatus.clickToStart}
                 </p>
               </div>
             )}
@@ -232,12 +232,12 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
             {/* 提示輸入框 */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                指令內容
+                {t.nanoBananaPrompt.promptLabel}
               </label>
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="例如：把背景換成海灘，保持主要物件不變、讓沙發移到客廳，維持沙發特徵..."
+                placeholder={t.nanoBananaPrompt.promptPlaceholder}
                 className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
               />
@@ -246,10 +246,10 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
             {/* 快速樣例 */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                快速範例
+                {t.nanoBananaPrompt.quickExamples}
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {voiceExamples.map((example, index) => (
+                {t.nanoBananaPrompt.examples.map((example, index) => (
                   <button
                     key={index}
                     onClick={() => insertExample(example)}
@@ -269,7 +269,7 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
               onClick={handleClose}
               className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              取消
+              {t.nanoBananaPrompt.cancel}
             </button>
             <button
               onClick={handleSubmit}
@@ -281,7 +281,7 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
               }`}
             >
               <Send className="w-4 h-4" />
-              <span>執行指令</span>
+              <span>{t.nanoBananaPrompt.submit}</span>
             </button>
           </div>
         </div>
@@ -289,3 +289,6 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
     </>
   )
 }
+
+// 保持舊名字的匯出以向後相容
+export const VoicePromptModal = PromptInputModal

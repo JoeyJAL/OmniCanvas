@@ -121,11 +121,11 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
       }
     ] : []),
 
-    // Voice prompt function (Nano Banana feature)
+    // Nano Banana prompt input function
     ...(selectedCount >= 1 && onVoicePrompt ? [
       {
-        icon: Mic,
-        label: '🎤 Nano Banana 語音指令',
+        icon: MessageCircle,
+        label: '🎤 Nano Banana 提示詞輸入',
         onClick: onVoicePrompt,
         className: 'text-purple-600 hover:bg-purple-50 font-semibold',
         separator: true

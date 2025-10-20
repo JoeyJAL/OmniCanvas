@@ -41,7 +41,15 @@
       "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-vnq5pfksd-joeyjals-projects.vercel.app/api)",
       "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend-mttekvbpb-joeyjals-projects.vercel.app/api)",
       "Bash(export VITE_BACKEND_API_URL=https://omnicanvas-backend.vercel.app/api)",
-      "WebFetch(domain:www.bnext.com.tw)"
+      "WebFetch(domain:www.bnext.com.tw)",
+      "Bash(export VITE_BACKEND_API_URL=http://localhost:3003/api)",
+      "Bash(PORT=3004 npm start)",
+      "Bash(export VITE_BACKEND_API_URL=http://localhost:3004/api)",
+      "Bash(VITE_BACKEND_API_URL=http://localhost:3004/api npm run dev)",
+      "WebFetch(domain:omnicanvas-frontend-mq46lqiwu-joeyjals-projects.vercel.app)",
+      "WebFetch(domain:omnicanvas-frontend-bl5hje4v1-joeyjals-projects.vercel.app)",
+      "WebFetch(domain:tw.cyberlink.com)",
+      "WebFetch(domain:www.lovart.ai)"
     ],
     "deny": [],
     "ask": []
