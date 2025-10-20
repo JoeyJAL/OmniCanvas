@@ -292,6 +292,146 @@ export interface Translations {
     deleteMultiple: string
   }
 
+  // Service Guide
+  serviceGuide: {
+    title: string
+    subtitle: string
+    quickStart: string
+    quickActions: {
+      generate: string
+      generateDesc: string
+      enhance: string
+      enhanceDesc: string
+      settings: string
+      settingsDesc: string
+    }
+    overview: {
+      title: string
+      whatIs: {
+        title: string
+        description: string
+        features: {
+          unlimited: string
+          aiPowered: string
+          multilingual: string
+          privacy: string
+        }
+      }
+    }
+    aiGeneration: {
+      title: string
+      textToImage: {
+        title: string
+        description: string
+        steps: {
+          openPanel: string
+          writePrompt: string
+          selectTemplate: string
+          generate: string
+        }
+      }
+      imageToImage: {
+        title: string
+        description: string
+        steps: {
+          selectImages: string
+          openPanel: string
+          writePrompt: string
+          generate: string
+        }
+      }
+    }
+    enhancement: {
+      title: string
+      aiUpscale: {
+        title: string
+        description: string
+        features: {
+          resolution: string
+          quality: string
+          details: string
+        }
+      }
+      backgroundRemoval: {
+        title: string
+        description: string
+        features: {
+          automatic: string
+          transparent: string
+          precise: string
+        }
+      }
+    }
+    canvas: {
+      title: string
+      navigation: {
+        title: string
+        description: string
+        controls: {
+          zoom: string
+          pan: string
+          select: string
+          multiSelect: string
+        }
+      }
+      layers: {
+        title: string
+        description: string
+        features: {
+          unlimited: string
+          visibility: string
+          reorder: string
+          lock: string
+        }
+      }
+    }
+    contextMenu: {
+      title: string
+      smartCompose: {
+        title: string
+        description: string
+        options: {
+          intelligent: string
+          accessory: string
+          scene: string
+          creative: string
+        }
+      }
+      voiceCommand: {
+        title: string
+        description: string
+        features: {
+          multilingual: string
+          intelligent: string
+          realtime: string
+        }
+      }
+    }
+    settings: {
+      title: string
+      apiKey: {
+        title: string
+        description: string
+        steps: {
+          getKey: string
+          openSettings: string
+          enterKey: string
+          save: string
+        }
+      }
+      language: {
+        title: string
+        description: string
+      }
+    }
+    needHelp: {
+      title: string
+      description: string
+      contact: string
+      community: string
+    }
+  }
+
   // Common
   common: {
     loading: string
@@ -588,6 +728,145 @@ const en: Translations = {
     delete: 'Delete',
     deleteMultiple: 'Delete'
   },
+
+  serviceGuide: {
+    title: 'Service Guide',
+    subtitle: 'Learn how to use OmniCanvas features',
+    quickStart: 'Quick Start',
+    quickActions: {
+      generate: 'Start Creating',
+      generateDesc: 'Open AI generation panel',
+      enhance: 'Enhance Images',
+      enhanceDesc: 'Improve your images with AI',
+      settings: 'Configure API',
+      settingsDesc: 'Set up your API keys'
+    },
+    overview: {
+      title: 'Overview',
+      whatIs: {
+        title: 'What is OmniCanvas?',
+        description: 'OmniCanvas is an AI-powered creative platform that combines digital drawing, AI image generation, and multi-modal content integration.',
+        features: {
+          unlimited: 'Unlimited creative canvas',
+          aiPowered: 'AI-powered generation and enhancement',
+          multilingual: 'Support for 5 languages',
+          privacy: 'Privacy-first with your own API keys'
+        }
+      }
+    },
+    aiGeneration: {
+      title: 'AI Image Generation',
+      textToImage: {
+        title: 'Text-to-Image',
+        description: 'Generate images from text descriptions using Gemini 2.5 Flash.',
+        steps: {
+          openPanel: 'Open the AI panel',
+          writePrompt: 'Write your description',
+          selectTemplate: 'Choose a template (optional)',
+          generate: 'Click Generate to create'
+        }
+      },
+      imageToImage: {
+        title: 'Image-to-Image',
+        description: 'Create new images based on existing reference images.',
+        steps: {
+          selectImages: 'Select reference images on canvas',
+          openPanel: 'Open AI panel',
+          writePrompt: 'Add your creative instructions',
+          generate: 'Generate new variations'
+        }
+      }
+    },
+    enhancement: {
+      title: 'AI Enhancement',
+      aiUpscale: {
+        title: 'AI Upscaling',
+        description: 'Increase image resolution up to 8x using AI technology.',
+        features: {
+          resolution: '2x, 4x, 8x resolution options',
+          quality: 'Enhanced detail preservation',
+          details: 'Smart edge enhancement'
+        }
+      },
+      backgroundRemoval: {
+        title: 'Background Removal',
+        description: 'Automatically remove backgrounds and create transparent PNGs.',
+        features: {
+          automatic: 'One-click background removal',
+          transparent: 'True transparent PNG output',
+          precise: 'Accurate edge detection'
+        }
+      }
+    },
+    canvas: {
+      title: 'Canvas Navigation',
+      navigation: {
+        title: 'Navigation Controls',
+        description: 'Learn how to navigate the infinite canvas.',
+        controls: {
+          zoom: 'Zoom in/out',
+          pan: 'Pan around',
+          select: 'Select objects',
+          multiSelect: 'Multi-select'
+        }
+      },
+      layers: {
+        title: 'Layer Management',
+        description: 'Organize your artwork with layers.',
+        features: {
+          unlimited: 'Unlimited layers',
+          visibility: 'Show/hide layers',
+          reorder: 'Drag to reorder',
+          lock: 'Lock for protection'
+        }
+      }
+    },
+    contextMenu: {
+      title: 'Smart Context Menu',
+      smartCompose: {
+        title: 'AI Composition',
+        description: 'Right-click on selected images to access AI composition tools.',
+        options: {
+          intelligent: 'Intelligent auto-compose',
+          accessory: 'Accessory integration',
+          scene: 'Scene composition',
+          creative: 'Creative blending'
+        }
+      },
+      voiceCommand: {
+        title: 'Voice Commands',
+        description: 'Use voice input for creative instructions.',
+        features: {
+          multilingual: 'Multiple language support',
+          intelligent: 'AI understanding of creative intent',
+          realtime: 'Real-time processing'
+        }
+      }
+    },
+    settings: {
+      title: 'Settings & Configuration',
+      apiKey: {
+        title: 'API Key Setup',
+        description: 'Configure your Gemini API key for AI features.',
+        steps: {
+          getKey: 'Get API key from ai.google.dev',
+          openSettings: 'Open Settings panel',
+          enterKey: 'Enter your API key',
+          save: 'Save configuration'
+        }
+      },
+      language: {
+        title: 'Language Settings',
+        description: 'Choose your preferred interface language.'
+      }
+    },
+    needHelp: {
+      title: 'Need Help?',
+      description: 'Get support from our community or contact us directly.',
+      contact: 'Contact Support',
+      community: 'Join Community'
+    }
+  },
   common: {
     loading: 'Loading...',
     error: 'Error',
@@ -881,6 +1160,145 @@ const zhTW: Translations = {
     duplicateMultiple: '複製',
     delete: '刪除',
     deleteMultiple: '刪除'
+  },
+
+  serviceGuide: {
+    title: '服務指南',
+    subtitle: '學習如何使用 OmniCanvas 功能',
+    quickStart: '快速開始',
+    quickActions: {
+      generate: '開始創作',
+      generateDesc: '開啟 AI 生成面板',
+      enhance: '增強圖片',
+      enhanceDesc: '使用 AI 提升圖片品質',
+      settings: '設定 API',
+      settingsDesc: '配置 API 金鑰'
+    },
+    overview: {
+      title: '概述',
+      whatIs: {
+        title: '什麼是 OmniCanvas？',
+        description: 'OmniCanvas 是一個 AI 驅動的創意平台，結合了數位繪圖、AI 圖片生成和多模態內容整合。',
+        features: {
+          unlimited: '無限創意畫布',
+          aiPowered: 'AI 驅動的生成與增強',
+          multilingual: '支援 5 種語言',
+          privacy: '隱私優先，使用您自己的 API 金鑰'
+        }
+      }
+    },
+    aiGeneration: {
+      title: 'AI 圖片生成',
+      textToImage: {
+        title: '文字轉圖片',
+        description: '使用 Gemini 2.5 Flash 從文字描述生成圖片。',
+        steps: {
+          openPanel: '開啟 AI 面板',
+          writePrompt: '撰寫描述文字',
+          selectTemplate: '選擇模板（可選）',
+          generate: '點擊生成創作'
+        }
+      },
+      imageToImage: {
+        title: '圖片轉圖片',
+        description: '基於現有參考圖片創建新圖片。',
+        steps: {
+          selectImages: '在畫布上選擇參考圖片',
+          openPanel: '開啟 AI 面板',
+          writePrompt: '添加創作指令',
+          generate: '生成新變化'
+        }
+      }
+    },
+    enhancement: {
+      title: 'AI 增強',
+      aiUpscale: {
+        title: 'AI 放大',
+        description: '使用 AI 技術將圖片解析度提升至 8 倍。',
+        features: {
+          resolution: '2x、4x、8x 解析度選項',
+          quality: '增強細節保留',
+          details: '智能邊緣強化'
+        }
+      },
+      backgroundRemoval: {
+        title: '背景移除',
+        description: '自動移除背景並創建透明 PNG。',
+        features: {
+          automatic: '一鍵背景移除',
+          transparent: '真正透明 PNG 輸出',
+          precise: '精確邊緣檢測'
+        }
+      }
+    },
+    canvas: {
+      title: '畫布導航',
+      navigation: {
+        title: '導航控制',
+        description: '學習如何在無限畫布上導航。',
+        controls: {
+          zoom: '縮放',
+          pan: '平移',
+          select: '選擇物件',
+          multiSelect: '多重選擇'
+        }
+      },
+      layers: {
+        title: '圖層管理',
+        description: '使用圖層組織您的作品。',
+        features: {
+          unlimited: '無限圖層',
+          visibility: '顯示/隱藏圖層',
+          reorder: '拖曳重新排序',
+          lock: '鎖定保護'
+        }
+      }
+    },
+    contextMenu: {
+      title: '智能右鍵選單',
+      smartCompose: {
+        title: 'AI 合成',
+        description: '右鍵點擊選中的圖片以使用 AI 合成工具。',
+        options: {
+          intelligent: '智能自動合成',
+          accessory: '配件整合',
+          scene: '場景合成',
+          creative: '創意混合'
+        }
+      },
+      voiceCommand: {
+        title: '語音指令',
+        description: '使用語音輸入創作指令。',
+        features: {
+          multilingual: '多語言支援',
+          intelligent: 'AI 理解創作意圖',
+          realtime: '即時處理'
+        }
+      }
+    },
+    settings: {
+      title: '設定與配置',
+      apiKey: {
+        title: 'API 金鑰設定',
+        description: '配置您的 Gemini API 金鑰以使用 AI 功能。',
+        steps: {
+          getKey: '從 ai.google.dev 獲取 API 金鑰',
+          openSettings: '開啟設定面板',
+          enterKey: '輸入您的 API 金鑰',
+          save: '儲存配置'
+        }
+      },
+      language: {
+        title: '語言設定',
+        description: '選擇您偏好的介面語言。'
+      }
+    },
+    needHelp: {
+      title: '需要幫助？',
+      description: '從我們的社群獲得支援或直接聯絡我們。',
+      contact: '聯絡支援',
+      community: '加入社群'
+    }
   },
   common: {
     loading: '載入中...',
@@ -1213,6 +1631,145 @@ const es: Translations = {
     avatarGenerationFailed: 'La generación del avatar falló: ',
     mergedImagesSuccess: '¡Fusionadas exitosamente {count} imágenes!'
   },
+
+  serviceGuide: {
+    title: 'Guía de Servicio',
+    subtitle: 'Aprende a usar las funciones de OmniCanvas',
+    quickStart: 'Inicio Rápido',
+    quickActions: {
+      generate: 'Comenzar a Crear',
+      generateDesc: 'Abrir panel de generación IA',
+      enhance: 'Mejorar Imágenes',
+      enhanceDesc: 'Mejora tus imágenes con IA',
+      settings: 'Configurar API',
+      settingsDesc: 'Configura tus claves API'
+    },
+    overview: {
+      title: 'Resumen',
+      whatIs: {
+        title: '¿Qué es OmniCanvas?',
+        description: 'OmniCanvas es una plataforma creativa impulsada por IA que combina dibujo digital, generación de imágenes IA e integración de contenido multimodal.',
+        features: {
+          unlimited: 'Lienzo creativo ilimitado',
+          aiPowered: 'Generación y mejora impulsada por IA',
+          multilingual: 'Soporte para 5 idiomas',
+          privacy: 'Privacidad primero con tus propias claves API'
+        }
+      }
+    },
+    aiGeneration: {
+      title: 'Generación de Imágenes IA',
+      textToImage: {
+        title: 'Texto a Imagen',
+        description: 'Genera imágenes desde descripciones de texto usando Gemini 2.5 Flash.',
+        steps: {
+          openPanel: 'Abre el panel IA',
+          writePrompt: 'Escribe tu descripción',
+          selectTemplate: 'Elige una plantilla (opcional)',
+          generate: 'Haz clic en Generar para crear'
+        }
+      },
+      imageToImage: {
+        title: 'Imagen a Imagen',
+        description: 'Crea nuevas imágenes basadas en imágenes de referencia existentes.',
+        steps: {
+          selectImages: 'Selecciona imágenes de referencia en el lienzo',
+          openPanel: 'Abre el panel IA',
+          writePrompt: 'Añade tus instrucciones creativas',
+          generate: 'Genera nuevas variaciones'
+        }
+      }
+    },
+    enhancement: {
+      title: 'Mejora IA',
+      aiUpscale: {
+        title: 'Escalado IA',
+        description: 'Aumenta la resolución de imagen hasta 8x usando tecnología IA.',
+        features: {
+          resolution: 'Opciones de resolución 2x, 4x, 8x',
+          quality: 'Preservación mejorada de detalles',
+          details: 'Mejora inteligente de bordes'
+        }
+      },
+      backgroundRemoval: {
+        title: 'Eliminación de Fondo',
+        description: 'Elimina automáticamente fondos y crea PNGs transparentes.',
+        features: {
+          automatic: 'Eliminación de fondo con un clic',
+          transparent: 'Salida PNG verdaderamente transparente',
+          precise: 'Detección precisa de bordes'
+        }
+      }
+    },
+    canvas: {
+      title: 'Navegación del Lienzo',
+      navigation: {
+        title: 'Controles de Navegación',
+        description: 'Aprende a navegar el lienzo infinito.',
+        controls: {
+          zoom: 'Acercar/alejar',
+          pan: 'Panorámica',
+          select: 'Seleccionar objetos',
+          multiSelect: 'Selección múltiple'
+        }
+      },
+      layers: {
+        title: 'Gestión de Capas',
+        description: 'Organiza tu arte con capas.',
+        features: {
+          unlimited: 'Capas ilimitadas',
+          visibility: 'Mostrar/ocultar capas',
+          reorder: 'Arrastra para reordenar',
+          lock: 'Bloquear para protección'
+        }
+      }
+    },
+    contextMenu: {
+      title: 'Menú Contextual Inteligente',
+      smartCompose: {
+        title: 'Composición IA',
+        description: 'Haz clic derecho en imágenes seleccionadas para acceder a herramientas de composición IA.',
+        options: {
+          intelligent: 'Composición inteligente automática',
+          accessory: 'Añadir accesorios relacionados',
+          scene: 'Crear escena envolvente',
+          creative: 'Mezcla artística creativa'
+        }
+      },
+      voiceCommand: {
+        title: 'Comando de Voz',
+        description: 'Usa comandos de voz para crear y editar contenido.',
+        features: {
+          multilingual: 'Reconocimiento multiidioma',
+          intelligent: 'Comprensión de contexto inteligente',
+          realtime: 'Procesamiento en tiempo real'
+        }
+      }
+    },
+    settings: {
+      title: 'Configuración',
+      apiKey: {
+        title: 'Configuración de Clave API',
+        description: 'Configura tu clave API de Gemini para usar funciones IA.',
+        steps: {
+          getKey: 'Obtén una clave API de Google AI Studio',
+          openSettings: 'Abre la configuración',
+          enterKey: 'Ingresa tu clave API',
+          save: 'Guarda la configuración'
+        }
+      },
+      language: {
+        title: 'Configuración de Idioma',
+        description: 'Cambia el idioma de la interfaz según tu preferencia.'
+      }
+    },
+    needHelp: {
+      title: '¿Necesitas Ayuda?',
+      description: 'Estamos aquí para ayudarte con cualquier pregunta.',
+      contact: 'Contactar Soporte',
+      community: 'Unirse a la Comunidad'
+    }
+  },
   ...apiKeysTranslations.es
 }
 
@@ -1507,6 +2064,145 @@ const ja: Translations = {
     avatarGenerationFailed: 'アバター生成に失敗しました：',
     mergedImagesSuccess: '{count}枚の画像を正常に結合しました！'
   },
+
+  serviceGuide: {
+    title: 'サービスガイド',
+    subtitle: 'OmniCanvasの機能の使い方を学ぶ',
+    quickStart: 'クイックスタート',
+    quickActions: {
+      generate: '作成を開始',
+      generateDesc: 'AI生成パネルを開く',
+      enhance: '画像を強化',
+      enhanceDesc: 'AIで画像を改善する',
+      settings: 'APIを設定',
+      settingsDesc: 'APIキーを設定する'
+    },
+    overview: {
+      title: '概要',
+      whatIs: {
+        title: 'OmniCanvasとは？',
+        description: 'OmniCanvasは、デジタル描画、AI画像生成、マルチモーダルコンテンツ統合を組み合わせたAI駆動のクリエイティブプラットフォームです。',
+        features: {
+          unlimited: '無制限のクリエイティブキャンバス',
+          aiPowered: 'AI駆動の生成と強化',
+          multilingual: '5言語サポート',
+          privacy: '独自のAPIキーでプライバシー優先'
+        }
+      }
+    },
+    aiGeneration: {
+      title: 'AI画像生成',
+      textToImage: {
+        title: 'テキストから画像',
+        description: 'Gemini 2.5 Flashを使用してテキスト説明から画像を生成します。',
+        steps: {
+          openPanel: 'AIパネルを開く',
+          writePrompt: '説明を書く',
+          selectTemplate: 'テンプレートを選択（オプション）',
+          generate: '生成をクリックして作成'
+        }
+      },
+      imageToImage: {
+        title: '画像から画像',
+        description: '既存の参照画像に基づいて新しい画像を作成します。',
+        steps: {
+          selectImages: 'キャンバス上で参照画像を選択',
+          openPanel: 'AIパネルを開く',
+          writePrompt: 'クリエイティブな指示を追加',
+          generate: '新しいバリエーションを生成'
+        }
+      }
+    },
+    enhancement: {
+      title: 'AI強化',
+      aiUpscale: {
+        title: 'AIアップスケール',
+        description: 'AI技術を使用して画像解像度を最大8倍に向上させます。',
+        features: {
+          resolution: '2倍、4倍、8倍の解像度オプション',
+          quality: '詳細保持の向上',
+          details: 'スマートエッジ強化'
+        }
+      },
+      backgroundRemoval: {
+        title: '背景除去',
+        description: '自動的に背景を除去し、透明なPNGを作成します。',
+        features: {
+          automatic: 'ワンクリック背景除去',
+          transparent: '真の透明PNG出力',
+          precise: '正確なエッジ検出'
+        }
+      }
+    },
+    canvas: {
+      title: 'キャンバスナビゲーション',
+      navigation: {
+        title: 'ナビゲーションコントロール',
+        description: '無限キャンバスのナビゲーション方法を学びます。',
+        controls: {
+          zoom: 'ズームイン/アウト',
+          pan: 'パン',
+          select: 'オブジェクト選択',
+          multiSelect: '複数選択'
+        }
+      },
+      layers: {
+        title: 'レイヤー管理',
+        description: 'レイヤーでアートワークを整理します。',
+        features: {
+          unlimited: '無制限レイヤー',
+          visibility: 'レイヤーの表示/非表示',
+          reorder: 'ドラッグで並べ替え',
+          lock: '保護のためのロック'
+        }
+      }
+    },
+    contextMenu: {
+      title: 'スマートコンテキストメニュー',
+      smartCompose: {
+        title: 'AI構成',
+        description: '選択した画像を右クリックしてAI構成ツールにアクセスします。',
+        options: {
+          intelligent: '自動インテリジェント構成',
+          accessory: '関連アクセサリーを追加',
+          scene: '包み込むシーンを作成',
+          creative: 'クリエイティブな芸術的ブレンド'
+        }
+      },
+      voiceCommand: {
+        title: '音声コマンド',
+        description: '音声コマンドを使用してコンテンツを作成・編集します。',
+        features: {
+          multilingual: '多言語認識',
+          intelligent: 'インテリジェントなコンテキスト理解',
+          realtime: 'リアルタイム処理'
+        }
+      }
+    },
+    settings: {
+      title: '設定',
+      apiKey: {
+        title: 'APIキー設定',
+        description: 'AI機能を使用するためのGemini APIキーを設定します。',
+        steps: {
+          getKey: 'Google AI StudioからAPIキーを取得',
+          openSettings: '設定を開く',
+          enterKey: 'APIキーを入力',
+          save: '設定を保存'
+        }
+      },
+      language: {
+        title: '言語設定',
+        description: '好みに応じてインターフェース言語を変更します。'
+      }
+    },
+    needHelp: {
+      title: 'ヘルプが必要ですか？',
+      description: 'ご質問があれば、喜んでお手伝いします。',
+      contact: 'サポートに連絡',
+      community: 'コミュニティに参加'
+    }
+  },
   ...apiKeysTranslations.ja
 }
 
@@ -1800,6 +2496,145 @@ const fr: Translations = {
     avatarSelectPhoto: 'Veuillez sélectionner une photo pour générer un avatar',
     avatarGenerationFailed: 'La génération d\'avatar a échoué : ',
     mergedImagesSuccess: '{count} images fusionnées avec succès !'
+  },
+
+  serviceGuide: {
+    title: 'Guide de Service',
+    subtitle: 'Apprendre à utiliser les fonctionnalités d\'OmniCanvas',
+    quickStart: 'Démarrage Rapide',
+    quickActions: {
+      generate: 'Commencer à Créer',
+      generateDesc: 'Ouvrir le panneau de génération IA',
+      enhance: 'Améliorer les Images',
+      enhanceDesc: 'Améliorez vos images avec l\'IA',
+      settings: 'Configurer l\'API',
+      settingsDesc: 'Configurez vos clés API'
+    },
+    overview: {
+      title: 'Aperçu',
+      whatIs: {
+        title: 'Qu\'est-ce qu\'OmniCanvas ?',
+        description: 'OmniCanvas est une plateforme créative alimentée par l\'IA qui combine le dessin numérique, la génération d\'images IA et l\'intégration de contenu multimodal.',
+        features: {
+          unlimited: 'Toile créative illimitée',
+          aiPowered: 'Génération et amélioration alimentées par l\'IA',
+          multilingual: 'Support de 5 langues',
+          privacy: 'Confidentialité d\'abord avec vos propres clés API'
+        }
+      }
+    },
+    aiGeneration: {
+      title: 'Génération d\'Images IA',
+      textToImage: {
+        title: 'Texte vers Image',
+        description: 'Générez des images à partir de descriptions textuelles en utilisant Gemini 2.5 Flash.',
+        steps: {
+          openPanel: 'Ouvrir le panneau IA',
+          writePrompt: 'Écrivez votre description',
+          selectTemplate: 'Choisissez un modèle (optionnel)',
+          generate: 'Cliquez sur Générer pour créer'
+        }
+      },
+      imageToImage: {
+        title: 'Image vers Image',
+        description: 'Créez de nouvelles images basées sur des images de référence existantes.',
+        steps: {
+          selectImages: 'Sélectionnez les images de référence sur la toile',
+          openPanel: 'Ouvrir le panneau IA',
+          writePrompt: 'Ajoutez vos instructions créatives',
+          generate: 'Générer de nouvelles variations'
+        }
+      }
+    },
+    enhancement: {
+      title: 'Amélioration IA',
+      aiUpscale: {
+        title: 'Mise à l\'échelle IA',
+        description: 'Augmentez la résolution d\'image jusqu\'à 8x en utilisant la technologie IA.',
+        features: {
+          resolution: 'Options de résolution 2x, 4x, 8x',
+          quality: 'Préservation améliorée des détails',
+          details: 'Amélioration intelligente des bords'
+        }
+      },
+      backgroundRemoval: {
+        title: 'Suppression d\'Arrière-plan',
+        description: 'Supprimez automatiquement les arrière-plans et créez des PNG transparents.',
+        features: {
+          automatic: 'Suppression d\'arrière-plan en un clic',
+          transparent: 'Sortie PNG vraiment transparente',
+          precise: 'Détection précise des bords'
+        }
+      }
+    },
+    canvas: {
+      title: 'Navigation de Toile',
+      navigation: {
+        title: 'Contrôles de Navigation',
+        description: 'Apprenez à naviguer sur la toile infinie.',
+        controls: {
+          zoom: 'Zoomer/Dézoomer',
+          pan: 'Panoramique',
+          select: 'Sélectionner des objets',
+          multiSelect: 'Multi-sélection'
+        }
+      },
+      layers: {
+        title: 'Gestion des Calques',
+        description: 'Organisez votre œuvre d\'art avec des calques.',
+        features: {
+          unlimited: 'Calques illimités',
+          visibility: 'Afficher/masquer les calques',
+          reorder: 'Glisser pour réorganiser',
+          lock: 'Verrouiller pour protection'
+        }
+      }
+    },
+    contextMenu: {
+      title: 'Menu Contextuel Intelligent',
+      smartCompose: {
+        title: 'Composition IA',
+        description: 'Cliquez droit sur les images sélectionnées pour accéder aux outils de composition IA.',
+        options: {
+          intelligent: 'Composition intelligente automatique',
+          accessory: 'Ajouter des accessoires connexes',
+          scene: 'Créer une scène enveloppante',
+          creative: 'Mélange artistique créatif'
+        }
+      },
+      voiceCommand: {
+        title: 'Commande Vocale',
+        description: 'Utilisez des commandes vocales pour créer et éditer du contenu.',
+        features: {
+          multilingual: 'Reconnaissance multilingue',
+          intelligent: 'Compréhension intelligente du contexte',
+          realtime: 'Traitement en temps réel'
+        }
+      }
+    },
+    settings: {
+      title: 'Paramètres',
+      apiKey: {
+        title: 'Configuration de Clé API',
+        description: 'Configurez votre clé API Gemini pour utiliser les fonctionnalités IA.',
+        steps: {
+          getKey: 'Obtenez une clé API de Google AI Studio',
+          openSettings: 'Ouvrir les paramètres',
+          enterKey: 'Entrez votre clé API',
+          save: 'Sauvegarder la configuration'
+        }
+      },
+      language: {
+        title: 'Paramètres de Langue',
+        description: 'Changez la langue de l\'interface selon votre préférence.'
+      }
+    },
+    needHelp: {
+      title: 'Besoin d\'Aide ?',
+      description: 'Nous sommes là pour vous aider avec toute question.',
+      contact: 'Contacter le Support',
+      community: 'Rejoindre la Communauté'
+    }
   },
   ...apiKeysTranslations.fr
 }
