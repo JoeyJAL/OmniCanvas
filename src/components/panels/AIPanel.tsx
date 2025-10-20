@@ -10,7 +10,11 @@ import { CanvasLoadingIndicator } from '@components/ui/CanvasLoadingIndicator'
 import {
   Sparkles,
   Wand2,
-  Settings
+  Settings,
+  Zap,
+  Scissors,
+  ZoomIn,
+  Play
 } from 'lucide-react'
 
 interface AIPanelProps {
@@ -27,13 +31,21 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const [loadingStage, setLoadingStage] = useState<'analyzing' | 'composing' | 'rendering' | 'finalizing'>('composing')
   const [loadingMessage, setLoadingMessage] = useState('')
   const [prompt, setPrompt] = useState('')
-  const [activeTab, setActiveTab] = useState<'generate'>('generate')
+  const [activeTab, setActiveTab] = useState<'generate' | 'enhance' | 'video'>('generate')
   const [_lastResult, setLastResult] = useState<string | null>(null)
   
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [templateCategory, setTemplateCategory] = useState<'all' | 'creative' | 'professional' | 'fun'>('all')
   const [activeEnhancements, setActiveEnhancements] = useState<string[]>([])
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null)
+
+  // Enhancement features state
+  const [selectedEnhancement, setSelectedEnhancement] = useState<string | null>(null)
+  const [enhanceSettings, setEnhanceSettings] = useState({
+    upscaleLevel: '4x',
+    removeBackground: true,
+    enhanceQuality: true
+  })
 
 
 

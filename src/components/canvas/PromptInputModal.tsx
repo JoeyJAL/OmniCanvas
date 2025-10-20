@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Mic, MicOff, Send, X, MessageCircle } from 'lucide-react'
+import { Mic, MicOff, Send, X, MessageCircle, Sparkles, Lightbulb, Shuffle, Star } from 'lucide-react'
 import { useTranslation } from '@hooks/useTranslation'
 
 interface PromptInputModalProps {
@@ -20,6 +20,8 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
   const [isListening, setIsListening] = useState(false)
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
   const [speechSupported, setSpeechSupported] = useState(false)
+  const [showEnhancer, setShowEnhancer] = useState(false)
+  const [enhancedPrompt, setEnhancedPrompt] = useState('')
 
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
@@ -129,6 +131,38 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
     setInputMode('text')
   }
 
+  // 智能提示詞增強
+  const enhancePrompt = () => {
+    if (!prompt.trim()) return
+
+    const enhancers = [
+      '，確保保持主要物件的特徵和比例',
+      '，使用專業攝影級別的燈光和構圖',
+      '，注意維持物件的原有顏色和質感',
+      '，確保場景的空間邏輯合理自然',
+      '，使整體畫面具有視覺衝擊力'
+    ]
+
+    const randomEnhancer = enhancers[Math.floor(Math.random() * enhancers.length)]
+    const enhanced = prompt + randomEnhancer
+    setEnhancedPrompt(enhanced)
+    setShowEnhancer(true)
+  }
+
+  // 使用增強後的提示詞
+  const useEnhancedPrompt = () => {
+    setPrompt(enhancedPrompt)
+    setShowEnhancer(false)
+    setEnhancedPrompt('')
+  }
+
+  // 隨機生成提示詞
+  const generateRandomPrompt = () => {
+    const examples = t.nanoBananaPrompt.examples
+    const randomExample = examples[Math.floor(Math.random() * examples.length)]
+    setPrompt(randomExample)
+  }
+
   if (!visible) return null
 
   return (
@@ -231,9 +265,32 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
 
             {/* 提示輸入框 */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                {t.nanoBananaPrompt.promptLabel}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.nanoBananaPrompt.promptLabel}
+                </label>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={enhancePrompt}
+                    disabled={!prompt.trim()}
+                    className={`text-xs px-2 py-1 rounded-lg transition-colors ${
+                      prompt.trim()
+                        ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <Sparkles className="w-3 h-3 inline mr-1" />
+                    智能增強
+                  </button>
+                  <button
+                    onClick={generateRandomPrompt}
+                    className="text-xs px-2 py-1 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg transition-colors"
+                  >
+                    <Shuffle className="w-3 h-3 inline mr-1" />
+                    隨機靈感
+                  </button>
+                </div>
+              </div>
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -241,6 +298,34 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
                 className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
               />
+
+              {/* 智能增強建議 */}
+              {showEnhancer && enhancedPrompt && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex items-start space-x-2">
+                    <Lightbulb className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-purple-700 mb-1">智能增強建議</div>
+                      <div className="text-sm text-purple-600 mb-3">{enhancedPrompt}</div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={useEnhancedPrompt}
+                          className="text-xs px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+                        >
+                          <Star className="w-3 h-3 inline mr-1" />
+                          使用增強版本
+                        </button>
+                        <button
+                          onClick={() => setShowEnhancer(false)}
+                          className="text-xs px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
+                        >
+                          關閉
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 快速樣例 */}
@@ -248,14 +333,15 @@ export const PromptInputModal: React.FC<PromptInputModalProps> = ({
               <label className="block text-sm font-medium text-gray-700">
                 {t.nanoBananaPrompt.quickExamples}
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
                 {t.nanoBananaPrompt.examples.map((example, index) => (
                   <button
                     key={index}
                     onClick={() => insertExample(example)}
-                    className="p-2 text-xs bg-gray-50 border border-gray-200 rounded hover:bg-gray-100 transition-colors text-left"
+                    className="p-2 text-xs bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-purple-100 transition-all text-left flex items-center"
                   >
-                    {example}
+                    <MessageCircle className="w-3 h-3 text-blue-500 mr-2 flex-shrink-0" />
+                    <span className="truncate">{example}</span>
                   </button>
                 ))}
               </div>

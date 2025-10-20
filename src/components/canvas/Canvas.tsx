@@ -614,68 +614,88 @@ export const Canvas: React.FC = () => {
 
   const handleExportSelected = async () => {
     if (!canvas || contextMenu.selectedObjects.length === 0) return
-    
+
     console.log('🖼️ Exporting selected objects:', contextMenu.selectedObjects.length)
-    
+
     try {
-      // 計算所有選中物件的邊界
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
-      
-      contextMenu.selectedObjects.forEach(obj => {
-        const boundingRect = obj.getBoundingRect()
-        minX = Math.min(minX, boundingRect.left)
-        minY = Math.min(minY, boundingRect.top)
-        maxX = Math.max(maxX, boundingRect.left + boundingRect.width)
-        maxY = Math.max(maxY, boundingRect.top + boundingRect.height)
+      // 創建選中物件的群組來計算整體邊界
+      const group = new fabric.Group(contextMenu.selectedObjects, {
+        left: 0,
+        top: 0
       })
-      
+
+      // 獲取群組的實際邊界（包括所有變換）
+      const groupBounds = group.getBoundingRect(true)
       const padding = 20
-      const exportWidth = maxX - minX + padding * 2
-      const exportHeight = maxY - minY + padding * 2
-      
-      console.log('📐 Export bounds:', { minX, minY, maxX, maxY, exportWidth, exportHeight })
-      
+
+      const exportWidth = groupBounds.width + padding * 2
+      const exportHeight = groupBounds.height + padding * 2
+
+      console.log('📐 Export bounds:', {
+        width: groupBounds.width,
+        height: groupBounds.height,
+        exportWidth,
+        exportHeight
+      })
+
       // 創建臨時畫布
       const tempCanvasEl = document.createElement('canvas')
       tempCanvasEl.width = exportWidth
       tempCanvasEl.height = exportHeight
       const tempCanvas = new fabric.Canvas(tempCanvasEl)
-      
+
       tempCanvas.setWidth(exportWidth)
       tempCanvas.setHeight(exportHeight)
       tempCanvas.backgroundColor = 'transparent'
-      
-      // 複製物件到臨時畫布
-      const clonePromises = contextMenu.selectedObjects.map(obj => {
+
+      // 分解群組並複製每個物件到臨時畫布
+      const clonePromises = group.getObjects().map((obj: fabric.Object) => {
         return new Promise<void>((resolve) => {
           obj.clone((cloned: fabric.Object) => {
-            // 調整位置到新的座標系統
-            const objBounds = obj.getBoundingRect()
+            // 計算物件在群組中的相對位置
+            const objCoords = fabric.util.transformPoint(
+              { x: obj.left || 0, y: obj.top || 0 },
+              group.calcTransformMatrix()
+            )
+
+            // 設定物件在新畫布上的位置
             cloned.set({
-              left: objBounds.left - minX + padding,
-              top: objBounds.top - minY + padding
+              left: objCoords.x - groupBounds.left + padding,
+              top: objCoords.y - groupBounds.top + padding,
+              // 保持原始的變換屬性
+              scaleX: obj.scaleX,
+              scaleY: obj.scaleY,
+              angle: obj.angle,
+              flipX: obj.flipX,
+              flipY: obj.flipY,
+              skewX: obj.skewX,
+              skewY: obj.skewY
             })
+
             tempCanvas.add(cloned)
             console.log('📦 Cloned object:', cloned.type, 'at', cloned.left, cloned.top)
             resolve()
           })
         })
       })
-      
+
+      // 清理群組（不影響原始物件）
+      group.destroy()
+
       // 等待所有複製完成
       await Promise.all(clonePromises)
-      
+
       // 強制渲染
       tempCanvas.renderAll()
-      
+
       // 等待渲染完成後匯出
       setTimeout(() => {
-        const dataUrl = tempCanvas.toDataURL({ 
-          format: 'png', 
+        const dataUrl = tempCanvas.toDataURL({
+          format: 'png',
           quality: 1,
           multiplier: 2  // Export at 2x resolution for better quality
         })
-        
+
         // 檢查是否成功生成圖片
         if (dataUrl && dataUrl !== 'data:,') {
           const link = document.createElement('a')
@@ -684,17 +704,19 @@ export const Canvas: React.FC = () => {
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
-          
+
           console.log('✅ Export completed successfully')
         } else {
           console.error('❌ Failed to generate image data')
+          alert('圖片匯出失敗，請重試')
         }
-        
+
         tempCanvas.dispose()
-      }, 200)
-      
+      }, 300) // 增加等待時間確保渲染完成
+
     } catch (error) {
       console.error('❌ Export error:', error)
+      alert('圖片匯出失敗：' + error)
     }
   }
 
