@@ -175,6 +175,28 @@ export interface Translations {
     }
   }
 
+  // Loading Indicator
+  loadingIndicator: {
+    stages: {
+      analyzing: {
+        text: string
+        description: string
+      }
+      composing: {
+        text: string
+        description: string
+      }
+      rendering: {
+        text: string
+        description: string
+      }
+      finalizing: {
+        text: string
+        description: string
+      }
+    }
+  }
+
   // Common
   common: {
     loading: string
@@ -353,6 +375,26 @@ const en: Translations = {
       }
     },
   },
+  loadingIndicator: {
+    stages: {
+      analyzing: {
+        text: 'Analyzing...',
+        description: 'Understanding your creative needs'
+      },
+      composing: {
+        text: 'Composing...',
+        description: 'Designing creative concepts'
+      },
+      rendering: {
+        text: 'Rendering...',
+        description: 'Drawing beautiful images'
+      },
+      finalizing: {
+        text: 'Finalizing...',
+        description: 'Final touches'
+      }
+    }
+  },
   common: {
     loading: 'Loading...',
     error: 'Error',
@@ -528,6 +570,26 @@ const zhTW: Translations = {
         generationFailed: '漫畫生成失敗，請重試。'
       }
     },
+  },
+  loadingIndicator: {
+    stages: {
+      analyzing: {
+        text: '分析中...',
+        description: '理解您的創意需求'
+      },
+      composing: {
+        text: '構思中...',
+        description: '設計創意概念'
+      },
+      rendering: {
+        text: '生成中...',
+        description: '繪製精美圖像'
+      },
+      finalizing: {
+        text: '完成中...',
+        description: '最後潤飾'
+      }
+    }
   },
   common: {
     loading: '載入中...',
@@ -705,6 +767,26 @@ const es: Translations = {
       }
     },
   },
+  loadingIndicator: {
+    stages: {
+      analyzing: {
+        text: 'Analizando...',
+        description: 'Entendiendo tus necesidades creativas'
+      },
+      composing: {
+        text: 'Componiendo...',
+        description: 'Diseñando conceptos creativos'
+      },
+      rendering: {
+        text: 'Renderizando...',
+        description: 'Dibujando imágenes hermosas'
+      },
+      finalizing: {
+        text: 'Finalizando...',
+        description: 'Toques finales'
+      }
+    }
+  },
   common: {
     loading: 'Cargando...',
     error: 'Error',
@@ -881,6 +963,26 @@ const ja: Translations = {
       }
     },
   },
+  loadingIndicator: {
+    stages: {
+      analyzing: {
+        text: '分析中...',
+        description: '您のクリエイティブニーズを理解中'
+      },
+      composing: {
+        text: '構成中...',
+        description: 'クリエイティブコンセプトをデザイン中'
+      },
+      rendering: {
+        text: 'レンダリング中...',
+        description: '美しい画像を描いています'
+      },
+      finalizing: {
+        text: '仕上げ中...',
+        description: '最終仕上げ'
+      }
+    }
+  },
   common: {
     loading: '読み込み中...',
     error: 'エラー',
@@ -1056,6 +1158,26 @@ const fr: Translations = {
         generationFailed: 'La génération de la BD a échoué. Veuillez réessayer.'
       }
     },
+  },
+  loadingIndicator: {
+    stages: {
+      analyzing: {
+        text: 'Analyse...',
+        description: 'Compréhension de vos besoins créatifs'
+      },
+      composing: {
+        text: 'Composition...',
+        description: 'Conception de concepts créatifs'
+      },
+      rendering: {
+        text: 'Rendu...',
+        description: 'Dessin d\'images magnifiques'
+      },
+      finalizing: {
+        text: 'Finalisation...',
+        description: 'Touches finales'
+      }
+    }
   },
   common: {
     loading: 'Chargement...',

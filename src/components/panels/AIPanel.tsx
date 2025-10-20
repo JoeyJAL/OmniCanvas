@@ -6,6 +6,7 @@ import { useAPIKeyStore } from '@store/apiKeyStore'
 import { useTranslation } from '@hooks/useTranslation'
 import { useLanguageStore } from '@store/languageStore'
 import { templatePrompts, getTemplatePrompt } from '@data/templatePrompts'
+import { CanvasLoadingIndicator } from '@components/ui/CanvasLoadingIndicator'
 import {
   Sparkles,
   Wand2,
@@ -23,6 +24,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const { getSelectedImages: getImageStoreImages } = useImageStore()
   const { importImage, getSelectedImages: getCanvasSelectedImages } = useCanvasStore()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [loadingStage, setLoadingStage] = useState<'analyzing' | 'composing' | 'rendering' | 'finalizing'>('composing')
+  const [loadingMessage, setLoadingMessage] = useState('')
   const [prompt, setPrompt] = useState('')
   const [activeTab, setActiveTab] = useState<'generate'>('generate')
   const [_lastResult, setLastResult] = useState<string | null>(null)
@@ -31,6 +34,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const [templateCategory, setTemplateCategory] = useState<'all' | 'creative' | 'professional' | 'fun'>('all')
   const [activeEnhancements, setActiveEnhancements] = useState<string[]>([])
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null)
+
 
 
   // Get selected images from canvas (higher priority) or image store
@@ -73,11 +77,30 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
       selectedImagesCount: selectedImages.length,
       canvasSelectedImages: getCanvasSelectedImages(),
       imageStoreImages: getImageStoreImages(),
-      selectedImages: selectedImages.map(img => ({ url: img.url.substring(0, 50) + '...' }))
+      selectedImages: selectedImages.map(img => ({ url: typeof img.url === 'string' ? img.url.substring(0, 50) + '...' : img.url }))
     })
 
     setIsProcessing(true)
+    setLoadingStage('analyzing')
+    setLoadingMessage('Analyzing your request...')
+
     try {
+      // Simulate different stages of processing
+      setTimeout(() => {
+        setLoadingStage('composing')
+        setLoadingMessage('AI is composing your masterpiece...')
+      }, 1000)
+
+      setTimeout(() => {
+        setLoadingStage('rendering')
+        setLoadingMessage('Rendering high-quality result...')
+      }, 3000)
+
+      setTimeout(() => {
+        setLoadingStage('finalizing')
+        setLoadingMessage('Adding final magical touches...')
+      }, 5000)
+
       let result
       
       if (activeTab === 'generate') {
@@ -88,7 +111,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
           const imageUrls = selectedImages.map(img => img.url)
           
           if (selectedImages.length === 1) {
-            console.log('📸 Single image generation with:', imageUrls[0].substring(0, 50) + '...')
+            console.log('📸 Single image generation with:', typeof imageUrls[0] === 'string' ? imageUrls[0].substring(0, 50) + '...' : imageUrls[0])
             // Single image: Image-to-Image generation with Nano Banana
             result = await aiService.imageToImage({
               prompt: prompt,
@@ -160,11 +183,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
 
 
 
-  const tabs = [
-    { id: 'generate' as const, label: t.aiPanel.tabs.generate, icon: Sparkles },
-  ]
+
+
 
   return (
+    <>
     <div className="flex h-full flex-col bg-gradient-to-br from-white to-purple-50">
       {/* Header */}
       <div className="p-3 border-b border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
@@ -188,32 +211,11 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex mt-3 bg-gradient-to-r from-purple-100/50 to-pink-100/50 rounded-xl p-1 shadow-inner">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex-1 flex items-center justify-center space-x-1.5 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200
-                  ${activeTab === tab.id
-                    ? 'bg-white text-purple-700 shadow-md scale-105 border border-purple-200'
-                    : 'text-gray-600 hover:text-purple-600 hover:bg-white/50'
-                  }
-                `}
-              >
-                <Icon className="w-3 h-3" />
-                <span>{tab.label}</span>
-              </button>
-            )
-          })}
-        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex-1 overflow-y-auto">
+      {/* Content - 可滾動區域 */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="p-4 flex-1 overflow-y-auto">
         {/* API Key Warning */}
         {!isConfigured && (
           <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
@@ -433,7 +435,13 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
                   })}
                 </div>
               </div>
-            
+          </div>
+        )}
+        </div>
+
+        {/* 固定生成按鈕區域 */}
+        {activeTab === 'generate' && (
+          <div className="p-4 border-t border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
             <button
               onClick={handleGenerateImage}
               disabled={isProcessing || !prompt.trim() || !tabValidation[activeTab]?.canUse}
@@ -457,12 +465,6 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
             </button>
           </div>
         )}
-
-
-
-
-
-
       </div>
 
       {/* Template Preview Modal */}
@@ -535,6 +537,13 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
       )}
 
     </div>
+
+    {/* Canvas Loading Indicator */}
+    <CanvasLoadingIndicator
+      isVisible={isProcessing}
+      stage={loadingStage}
+    />
+  </>
   )
 
 }
