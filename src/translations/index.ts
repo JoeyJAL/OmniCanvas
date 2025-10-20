@@ -222,6 +222,21 @@ export interface Translations {
     cancel: string
   }
 
+  // Context Menu
+  contextMenu: {
+    header: string
+    playVideo: string
+    aiSmartCompose: string
+    creativeBlend: string
+    generateSimilar: string
+    nanoBananaPrompt: string
+    saveSelected: string
+    duplicate: string
+    duplicateMultiple: string
+    delete: string
+    deleteMultiple: string
+  }
+
   // Common
   common: {
     loading: string
@@ -450,6 +465,19 @@ const en: Translations = {
     submit: 'Execute Command',
     cancel: 'Cancel'
   },
+  contextMenu: {
+    header: '✨ AI Actions',
+    playVideo: '🎬 Play Video',
+    aiSmartCompose: '🧠 AI Smart Compose',
+    creativeBlend: '✨ Creative Blend',
+    generateSimilar: '🌟 Generate Similar',
+    nanoBananaPrompt: '🎤 Nano Banana Prompt Input',
+    saveSelected: 'Save Selected',
+    duplicate: 'Duplicate',
+    duplicateMultiple: 'Duplicate',
+    delete: 'Delete',
+    deleteMultiple: 'Delete'
+  },
   common: {
     loading: 'Loading...',
     error: 'Error',
@@ -675,6 +703,19 @@ const zhTW: Translations = {
     ],
     submit: '執行指令',
     cancel: '取消'
+  },
+  contextMenu: {
+    header: '✨ AI 動作',
+    playVideo: '🎬 播放影片',
+    aiSmartCompose: '🧠 AI 智能合成',
+    creativeBlend: '✨ 創意混合',
+    generateSimilar: '🌟 生成相似內容',
+    nanoBananaPrompt: '🎤 Nano Banana 提示詞輸入',
+    saveSelected: '儲存已選擇',
+    duplicate: '複製',
+    duplicateMultiple: '複製',
+    delete: '刪除',
+    deleteMultiple: '刪除'
   },
   common: {
     loading: '載入中...',
@@ -902,6 +943,19 @@ const es: Translations = {
     submit: 'Ejecutar Comando',
     cancel: 'Cancelar'
   },
+  contextMenu: {
+    header: '✨ Acciones IA',
+    playVideo: '🎬 Reproducir Video',
+    aiSmartCompose: '🧠 Composición Inteligente IA',
+    creativeBlend: '✨ Mezcla Creativa',
+    generateSimilar: '🌟 Generar Similar',
+    nanoBananaPrompt: '🎤 Entrada de Comando Nano Banana',
+    saveSelected: 'Guardar Seleccionados',
+    duplicate: 'Duplicar',
+    duplicateMultiple: 'Duplicar',
+    delete: 'Eliminar',
+    deleteMultiple: 'Eliminar'
+  },
   common: {
     loading: 'Cargando...',
     error: 'Error',
@@ -1128,6 +1182,19 @@ const ja: Translations = {
     submit: 'コマンド実行',
     cancel: 'キャンセル'
   },
+  contextMenu: {
+    header: '✨ AIアクション',
+    playVideo: '🎬 動画再生',
+    aiSmartCompose: '🧠 AIスマート合成',
+    creativeBlend: '✨ クリエイティブブレンド',
+    generateSimilar: '🌟 類似生成',
+    nanoBananaPrompt: '🎤 Nano Banana プロンプト入力',
+    saveSelected: '選択項目を保存',
+    duplicate: '複製',
+    duplicateMultiple: '複製',
+    delete: '削除',
+    deleteMultiple: '削除'
+  },
   common: {
     loading: '読み込み中...',
     error: 'エラー',
@@ -1353,6 +1420,19 @@ const fr: Translations = {
     ],
     submit: 'Exécuter la Commande',
     cancel: 'Annuler'
+  },
+  contextMenu: {
+    header: '✨ Actions IA',
+    playVideo: '🎬 Lire Vidéo',
+    aiSmartCompose: '🧠 Composition Intelligente IA',
+    creativeBlend: '✨ Mélange Créatif',
+    generateSimilar: '🌟 Générer Similaire',
+    nanoBananaPrompt: '🎤 Saisie de Commande Nano Banana',
+    saveSelected: 'Sauvegarder Sélectionnés',
+    duplicate: 'Dupliquer',
+    duplicateMultiple: 'Dupliquer',
+    delete: 'Supprimer',
+    deleteMultiple: 'Supprimer'
   },
   common: {
     loading: 'Chargement...',

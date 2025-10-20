@@ -16,6 +16,7 @@ import {
   Mic,
   MessageCircle
 } from 'lucide-react'
+import { useTranslation } from '@hooks/useTranslation'
 
 interface NewContextMenuProps {
   x: number
@@ -69,6 +70,8 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
   hasVideoThumbnail,
   onVoicePrompt
 }) => {
+  const t = useTranslation()
+
   if (!visible) return null
 
   console.log('🔥🔥🔥 NEW AI CONTEXT MENU RENDERING! Time:', new Date().toLocaleTimeString())
@@ -85,7 +88,7 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
     ...(hasVideoThumbnail && selectedCount === 1 && onPlayVideo ? [
       {
         icon: Play,
-        label: '🎬 Play Video',
+        label: t.contextMenu.playVideo,
         onClick: onPlayVideo,
         className: 'text-orange-600 hover:bg-orange-50 font-semibold',
         separator: true
@@ -96,14 +99,14 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
     ...(selectedCount >= 2 ? [
       {
         icon: Brain,
-        label: `🧠 AI Smart Compose (${selectedCount})`,
+        label: `${t.contextMenu.aiSmartCompose} (${selectedCount})`,
         onClick: onIntelligentCompose,
         className: 'text-blue-600 hover:bg-blue-50 font-semibold',
         separator: false
       },
       {
         icon: Wand2,
-        label: '✨ Creative Blend',
+        label: t.contextMenu.creativeBlend,
         onClick: onCreativeBlend,
         className: 'text-pink-600 hover:bg-pink-50',
         separator: true
@@ -114,7 +117,7 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
     ...(selectedCount >= 1 ? [
       {
         icon: Sparkles,
-        label: '🌟 Generate Similar',
+        label: t.contextMenu.generateSimilar,
         onClick: onGenerateSimilar,
         className: 'text-green-600 hover:bg-green-50',
         separator: false
@@ -125,7 +128,7 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
     ...(selectedCount >= 1 && onVoicePrompt ? [
       {
         icon: MessageCircle,
-        label: '🎤 Nano Banana 提示詞輸入',
+        label: t.contextMenu.nanoBananaPrompt,
         onClick: onVoicePrompt,
         className: 'text-purple-600 hover:bg-purple-50 font-semibold',
         separator: true
@@ -136,21 +139,21 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
     ...(selectedCount >= 1 ? [
       {
         icon: Download,
-        label: 'Save Selected',
+        label: t.contextMenu.saveSelected,
         onClick: onExportSelected,
         className: 'text-blue-600 hover:bg-blue-50',
         separator: false
       },
       {
         icon: Copy,
-        label: selectedCount > 1 ? `Duplicate ${selectedCount}` : 'Duplicate',
+        label: selectedCount > 1 ? `${t.contextMenu.duplicateMultiple} ${selectedCount}` : t.contextMenu.duplicate,
         onClick: onDuplicate,
         className: 'hover:bg-gray-50',
         separator: false
       },
       {
         icon: Trash2,
-        label: selectedCount > 1 ? `Delete ${selectedCount}` : 'Delete',
+        label: selectedCount > 1 ? `${t.contextMenu.deleteMultiple} ${selectedCount}` : t.contextMenu.delete,
         onClick: onDelete,
         className: 'text-red-600 hover:bg-red-50',
         separator: false
@@ -179,7 +182,7 @@ export const NewContextMenu: React.FC<NewContextMenuProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-3 py-2 text-xs font-medium text-gray-500 bg-gradient-to-r from-blue-50 to-purple-50">
-          ✨ AI Actions - {selectedCount} selected
+          {t.contextMenu.header} - {selectedCount} selected
         </div>
         
         {menuItems.map((item, index) => {
