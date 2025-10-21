@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, PanelRightClose, PanelRightOpen, BookOpen } from 'lucide-react'
+import { Settings, PanelRightClose, PanelRightOpen, BookOpen, Menu, X } from 'lucide-react'
 import { Canvas } from '@components/canvas/Canvas'
 import { Toolbar } from '@components/toolbar/Toolbar'
 import { AIPanel } from '@components/panels/AIPanel'
@@ -13,6 +13,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isServiceGuideOpen, setIsServiceGuideOpen] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   // Trigger window resize event when panel visibility changes
   // This ensures Canvas component recalculates its dimensions
@@ -27,13 +28,14 @@ function App() {
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-100">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-bold text-gray-900">OmniCanvas</h1>
-          <span className="text-sm text-gray-500">AI Creative Canvas</span>
+      <header className="bg-white border-b border-gray-200 px-3 py-2 flex items-center justify-between relative">
+        <div className="flex items-center space-x-2 flex-1 min-w-0">
+          <h1 className="text-lg md:text-xl font-bold text-gray-900 truncate">OmniCanvas</h1>
+          <span className="text-xs md:text-sm text-gray-500 hidden sm:block">AI Creative Canvas</span>
         </div>
-        
-        <div className="flex items-center space-x-2">
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-2">
           <LanguageSwitcher />
           <button
             onClick={() => setIsSettingsOpen(true)}
@@ -58,21 +60,69 @@ function App() {
             <span>{isPanelOpen ? "Hide Panel" : "Show Panel"}</span>
           </button>
         </div>
+
+        {/* Mobile Navigation */}
+        <div className="md:hidden flex items-center space-x-2">
+          <LanguageSwitcher />
+          <button
+            onClick={() => setIsPanelOpen(!isPanelOpen)}
+            className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
+            title={isPanelOpen ? "Hide AI Assistant" : "Show AI Assistant"}
+          >
+            {isPanelOpen ? <PanelRightClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
+          </button>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-lg md:hidden">
+            <div className="p-4 space-y-3">
+              <button
+                onClick={() => {
+                  setIsSettingsOpen(true)
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                <span>{t.common.settings}</span>
+              </button>
+              <button
+                onClick={() => {
+                  setIsServiceGuideOpen(true)
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>{t.serviceGuide.title}</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Toolbar */}
-        <Toolbar />
-        
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+        {/* Left Toolbar - Hidden on mobile when AI panel is open */}
+        <div className={`${isPanelOpen ? 'hidden md:block' : 'block'}`}>
+          <Toolbar />
+        </div>
+
         {/* Canvas Area */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className={`flex-1 flex flex-col min-w-0 ${isPanelOpen ? 'hidden md:flex' : 'flex'}`}>
           <Canvas />
         </div>
-        
-        {/* Right Panel - AI Assistant with toggle functionality */}
+
+        {/* Right Panel - AI Assistant with mobile-first design */}
         {isPanelOpen && (
-          <div className="w-80 lg:w-96 xl:w-[420px] bg-white border-l border-gray-200 flex flex-col overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out">
+          <div className="w-full md:w-80 lg:w-96 xl:w-[420px] bg-white border-l border-gray-200 flex flex-col overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out">
             <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
               <AIPanel onOpenSettings={() => setIsSettingsOpen(true)} />
             </div>

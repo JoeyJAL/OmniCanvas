@@ -66,41 +66,41 @@ export const Toolbar: React.FC = () => {
 
   return (
     <div className="tool-panel relative">
-      <div className="w-16 flex flex-col items-center py-4 space-y-2">
+      <div className="w-12 md:w-16 flex flex-col items-center py-2 md:py-4 space-y-1 md:space-y-2">
         {/* Import Images - Top Priority */}
         <div className="flex flex-col space-y-1">
           <button
             onClick={handleBatchImport}
-            className="w-10 h-10 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-600 flex items-center justify-center transition-all duration-200"
+            className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-600 flex items-center justify-center transition-all duration-200 touch-manipulation"
             title="Import Multiple Images"
           >
-            <Image className="w-5 h-5" />
+            <Image className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
 
       {/* Separator */}
-      <div className="w-8 h-px bg-gray-300 my-2"></div>
+      <div className="w-6 md:w-8 h-px bg-gray-300 my-1 md:my-2"></div>
 
       {/* Drawing Tools */}
       <div className="flex flex-col space-y-1">
         {tools.map((toolItem) => {
           const Icon = toolItem.icon
           const isActive = tool === toolItem.id
-          
+
           return (
             <button
               key={toolItem.id}
               onClick={() => handleToolSelect(toolItem.id)}
               className={`
-                w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200
-                ${isActive 
-                  ? 'bg-primary-600 text-white shadow-md' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center transition-all duration-200 touch-manipulation
+                ${isActive
+                  ? 'bg-primary-600 text-white shadow-md'
+                  : 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-600'
                 }
               `}
               title={`${toolItem.label} (${toolItem.shortcut})`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           )
         })}
@@ -112,44 +112,44 @@ export const Toolbar: React.FC = () => {
           onClick={undo}
           disabled={!canUndo()}
           className={`
-            w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200
+            w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center transition-all duration-200 touch-manipulation
             ${canUndo()
-              ? 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              ? 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-600'
               : 'bg-gray-50 text-gray-300 cursor-not-allowed'
             }
           `}
           title="Undo (Ctrl+Z)"
         >
-          <Undo className="w-5 h-5" />
+          <Undo className="w-4 h-4 md:w-5 md:h-5" />
         </button>
-        
+
         <button
           onClick={redo}
           disabled={!canRedo()}
           className={`
-            w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200
+            w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center transition-all duration-200 touch-manipulation
             ${canRedo()
-              ? 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              ? 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-600'
               : 'bg-gray-50 text-gray-300 cursor-not-allowed'
             }
           `}
           title="Redo (Ctrl+Y)"
         >
-          <Redo className="w-5 h-5" />
+          <Redo className="w-4 h-4 md:w-5 md:h-5" />
         </button>
       </div>
 
       {/* Separator */}
-      <div className="w-8 h-px bg-gray-300 my-2"></div>
+      <div className="w-6 md:w-8 h-px bg-gray-300 my-1 md:my-2"></div>
 
       {/* Clear Canvas */}
       <div className="flex flex-col space-y-1">
         <button
           onClick={clearCanvas}
-          className="w-10 h-10 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-all duration-200"
+          className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-red-100 hover:bg-red-200 active:bg-red-300 text-red-600 flex items-center justify-center transition-all duration-200 touch-manipulation"
           title="Clear Canvas"
         >
-          <Trash2 className="w-5 h-5" />
+          <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
         </button>
       </div>
     </div>
