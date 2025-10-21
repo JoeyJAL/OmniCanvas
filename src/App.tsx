@@ -7,6 +7,7 @@ import { SettingsPanel } from '@components/panels/SettingsPanel'
 import { ServiceGuidePanel } from '@components/panels/ServiceGuidePanel'
 import { LanguageSwitcher } from '@components/LanguageSwitcher'
 import { useTranslation } from '@hooks/useTranslation'
+import { analyticsService } from '@services/analyticsService'
 
 function App() {
   const t = useTranslation()
@@ -15,14 +16,41 @@ function App() {
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
+  // Initialize analytics and track app usage
+  useEffect(() => {
+    // Track initial app load
+    analyticsService.trackPageView('/')
+    analyticsService.trackFeatureUsage('app_loaded', {
+      timestamp: Date.now(),
+      user_agent: navigator.userAgent,
+      viewport: `${window.innerWidth}x${window.innerHeight}`
+    })
+
+    // Track when user closes the app
+    const handleBeforeUnload = () => {
+      analyticsService.trackUserEngagement()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
+
   // Trigger window resize event when panel visibility changes
   // This ensures Canvas component recalculates its dimensions
   useEffect(() => {
     const timer = setTimeout(() => {
       window.dispatchEvent(new Event('resize'))
     }, 300) // Wait for CSS transition to complete
-    
+
     return () => clearTimeout(timer)
+  }, [isPanelOpen])
+
+  // Track panel usage
+  useEffect(() => {
+    analyticsService.trackFeatureUsage('panel_toggle', {
+      panel_state: isPanelOpen ? 'open' : 'closed',
+      timestamp: Date.now()
+    })
   }, [isPanelOpen])
 
   return (
@@ -38,14 +66,26 @@ function App() {
         <div className="hidden md:flex items-center space-x-2">
           <LanguageSwitcher />
           <button
-            onClick={() => setIsSettingsOpen(true)}
+            onClick={() => {
+              setIsSettingsOpen(true)
+              analyticsService.trackFeatureUsage('settings_opened', {
+                source: 'desktop_header',
+                timestamp: Date.now()
+              })
+            }}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
           >
             <Settings className="w-4 h-4" />
             <span>{t.common.settings}</span>
           </button>
           <button
-            onClick={() => setIsServiceGuideOpen(true)}
+            onClick={() => {
+              setIsServiceGuideOpen(true)
+              analyticsService.trackFeatureUsage('service_guide_opened', {
+                source: 'desktop_header',
+                timestamp: Date.now()
+              })
+            }}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
           >
             <BookOpen className="w-4 h-4" />

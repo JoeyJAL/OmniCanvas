@@ -7,6 +7,7 @@ import { useTranslation } from '@hooks/useTranslation'
 import { useLanguageStore } from '@store/languageStore'
 import { templatePrompts, getTemplatePrompt } from '@data/templatePrompts'
 import { CanvasLoadingIndicator } from '@components/ui/CanvasLoadingIndicator'
+import { analyticsService } from '@services/analyticsService'
 import {
   Sparkles,
   Wand2,
@@ -87,6 +88,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
   const handleGenerateImage = async () => {
     if (!prompt.trim() && activeTab === 'generate') return
 
+    const startTime = Date.now()
+
     console.log('🚀 Starting generation process...')
     console.log('📊 State check:', {
       activeTab,
@@ -95,6 +98,16 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
       canvasSelectedImages: getCanvasSelectedImages(),
       imageStoreImages: getImageStoreImages(),
       selectedImages: selectedImages.map(img => ({ url: typeof img.url === 'string' ? img.url.substring(0, 50) + '...' : img.url }))
+    })
+
+    // Track AI generation start
+    const generationType = activeTab === 'enhance' ? 'enhancement' : (hasSelection ? 'image-to-image' : 'text-to-image')
+
+    analyticsService.trackAIGeneration({
+      type: generationType as any,
+      template: selectedTemplate || undefined,
+      hasSelection,
+      promptLength: prompt.length
     })
 
     setIsProcessing(true)
@@ -227,8 +240,35 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
         setPrompt('')
       }
 
+      // Track successful generation with timing
+      const processingTime = Date.now() - startTime
+      analyticsService.trackAIGeneration({
+        type: generationType as any,
+        template: selectedTemplate || undefined,
+        hasSelection,
+        promptLength: prompt.length,
+        processingTime
+      })
+
+      analyticsService.trackEvent({
+        action: 'ai_generation_success',
+        category: 'AI Features',
+        label: generationType,
+        value: processingTime,
+        custom_parameters: {
+          generation_successful: true,
+          processing_time_ms: processingTime,
+          template_used: selectedTemplate,
+          ai_feature: 'generation_completion'
+        }
+      })
+
     } catch (error) {
       console.error('Image processing failed:', error)
+
+      // Track generation error
+      analyticsService.trackError(`AI generation failed: ${error}`, `${generationType}_generation`)
+
       alert(t.alerts.imageGenerationFailed + error)
     } finally {
       setIsProcessing(false)
@@ -463,6 +503,15 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
                         const templatePrompt = getTemplatePrompt(template.id, hasSelection, currentLanguage);
                         setPrompt(templatePrompt);
                         setSelectedTemplate(template.id);
+
+                        // Track template selection
+                        analyticsService.trackTemplateUsage(template.id, template.category);
+                        analyticsService.trackFeatureUsage('template_selected', {
+                          template_id: template.id,
+                          template_category: template.category,
+                          has_selection: hasSelection,
+                          timestamp: Date.now()
+                        });
                       }}
                       className={`p-2 rounded-lg border text-left transition-all ${
                         selectedTemplate === template.id
