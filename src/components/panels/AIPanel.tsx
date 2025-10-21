@@ -654,34 +654,44 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
         )}
         </div>
 
-        {/* 固定按鈕區域 */}
+        {/* 固定按鈕區域 - 手機優化 */}
         {(activeTab === 'generate' || (activeTab === 'enhance' && hasSelection)) && (
-          <div className="p-4 border-t border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
+          <div className="p-3 md:p-4 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex-shrink-0 safe-area-pb">
             <button
               onClick={handleGenerateImage}
               disabled={isProcessing || (activeTab === 'generate' && (!prompt.trim() || !tabValidation[activeTab]?.canUse)) || (activeTab === 'enhance' && !hasSelection)}
-              className={`w-full py-3 px-4 bg-gradient-to-r ${
+              className={`w-full py-4 md:py-3 px-4 bg-gradient-to-r ${
                 activeTab === 'enhance'
-                  ? 'from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
-                  : 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-              } disabled:from-gray-300 disabled:to-gray-400 text-white text-sm rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 disabled:scale-100`}
+                  ? 'from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 active:from-green-800 active:to-emerald-800'
+                  : 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 active:from-purple-800 active:to-pink-800'
+              } disabled:from-gray-300 disabled:to-gray-400 text-white text-sm md:text-base rounded-xl transition-all flex items-center justify-center space-x-2 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:scale-100 touch-manipulation`}
             >
               {isProcessing ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white"></div>
                   <span>
                     {activeTab === 'enhance' ? t.aiPanel.enhance.enhancing : t.aiPanel.generate.generating}
                   </span>
                 </>
               ) : (
                 <>
-                  {activeTab === 'enhance' ? <Zap className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                  {activeTab === 'enhance' ? <Zap className="w-4 h-4 md:w-5 md:h-5" /> : <Sparkles className="w-4 h-4 md:w-5 md:h-5" />}
                   <span>
                     {activeTab === 'enhance' ? t.aiPanel.enhance.enhanceButton : t.aiPanel.generate.generateButton}
                   </span>
                 </>
               )}
             </button>
+
+            {/* 手機版提示文字 */}
+            <div className="md:hidden mt-2 text-center">
+              <p className="text-xs text-gray-500">
+                {activeTab === 'generate'
+                  ? '🤖 由 Google Gemini 驅動的 AI 圖像生成'
+                  : '✨ 智慧圖像增強與優化'
+                }
+              </p>
+            </div>
           </div>
         )}
       </div>

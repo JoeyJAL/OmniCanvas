@@ -1251,66 +1251,70 @@ export const Canvas: React.FC = () => {
       <canvas ref={canvasRef} />
       
       
-      {/* Canvas Navigator - Top Right */}
-      <div className="absolute top-4 right-4 bg-white bg-opacity-90 rounded-lg px-3 py-2 shadow-lg border border-gray-200">
+      {/* Canvas Navigator - 響應式位置 */}
+      <div className="absolute top-4 left-4 md:top-4 md:right-4 md:left-auto bg-white bg-opacity-90 rounded-lg px-2 md:px-3 py-1.5 md:py-2 shadow-lg border border-gray-200 z-10">
         <div className="space-y-1 text-xs text-gray-600">
-          <div className="flex items-center justify-between">
-            <span>📍 Mouse:</span>
-            <span className="font-mono bg-gray-100 px-2 py-0.5 rounded">x:{mousePos.x} y:{mousePos.y}</span>
+          <div className="flex items-center justify-between space-x-2">
+            <span className="hidden md:inline">📍 Mouse:</span>
+            <span className="md:hidden">📍</span>
+            <span className="font-mono bg-gray-100 px-1.5 md:px-2 py-0.5 rounded text-xs">x:{mousePos.x} y:{mousePos.y}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span>🎯 Center:</span>
-            <span className="font-mono bg-blue-100 px-2 py-0.5 rounded">x:{viewportCenter.x} y:{viewportCenter.y}</span>
+          <div className="flex items-center justify-between space-x-2">
+            <span className="hidden md:inline">🎯 Center:</span>
+            <span className="md:hidden">🎯</span>
+            <span className="font-mono bg-blue-100 px-1.5 md:px-2 py-0.5 rounded text-xs">x:{viewportCenter.x} y:{viewportCenter.y}</span>
           </div>
           <div className="flex items-center space-x-1 pt-1">
             <button
               onClick={goToOrigin}
-              className="text-xs px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded transition-colors"
+              className="text-xs px-1.5 md:px-2 py-1 bg-green-100 hover:bg-green-200 active:bg-green-300 text-green-700 rounded transition-colors touch-manipulation"
               title="Go to origin (0,0)"
             >
-              🏠 Origin
+              <span className="hidden md:inline">🏠 Origin</span>
+              <span className="md:hidden">🏠</span>
             </button>
             <button
               onClick={() => setShowGrid(!showGrid)}
-              className={`text-xs px-2 py-1 rounded transition-colors ${
-                showGrid 
-                  ? 'bg-purple-200 text-purple-700' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              className={`text-xs px-1.5 md:px-2 py-1 rounded transition-colors touch-manipulation ${
+                showGrid
+                  ? 'bg-purple-200 text-purple-700'
+                  : 'bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700'
               }`}
               title="Toggle grid"
             >
-              ⊞ Grid
+              <span className="hidden md:inline">⊞ Grid</span>
+              <span className="md:hidden">⊞</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Zoom controls */}
-      <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-        <button 
+      {/* Zoom controls - 手機優化 */}
+      <div className="absolute bottom-4 right-4 flex items-center space-x-1 md:space-x-2">
+        <button
           onClick={zoomOut}
-          className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded p-2 text-gray-600 transition-all"
+          className="bg-white bg-opacity-90 hover:bg-opacity-100 active:bg-gray-100 rounded p-2 md:p-2.5 text-gray-600 transition-all shadow-md touch-manipulation"
           title="Zoom out (Ctrl+Mouse wheel)"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
           </svg>
         </button>
-        
-        <button 
+
+        <button
           onClick={resetView}
-          className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded px-3 py-1 text-sm text-gray-600 min-w-[60px] transition-all"
+          className="bg-white bg-opacity-90 hover:bg-opacity-100 active:bg-gray-100 rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm text-gray-600 min-w-[50px] md:min-w-[60px] transition-all shadow-md touch-manipulation font-mono"
           title="Reset zoom and pan"
         >
           {Math.round(zoom * 100)}%
         </button>
-        
-        <button 
+
+        <button
           onClick={zoomIn}
-          className="bg-white bg-opacity-75 hover:bg-opacity-100 rounded p-2 text-gray-600 transition-all"
+          className="bg-white bg-opacity-90 hover:bg-opacity-100 active:bg-gray-100 rounded p-2 md:p-2.5 text-gray-600 transition-all shadow-md touch-manipulation"
           title="Zoom in (Ctrl+Mouse wheel)"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
           </svg>
         </button>
