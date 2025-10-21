@@ -122,8 +122,8 @@ function App() {
 
         {/* Right Panel - AI Assistant with mobile-first design */}
         {isPanelOpen && (
-          <div className="w-full md:w-80 lg:w-96 xl:w-[420px] bg-white border-l border-gray-200 flex flex-col overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out">
-            <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+          <div className="w-full md:w-80 lg:w-96 xl:w-[420px] bg-white border-l border-gray-200 flex flex-col overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out h-full md:h-auto">
+            <div className="flex-1 flex flex-col min-h-0 h-full">
               <AIPanel onOpenSettings={() => setIsSettingsOpen(true)} />
             </div>
           </div>

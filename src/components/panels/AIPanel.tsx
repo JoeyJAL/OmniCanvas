@@ -252,7 +252,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
 
   return (
     <>
-    <div className="flex h-full flex-col bg-gradient-to-br from-white to-purple-50">
+    <div className="flex h-full flex-col bg-gradient-to-br from-white to-purple-50 min-h-0">
       {/* Header */}
       <div className="p-3 border-b border-gray-200 bg-white/90 backdrop-blur-sm flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -265,8 +265,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
           <div className="flex items-center space-x-1">
             {hasSelection && (
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                tabValidation[activeTab]?.canUse 
-                  ? 'bg-blue-100 text-blue-700' 
+                tabValidation[activeTab]?.canUse
+                  ? 'bg-blue-100 text-blue-700'
                   : 'bg-orange-100 text-orange-700'
               }`}>
                 🖼️ {selectedImages.length} {t.aiPanel.selected}
@@ -306,8 +306,8 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
       </div>
 
       {/* Content - 可滾動區域 */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="p-4 flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        <div className="p-3 md:p-4 flex-1 overflow-y-auto pb-safe">
         {/* API Key Warning */}
         {!isConfigured && (
           <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
@@ -656,7 +656,7 @@ export const AIPanel: React.FC<AIPanelProps> = ({ onOpenSettings }) => {
 
         {/* 固定按鈕區域 - 手機優化 */}
         {(activeTab === 'generate' || (activeTab === 'enhance' && hasSelection)) && (
-          <div className="p-3 md:p-4 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex-shrink-0 safe-area-pb">
+          <div className="sticky bottom-0 p-3 md:p-4 border-t border-gray-200 bg-white/98 backdrop-blur-sm flex-shrink-0 shadow-lg md:shadow-none">
             <button
               onClick={handleGenerateImage}
               disabled={isProcessing || (activeTab === 'generate' && (!prompt.trim() || !tabValidation[activeTab]?.canUse)) || (activeTab === 'enhance' && !hasSelection)}
