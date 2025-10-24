@@ -3,6 +3,7 @@ import { Settings, Check, X, Shield, Key, Eye, EyeOff, AlertCircle, Save, Extern
 import { useAPIKeyStore, APIKeys } from '@store/apiKeyStore'
 import { useLanguageStore } from '@store/languageStore'
 import { getTranslation } from '@translations/index'
+import SecurityStatusPanel from './SecurityStatusPanel'
 
 interface SettingsPanelProps {
   isOpen: boolean
@@ -16,7 +17,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
   const [localKeys, setLocalKeys] = useState<APIKeys>({})
   const [showKeys, setShowKeys] = useState<Record<keyof APIKeys, boolean>>({})
   const [validationStatus, setValidationStatus] = useState<Record<keyof APIKeys, 'valid' | 'invalid' | 'unchecked'>>({})
-  const [activeTab, setActiveTab] = useState<'apikeys' | 'backend'>('apikeys')
+  const [activeTab, setActiveTab] = useState<'apikeys' | 'backend' | 'security'>('apikeys')
 
   // Load saved API keys
   useEffect(() => {
@@ -91,19 +92,48 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
               </button>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="flex space-x-1 border-b border-gray-200 mb-4">
+              <button
+                onClick={() => setActiveTab('apikeys')}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                  activeTab === 'apikeys'
+                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Key className="w-4 h-4 inline mr-2" />
+                API 金鑰
+              </button>
+              <button
+                onClick={() => setActiveTab('security')}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                  activeTab === 'security'
+                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Shield className="w-4 h-4 inline mr-2" />
+                安全狀態
+              </button>
+            </div>
+
             <div className="space-y-4">
-              {/* Important Notice */}
-              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                <div className="flex items-start">
-                  <AlertCircle className="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h3 className="text-sm font-medium text-amber-900 mb-1">{t.settings.importantNotice.title}</h3>
-                    <p className="text-xs text-amber-800">
-                      {t.settings.importantNotice.description}
-                    </p>
+              {/* API Keys Tab */}
+              {activeTab === 'apikeys' && (
+                <>
+                  {/* Important Notice */}
+                  <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                    <div className="flex items-start">
+                      <AlertCircle className="w-5 h-5 text-amber-600 mr-2 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h3 className="text-sm font-medium text-amber-900 mb-1">{t.settings.importantNotice.title}</h3>
+                        <p className="text-xs text-amber-800">
+                          {t.settings.importantNotice.description}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
               {/* API Keys Configuration */}
               <div className="space-y-4">
@@ -197,18 +227,25 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
                 </ol>
               </div>
 
-              {/* Security Info */}
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <h3 className="text-sm font-medium text-green-900 mb-2 flex items-center">
-                  <Shield className="w-4 h-4 mr-2" />
-                  {t.settings.security.title}
-                </h3>
-                <ul className="text-xs text-green-800 space-y-1">
-                  {t.settings.security.benefits.map((benefit, index) => (
-                    <li key={index}>• {benefit}</li>
-                  ))}
-                </ul>
-              </div>
+                  {/* Security Info */}
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h3 className="text-sm font-medium text-green-900 mb-2 flex items-center">
+                      <Shield className="w-4 h-4 mr-2" />
+                      {t.settings.security.title}
+                    </h3>
+                    <ul className="text-xs text-green-800 space-y-1">
+                      {t.settings.security.benefits.map((benefit, index) => (
+                        <li key={index}>• {benefit}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+              {/* Security Tab */}
+              {activeTab === 'security' && (
+                <SecurityStatusPanel />
+              )}
 
               <div className="flex justify-end space-x-2 pt-4">
                 <button

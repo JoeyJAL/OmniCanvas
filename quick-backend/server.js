@@ -13,6 +13,52 @@ fal.config({
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Security Middleware
+app.use((req, res, next) => {
+  // Security Headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
+  // HSTS (only in production)
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+
+  next();
+});
+
+// Rate Limiting
+const requestCounts = new Map();
+app.use((req, res, next) => {
+  const clientIP = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 100; // requests per window
+
+  if (!requestCounts.has(clientIP)) {
+    requestCounts.set(clientIP, { count: 1, resetTime: now + windowMs });
+  } else {
+    const clientData = requestCounts.get(clientIP);
+    if (now > clientData.resetTime) {
+      requestCounts.set(clientIP, { count: 1, resetTime: now + windowMs });
+    } else {
+      clientData.count++;
+      if (clientData.count > maxRequests) {
+        return res.status(429).json({
+          error: 'Too Many Requests',
+          message: 'Rate limit exceeded. Please try again later.',
+          retryAfter: Math.ceil((clientData.resetTime - now) / 1000)
+        });
+      }
+    }
+  }
+
+  next();
+});
+
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
