@@ -15,6 +15,18 @@ function App() {
   const [isServiceGuideOpen, setIsServiceGuideOpen] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // 首次訪問檢測
+  useEffect(() => {
+    const isFirstVisit = !localStorage.getItem('omnicanvas_visited')
+    if (isFirstVisit) {
+      localStorage.setItem('omnicanvas_visited', 'true')
+      // 延遲顯示服務指南，讓用戶先看到主界面
+      setTimeout(() => {
+        setIsServiceGuideOpen(true)
+      }, 1500)
+    }
+  }, [])
   
   // Initialize analytics and track app usage
   useEffect(() => {
@@ -52,6 +64,15 @@ function App() {
       timestamp: Date.now()
     })
   }, [isPanelOpen])
+
+  // 處理打開 AI 面板
+  const handleOpenAIPanel = () => {
+    setIsPanelOpen(true)
+    analyticsService.trackFeatureUsage('ai_panel_opened_from_guide', {
+      source: 'service_guide',
+      timestamp: Date.now()
+    })
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-100">
@@ -192,7 +213,11 @@ function App() {
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <ServiceGuidePanel />
+              <ServiceGuidePanel
+                onOpenSettings={() => setIsSettingsOpen(true)}
+                onOpenAIPanel={handleOpenAIPanel}
+                onClose={() => setIsServiceGuideOpen(false)}
+              />
             </div>
           </div>
         </div>

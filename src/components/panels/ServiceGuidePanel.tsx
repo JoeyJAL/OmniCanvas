@@ -19,12 +19,41 @@ import {
   Download
 } from 'lucide-react'
 
-export const ServiceGuidePanel: React.FC = () => {
+interface ServiceGuidePanelProps {
+  onOpenSettings?: () => void
+  onOpenAIPanel?: () => void
+  onClose?: () => void
+}
+
+export const ServiceGuidePanel: React.FC<ServiceGuidePanelProps> = ({
+  onOpenSettings,
+  onOpenAIPanel,
+  onClose
+}) => {
   const t = useTranslation()
   const [expandedSection, setExpandedSection] = useState<string | null>('overview')
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section)
+  }
+
+  const handleQuickAction = (action: string) => {
+    switch (action) {
+      case 'open_settings':
+        onOpenSettings?.()
+        onClose?.()
+        break
+      case 'open_ai_panel':
+        onOpenAIPanel?.()
+        onClose?.()
+        break
+      case 'open_enhancement':
+        onOpenAIPanel?.() // 增強功能也是在 AI 面板中
+        onClose?.()
+        break
+      default:
+        console.log('Unknown action:', action)
+    }
   }
 
   const sections = [
@@ -178,22 +207,22 @@ export const ServiceGuidePanel: React.FC = () => {
 
   const quickActions = [
     {
+      icon: Settings,
+      title: t.serviceGuide.quickActions.settings,
+      description: t.serviceGuide.quickActions.settingsDesc,
+      action: 'open_settings'
+    },
+    {
       icon: Sparkles,
       title: t.serviceGuide.quickActions.generate,
       description: t.serviceGuide.quickActions.generateDesc,
-      action: () => console.log('Open AI Panel')
+      action: 'open_ai_panel'
     },
     {
       icon: Zap,
       title: t.serviceGuide.quickActions.enhance,
       description: t.serviceGuide.quickActions.enhanceDesc,
-      action: () => console.log('Open Enhancement')
-    },
-    {
-      icon: Settings,
-      title: t.serviceGuide.quickActions.settings,
-      description: t.serviceGuide.quickActions.settingsDesc,
-      action: () => console.log('Open Settings')
+      action: 'open_enhancement'
     }
   ]
 
@@ -227,7 +256,7 @@ export const ServiceGuidePanel: React.FC = () => {
             {quickActions.map((action, index) => (
               <button
                 key={index}
-                onClick={action.action}
+                onClick={() => handleQuickAction(action.action)}
                 className="p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all text-left group active:bg-blue-100 touch-manipulation"
               >
                 <div className="flex items-start space-x-3">
