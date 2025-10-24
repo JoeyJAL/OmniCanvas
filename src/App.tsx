@@ -7,26 +7,39 @@ import { SettingsPanel } from '@components/panels/SettingsPanel'
 import { ServiceGuidePanel } from '@components/panels/ServiceGuidePanel'
 import { LanguageSwitcher } from '@components/LanguageSwitcher'
 import { useTranslation } from '@hooks/useTranslation'
+import { useLanguageStore } from '@store/languageStore'
 import { analyticsService } from '@services/analyticsService'
 
 function App() {
   const t = useTranslation()
+  const { initializeLanguage } = useLanguageStore()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isServiceGuideOpen, setIsServiceGuideOpen] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // 首次訪問檢測
+  // 首次訪問檢測和語言初始化
   useEffect(() => {
+    // 初始化語言（首次訪問時自動檢測，返回訪問時使用保存的設定）
+    initializeLanguage()
+
     const isFirstVisit = !localStorage.getItem('omnicanvas_visited')
     if (isFirstVisit) {
       localStorage.setItem('omnicanvas_visited', 'true')
+
+      // 追蹤首次訪問的語言偏好
+      analyticsService.trackFeatureUsage('first_visit', {
+        detected_language: navigator.language,
+        user_agent: navigator.userAgent,
+        timestamp: Date.now()
+      })
+
       // 延遲顯示服務指南，讓用戶先看到主界面
       setTimeout(() => {
         setIsServiceGuideOpen(true)
       }, 1500)
     }
-  }, [])
+  }, [initializeLanguage])
   
   // Initialize analytics and track app usage
   useEffect(() => {
