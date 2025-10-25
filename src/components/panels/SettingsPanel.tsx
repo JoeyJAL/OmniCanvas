@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, Check, X, Shield, Key, Eye, EyeOff, AlertCircle, Save, ExternalLink } from 'lucide-react'
+import { Settings, Check, X, Shield, Key, Eye, EyeOff, AlertCircle, Save, ExternalLink, GitBranch } from 'lucide-react'
 import { useAPIKeyStore, APIKeys } from '@store/apiKeyStore'
 import { useLanguageStore } from '@store/languageStore'
 import { getTranslation } from '@translations/index'
 import SecurityStatusPanel from './SecurityStatusPanel'
+import VersionHistoryPanel from './VersionHistoryPanel'
 
 interface SettingsPanelProps {
   isOpen: boolean
@@ -17,7 +18,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
   const [localKeys, setLocalKeys] = useState<APIKeys>({})
   const [showKeys, setShowKeys] = useState<Record<keyof APIKeys, boolean>>({})
   const [validationStatus, setValidationStatus] = useState<Record<keyof APIKeys, 'valid' | 'invalid' | 'unchecked'>>({})
-  const [activeTab, setActiveTab] = useState<'apikeys' | 'backend' | 'security'>('apikeys')
+  const [activeTab, setActiveTab] = useState<'apikeys' | 'backend' | 'security' | 'version'>('apikeys')
 
   // Load saved API keys
   useEffect(() => {
@@ -115,6 +116,17 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
               >
                 <Shield className="w-4 h-4 inline mr-2" />
                 安全狀態
+              </button>
+              <button
+                onClick={() => setActiveTab('version')}
+                className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                  activeTab === 'version'
+                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <GitBranch className="w-4 h-4 inline mr-2" />
+                版本歷史
               </button>
             </div>
 
@@ -245,6 +257,11 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, setIsOpen 
               {/* Security Tab */}
               {activeTab === 'security' && (
                 <SecurityStatusPanel />
+              )}
+
+              {/* Version History Tab */}
+              {activeTab === 'version' && (
+                <VersionHistoryPanel />
               )}
 
               <div className="flex justify-end space-x-2 pt-4">

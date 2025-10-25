@@ -408,6 +408,9 @@ export const Canvas: React.FC = () => {
       } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
         // Reset zoom and pan
         resetView()
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        // Paste image from clipboard
+        handlePasteFromClipboard()
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         // Check if the focus is on an input field, textarea, or contenteditable element
         const activeElement = document.activeElement
@@ -442,6 +445,65 @@ export const Canvas: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [canvas])
+
+  // Handle paste from clipboard
+  const handlePasteFromClipboard = async () => {
+    if (!canvas) return
+
+    // Check if focus is on an input field - don't paste images if so
+    const activeElement = document.activeElement
+    const isInputField = activeElement && (
+      activeElement.tagName === 'INPUT' ||
+      activeElement.tagName === 'TEXTAREA' ||
+      activeElement.getAttribute('contenteditable') === 'true'
+    )
+
+    if (isInputField) {
+      return // Let normal paste behavior work for text inputs
+    }
+
+    try {
+      const clipboardItems = await navigator.clipboard.read()
+
+      for (const clipboardItem of clipboardItems) {
+        // Look for image types
+        for (const type of clipboardItem.types) {
+          if (type.startsWith('image/')) {
+            const blob = await clipboardItem.getType(type)
+
+            // Convert blob to data URL
+            const reader = new FileReader()
+            reader.onload = async (event) => {
+              if (event.target?.result && typeof event.target.result === 'string') {
+                try {
+                  await importImage(event.target.result)
+                  console.log('✅ Image pasted from clipboard successfully')
+                } catch (error) {
+                  console.error('❌ Failed to import pasted image:', error)
+                  alert('無法貼上圖片，請確保圖片格式正確')
+                }
+              }
+            }
+            reader.readAsDataURL(blob)
+            return // Only handle the first image found
+          }
+        }
+      }
+
+      // If no image found in clipboard
+      console.log('ℹ️ No image found in clipboard')
+      // Don't show alert for better UX - just silently do nothing
+
+    } catch (error) {
+      console.error('❌ Failed to read clipboard:', error)
+      // Check if it's a permission error
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        alert('需要剪貼簿權限才能貼上圖片，請允許瀏覽器訪問剪貼簿')
+      } else {
+        console.log('ℹ️ Clipboard access failed (might be normal on some browsers)')
+      }
+    }
+  }
 
   // Context menu handlers
   const handleMergeImages = async () => {
