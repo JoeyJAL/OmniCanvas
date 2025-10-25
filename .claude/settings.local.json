@@ -58,7 +58,10 @@
       "Bash(for i in {1..5})",
       "Bash(do curl -s http://localhost:3004/api/health)",
       "Bash(done)",
-      "Bash(open https://omnicanvas-frontend-n5jel7yox-joeyjals-projects.vercel.app)"
+      "Bash(open https://omnicanvas-frontend-n5jel7yox-joeyjals-projects.vercel.app)",
+      "Bash(open https://omnicanvas-frontend-18u0qvogz-joeyjals-projects.vercel.app)",
+      "Bash(open https://omnicanvas-frontend-ax4lk8l7c-joeyjals-projects.vercel.app)",
+      "Bash(open https://omnicanvas-frontend-9gjwwcdvf-joeyjals-projects.vercel.app)"
     ],
     "deny": [],
     "ask": []

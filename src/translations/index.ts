@@ -96,6 +96,14 @@ export interface Translations {
             title: string
             description: string
           }
+          backgroundRemoval: {
+            title: string
+            description: string
+          }
+          qualityEnhancement: {
+            title: string
+            description: string
+          }
         }
         applied: string
       }
@@ -563,6 +571,14 @@ const en: Translations = {
           ingredients: {
             title: 'Food Breakdown',
             description: 'Recipe guide'
+          },
+          backgroundRemoval: {
+            title: 'Background Removal',
+            description: 'Remove background'
+          },
+          qualityEnhancement: {
+            title: 'Quality Enhancement',
+            description: 'Improve clarity'
           }
         },
         applied: '✨ Template applied! You can generate directly or modify the prompt above'
@@ -996,6 +1012,14 @@ const zhTW: Translations = {
           ingredients: {
             title: '食材分解',
             description: '料理教學'
+          },
+          backgroundRemoval: {
+            title: '背景移除',
+            description: '去除背景'
+          },
+          qualityEnhancement: {
+            title: '品質增強',
+            description: '提升清晰度'
           }
         },
         applied: '✨ 模板已套用！可以直接生成或在上方輸入框中修改提示詞'

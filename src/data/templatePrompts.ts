@@ -246,6 +246,46 @@ export const templatePrompts: TemplatePrompt[] = [
       ja: '料理のすべての材料と調味料を表示',
       fr: 'Affichez tous les ingrédients et assaisonnements pour un plat'
     }
+  },
+
+  // Enhancement Templates
+  {
+    id: 'backgroundRemoval',
+    category: 'professional',
+    icon: '✂️',
+    withSelection: {
+      en: 'REMOVE ALL BACKGROUND completely, make background fully transparent, isolate main subject only, cutout style, PNG with alpha channel, white background becomes transparent, solid subject with clean edges, preserve subject 100% unchanged',
+      'zh-TW': '完全移除所有背景，讓背景完全透明，只保留主要物體，去背風格，PNG透明通道，白色背景變透明，保持主體邊緣乾淨，100%保持主體不變',
+      es: 'ELIMINAR COMPLETAMENTE TODO EL FONDO, hacer el fondo completamente transparente, aislar solo el sujeto principal, estilo de recorte, PNG con canal alfa, el fondo blanco se vuelve transparente, sujeto sólido con bordes limpios, preservar el sujeto 100% sin cambios',
+      ja: 'すべての背景を完全に削除し、背景を完全に透明にし、メインの被写体のみを分離し、カットアウトスタイル、アルファチャンネル付きPNG、白い背景を透明にし、きれいなエッジで被写体を確実にし、被写体を100%変更しない',
+      fr: 'SUPPRIMER COMPLÈTEMENT TOUT L\'ARRIÈRE-PLAN, rendre l\'arrière-plan complètement transparent, isoler uniquement le sujet principal, style de découpe, PNG avec canal alpha, l\'arrière-plan blanc devient transparent, sujet solide avec des bords nets, préserver le sujet 100% inchangé'
+    },
+    withoutSelection: {
+      en: 'Remove background from object, transparent PNG output',
+      'zh-TW': '移除物體背景，輸出透明PNG',
+      es: 'Eliminar fondo del objeto, salida PNG transparente',
+      ja: 'オブジェクトから背景を削除、透明PNG出力',
+      fr: 'Supprimer l\'arrière-plan de l\'objet, sortie PNG transparente'
+    }
+  },
+  {
+    id: 'qualityEnhancement',
+    category: 'professional',
+    icon: '✨',
+    withSelection: {
+      en: 'preserve original appearance, enhance clarity, reduce noise, maintain exact same composition and features, improve sharpness and detail while keeping the original look identical',
+      'zh-TW': '保持原始外觀，增強清晰度，減少雜訊，維持完全相同的構圖和特徵，提升銳利度和細節同時保持原始外觀一致',
+      es: 'preservar la apariencia original, mejorar la claridad, reducir el ruido, mantener exactamente la misma composición y características, mejorar la nitidez y los detalles manteniendo el aspecto original idéntico',
+      ja: '元の外観を保持し、明瞭度を向上させ、ノイズを減らし、まったく同じ構成と特徴を維持し、元の外観を同一に保ちながらシャープネスと詳細を改善します',
+      fr: 'préserver l\'apparence originale, améliorer la clarté, réduire le bruit, maintenir exactement la même composition et les mêmes caractéristiques, améliorer la netteté et les détails tout en gardant l\'aspect original identique'
+    },
+    withoutSelection: {
+      en: 'Enhance image quality and clarity, professional photo enhancement',
+      'zh-TW': '增強圖像品質和清晰度，專業照片增強',
+      es: 'Mejorar la calidad y claridad de la imagen, mejora profesional de fotos',
+      ja: '画像の品質と明瞭度を向上させ、プロの写真強化',
+      fr: 'Améliorer la qualité et la clarté de l\'image, amélioration professionnelle des photos'
+    }
   }
 ]
 
