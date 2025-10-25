@@ -98,20 +98,6 @@ function App() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-2">
-          <LanguageSwitcher />
-          <button
-            onClick={() => {
-              setIsSettingsOpen(true)
-              analyticsService.trackFeatureUsage('settings_opened', {
-                source: 'desktop_header',
-                timestamp: Date.now()
-              })
-            }}
-            className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            <span>{t.common.settings}</span>
-          </button>
           <button
             onClick={() => {
               setIsServiceGuideOpen(true)
@@ -126,6 +112,20 @@ function App() {
             <span>{t.serviceGuide.title}</span>
           </button>
           <button
+            onClick={() => {
+              setIsSettingsOpen(true)
+              analyticsService.trackFeatureUsage('settings_opened', {
+                source: 'desktop_header',
+                timestamp: Date.now()
+              })
+            }}
+            className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            <span>{t.common.settings}</span>
+          </button>
+          <LanguageSwitcher />
+          <button
             onClick={() => setIsPanelOpen(!isPanelOpen)}
             className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
             title={isPanelOpen ? "Hide AI Assistant" : "Show AI Assistant"}
@@ -137,7 +137,6 @@ function App() {
 
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center space-x-2">
-          <LanguageSwitcher />
           <button
             onClick={() => setIsPanelOpen(!isPanelOpen)}
             className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors"
@@ -151,6 +150,7 @@ function App() {
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
+          <LanguageSwitcher />
         </div>
 
         {/* Mobile Menu Dropdown */}
