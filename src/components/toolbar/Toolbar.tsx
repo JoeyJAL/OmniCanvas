@@ -8,9 +8,7 @@ import {
   Redo,
   Trash2,
   Image,
-  MousePointer,
-  Brush,
-  Eraser
+  MousePointer
 } from 'lucide-react'
 
 const tools: Array<{
@@ -24,18 +22,6 @@ const tools: Array<{
     icon: MousePointer,
     label: '選取工具',
     shortcut: 'V'
-  },
-  {
-    id: 'brush',
-    icon: Brush,
-    label: '筆刷工具',
-    shortcut: 'B'
-  },
-  {
-    id: 'eraser',
-    icon: Eraser,
-    label: '橡皮擦',
-    shortcut: 'E'
   }
 ]
 
