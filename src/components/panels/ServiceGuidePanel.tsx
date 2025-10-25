@@ -3,7 +3,6 @@ import { useTranslation } from '@/hooks/useTranslation'
 import {
   BookOpen,
   Sparkles,
-  Zap,
   Palette,
   Mouse,
   Settings,
@@ -47,10 +46,6 @@ export const ServiceGuidePanel: React.FC<ServiceGuidePanelProps> = ({
         onOpenAIPanel?.()
         onClose?.()
         break
-      case 'open_enhancement':
-        onOpenAIPanel?.() // 增強功能也是在 AI 面板中
-        onClose?.()
-        break
       default:
         console.log('Unknown action:', action)
     }
@@ -90,6 +85,16 @@ export const ServiceGuidePanel: React.FC<ServiceGuidePanelProps> = ({
           ]
         },
         {
+          title: '專業模板功能',
+          description: '使用內建的專業模板快速實現常見需求，包括背景移除和品質增強等功能',
+          features: [
+            '✂️ 背景移除模板 - 一鍵去除圖片背景',
+            '✨ 品質增強模板 - 提升圖片清晰度和細節',
+            '📷 證件照模板 - 專業證件照製作',
+            '📦 產品攝影模板 - 電商產品圖片優化'
+          ]
+        },
+        {
           title: t.serviceGuide.aiGeneration.imageToImage.title,
           description: t.serviceGuide.aiGeneration.imageToImage.description,
           steps: [
@@ -100,32 +105,7 @@ export const ServiceGuidePanel: React.FC<ServiceGuidePanelProps> = ({
           ]
         }
       ]
-    },
-    {
-      id: 'enhancement',
-      icon: Zap,
-      title: t.serviceGuide.enhancement.title,
-      content: [
-        {
-          title: t.serviceGuide.enhancement.aiUpscale.title,
-          description: t.serviceGuide.enhancement.aiUpscale.description,
-          features: [
-            t.serviceGuide.enhancement.aiUpscale.features.resolution,
-            t.serviceGuide.enhancement.aiUpscale.features.quality,
-            t.serviceGuide.enhancement.aiUpscale.features.details
-          ]
-        },
-        {
-          title: t.serviceGuide.enhancement.backgroundRemoval.title,
-          description: t.serviceGuide.enhancement.backgroundRemoval.description,
-          features: [
-            t.serviceGuide.enhancement.backgroundRemoval.features.automatic,
-            t.serviceGuide.enhancement.backgroundRemoval.features.transparent,
-            t.serviceGuide.enhancement.backgroundRemoval.features.precise
-          ]
-        }
-      ]
-    },
+},
     {
       id: 'canvas',
       icon: Palette,
@@ -217,13 +197,7 @@ export const ServiceGuidePanel: React.FC<ServiceGuidePanelProps> = ({
       title: t.serviceGuide.quickActions.generate,
       description: t.serviceGuide.quickActions.generateDesc,
       action: 'open_ai_panel'
-    },
-    {
-      icon: Zap,
-      title: t.serviceGuide.quickActions.enhance,
-      description: t.serviceGuide.quickActions.enhanceDesc,
-      action: 'open_enhancement'
-    }
+}
   ]
 
   return (

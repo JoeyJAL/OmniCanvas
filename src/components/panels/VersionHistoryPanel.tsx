@@ -13,7 +13,7 @@ interface VersionRelease {
 const versionHistory: VersionRelease[] = [
   {
     version: 'v1.0.0',
-    date: '2024-10-25',
+    date: '2025-10-25',
     type: 'major',
     features: [
       '🎨 無界創意畫布 - AI 驅動的線上創意平台',
