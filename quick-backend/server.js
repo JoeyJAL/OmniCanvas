@@ -1515,6 +1515,119 @@ app.post('/api/ai/nano-banana-image-fusion', async (req, res) => {
   }
 });
 
+// ===== SHARE API ENDPOINTS =====
+
+// In-memory storage for shares (in production, use a database)
+const sharedCanvases = new Map();
+
+// Create a new share
+app.post('/api/shares', (req, res) => {
+  try {
+    const { canvasData, thumbnail, creatorName = 'Anonymous', createdAt } = req.body;
+
+    if (!canvasData || !thumbnail) {
+      return res.status(400).json({ error: 'Canvas data and thumbnail are required' });
+    }
+
+    const shareId = `share_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const share = {
+      id: shareId,
+      canvasData,
+      thumbnail,
+      creatorName,
+      createdAt: createdAt || Date.now(),
+      viewCount: 0,
+      expiresAt: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+    };
+
+    // Store in memory
+    sharedCanvases.set(shareId, share);
+
+    console.log('✅ Share created:', shareId);
+    console.log('📊 Total shares:', sharedCanvases.size);
+
+    res.json({
+      id: shareId,
+      shareId: shareId,
+      shareUrl: `${process.env.FRONTEND_URL || 'http://localhost:3005'}/share/${shareId}`,
+      expiresAt: share.expiresAt
+    });
+  } catch (error) {
+    console.error('❌ Failed to create share:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a shared canvas
+app.get('/api/shares/:shareId', (req, res) => {
+  try {
+    const { shareId } = req.params;
+    const share = sharedCanvases.get(shareId);
+
+    if (!share) {
+      return res.status(404).json({ error: 'Share not found' });
+    }
+
+    // Check if share has expired
+    if (share.expiresAt && Date.now() > share.expiresAt) {
+      sharedCanvases.delete(shareId);
+      return res.status(404).json({ error: 'Share has expired' });
+    }
+
+    // Increment view count
+    share.viewCount++;
+    sharedCanvases.set(shareId, share);
+
+    console.log('✅ Share retrieved:', shareId, 'Views:', share.viewCount);
+
+    res.json(share);
+  } catch (error) {
+    console.error('❌ Failed to get share:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a share
+app.delete('/api/shares/:shareId', (req, res) => {
+  try {
+    const { shareId } = req.params;
+    const deleted = sharedCanvases.delete(shareId);
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'Share not found' });
+    }
+
+    console.log('✅ Share deleted:', shareId);
+    console.log('📊 Total shares:', sharedCanvases.size);
+
+    res.json({ message: 'Share deleted successfully', shareId });
+  } catch (error) {
+    console.error('❌ Failed to delete share:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get share statistics (optional)
+app.get('/api/shares-stats', (req, res) => {
+  try {
+    const stats = {
+      totalShares: sharedCanvases.size,
+      totalViews: Array.from(sharedCanvases.values()).reduce((sum, share) => sum + share.viewCount, 0),
+      shares: Array.from(sharedCanvases.entries()).map(([id, share]) => ({
+        id,
+        creatorName: share.creatorName,
+        viewCount: share.viewCount,
+        createdAt: share.createdAt,
+        expiresAt: share.expiresAt
+      }))
+    };
+
+    res.json(stats);
+  } catch (error) {
+    console.error('❌ Failed to get share statistics:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Error handling
 app.use((err, req, res, next) => {

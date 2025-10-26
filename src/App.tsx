@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, PanelRightClose, PanelRightOpen, BookOpen, Menu, X } from 'lucide-react'
+import { Settings, PanelRightClose, PanelRightOpen, BookOpen, Menu, X, Heart, Share2 } from 'lucide-react'
 import { Canvas } from '@components/canvas/Canvas'
 import { Toolbar } from '@components/toolbar/Toolbar'
 import { AIPanel } from '@components/panels/AIPanel'
 import { SettingsPanel } from '@components/panels/SettingsPanel'
 import { ServiceGuidePanel } from '@components/panels/ServiceGuidePanel'
+import { FavoritesPanel } from '@components/panels/FavoritesPanel'
+import { SharePanel } from '@components/panels/SharePanel'
 import { LanguageSwitcher } from '@components/LanguageSwitcher'
 import { useTranslation } from '@hooks/useTranslation'
 import { useLanguageStore } from '@store/languageStore'
@@ -15,6 +17,8 @@ function App() {
   const { initializeLanguage } = useLanguageStore()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isServiceGuideOpen, setIsServiceGuideOpen] = useState(false)
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false)
+  const [isShareOpen, setIsShareOpen] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -100,6 +104,34 @@ function App() {
         <div className="hidden md:flex items-center space-x-2">
           <button
             onClick={() => {
+              setIsShareOpen(true)
+              analyticsService.trackFeatureUsage('share_opened', {
+                source: 'desktop_header',
+                timestamp: Date.now()
+              })
+            }}
+            className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg transition-colors"
+            title="Share Canvas"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>Share</span>
+          </button>
+          <button
+            onClick={() => {
+              setIsFavoritesOpen(true)
+              analyticsService.trackFeatureUsage('favorites_opened', {
+                source: 'desktop_header',
+                timestamp: Date.now()
+              })
+            }}
+            className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+            title="Open Favorites"
+          >
+            <Heart className="w-4 h-4" />
+            <span>Favorites</span>
+          </button>
+          <button
+            onClick={() => {
               setIsServiceGuideOpen(true)
               analyticsService.trackFeatureUsage('service_guide_opened', {
                 source: 'desktop_header',
@@ -159,6 +191,26 @@ function App() {
             <div className="p-4 space-y-3">
               <button
                 onClick={() => {
+                  setIsShareOpen(true)
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm bg-cyan-100 hover:bg-cyan-200 text-cyan-700 rounded-lg transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Share</span>
+              </button>
+              <button
+                onClick={() => {
+                  setIsFavoritesOpen(true)
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full flex items-center space-x-3 px-3 py-2 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+              >
+                <Heart className="w-4 h-4" />
+                <span>Favorites</span>
+              </button>
+              <button
+                onClick={() => {
                   setIsSettingsOpen(true)
                   setIsMobileMenuOpen(false)
                 }}
@@ -208,6 +260,18 @@ function App() {
       <SettingsPanel
         isOpen={isSettingsOpen}
         setIsOpen={setIsSettingsOpen}
+      />
+
+      {/* Favorites Panel */}
+      <FavoritesPanel
+        isOpen={isFavoritesOpen}
+        onClose={() => setIsFavoritesOpen(false)}
+      />
+
+      {/* Share Panel */}
+      <SharePanel
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
       />
 
       {/* Service Guide Panel */}
