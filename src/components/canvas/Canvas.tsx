@@ -5,6 +5,7 @@ import { useImageStore } from '@store/imageStore'
 import { aiService } from '@services/aiService'
 import { NewContextMenu } from './NewContextMenu'
 import { PromptInputModal } from './PromptInputModal'
+import { CanvasLoadingIndicator } from '@components/ui/CanvasLoadingIndicator'
 import type { CanvasConfig } from '@/types/canvas'
 
 const defaultConfig: CanvasConfig = {
@@ -32,6 +33,10 @@ export const Canvas: React.FC = () => {
     visible: false,
     selectedObjects: [] as fabric.Object[]
   })
+
+  // Loading indicator state
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [loadingStage, setLoadingStage] = useState<'analyzing' | 'composing' | 'rendering' | 'finalizing'>('analyzing')
 
   // Canvas position tracking
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
@@ -950,84 +955,63 @@ export const Canvas: React.FC = () => {
   // 🧠 Advanced AI Composition Handlers
   const handleIntelligentCompose = async () => {
     if (contextMenu.selectedObjects.length < 2) return
-    
-    let progressTimeout: number
-    let currentProgressImg: any = null
-    
+
     try {
       const imageUrls = contextMenu.selectedObjects
         .filter(obj => obj.type === 'image')
         .map(obj => (obj as any)._originalElement?.src || (obj as any).src)
         .filter(Boolean)
-      
+
       if (imageUrls.length < 2) {
         alert('Please select at least 2 images for AI composition')
         return
       }
 
       setContextMenu(prev => ({ ...prev, visible: false }))
-      
-      // Create initial progress image on canvas
-      currentProgressImg = await createProgressImage(`Analyzing ${imageUrls.length} images`, 0.1)
-      
-      // Set up a backup timeout
-      progressTimeout = setTimeout(() => {
-        console.warn('⚠️ Progress timeout - removing progress image')
-        removeProgressImage()
-        alert('AI processing took too long - please try again')
-      }, 30000)
-      
+
+      // Show loading indicator
+      setIsProcessing(true)
+      setLoadingStage('analyzing')
+
       // Update progress stages
-      setTimeout(async () => {
-        if (currentProgressImg) {
-          currentProgressImg = await updateProgressImage(currentProgressImg, 'AI is composing your masterpiece', 0.4)
-        }
+      setTimeout(() => {
+        setLoadingStage('composing')
       }, 1000)
-      
-      setTimeout(async () => {
-        if (currentProgressImg) {
-          currentProgressImg = await updateProgressImage(currentProgressImg, 'Rendering high-quality result', 0.7)
-        }
+
+      setTimeout(() => {
+        setLoadingStage('rendering')
       }, 2000)
-      
+
       // Start AI processing
       const result = await aiService.mergeImages(imageUrls, 'Intelligent auto-compose - merge the key subjects and elements naturally into a cohesive, professional composition')
-      
-      // Clear timeout
-      clearTimeout(progressTimeout)
-      
-      // Final progress update
-      if (currentProgressImg) {
-        currentProgressImg = await updateProgressImage(currentProgressImg, 'Adding final touches', 0.9)
-      }
-      
-      // Brief delay then replace progress with result
+
+      // Final stage
+      setLoadingStage('finalizing')
+
+      // Brief delay then import result
       setTimeout(async () => {
         try {
-          // Remove progress image
-          removeProgressImage()
-          
           // Add the generated image
           await importImage(result)
           console.log(`✅ AI Smart Composition completed! Merged ${imageUrls.length} images intelligently.`)
         } catch (error) {
           console.error('Failed to import generated image:', error)
-          removeProgressImage()
           alert('Image generation completed but failed to display on canvas: ' + error)
+        } finally {
+          setIsProcessing(false)
         }
       }, 500)
-      
+
     } catch (error) {
       console.error('AI Composition failed:', error)
-      if (progressTimeout) clearTimeout(progressTimeout)
-      removeProgressImage()
+      setIsProcessing(false)
       alert('AI Composition failed: ' + error)
     }
   }
 
   const handleWearAccessory = async () => {
     if (contextMenu.selectedObjects.length < 2) return
-    
+
     try {
       const imageUrls = contextMenu.selectedObjects
         .filter(obj => obj.type === 'image')
@@ -1037,18 +1021,44 @@ export const Canvas: React.FC = () => {
       if (imageUrls.length < 2) return
 
       setContextMenu(prev => ({ ...prev, visible: false }))
+
+      // Show loading indicator
+      setIsProcessing(true)
+      setLoadingStage('analyzing')
+
+      setTimeout(() => {
+        setLoadingStage('composing')
+      }, 1000)
+
+      setTimeout(() => {
+        setLoadingStage('rendering')
+      }, 2000)
+
       const result = await aiService.mergeImages(imageUrls, 'Make the person wear or use the accessories/items naturally. Ensure realistic lighting, shadows, and proportions.')
-      await importImage(result)
-      alert('🥽 Accessory composition completed! Items naturally integrated.')
+
+      setLoadingStage('finalizing')
+
+      setTimeout(async () => {
+        try {
+          await importImage(result)
+          alert('🥽 Accessory composition completed! Items naturally integrated.')
+        } catch (error) {
+          console.error('Failed to import accessory composition:', error)
+          alert('Accessory composition completed but failed to display: ' + error)
+        } finally {
+          setIsProcessing(false)
+        }
+      }, 500)
     } catch (error) {
       console.error('Accessory composition failed:', error)
+      setIsProcessing(false)
       alert('Accessory composition failed: ' + error)
     }
   }
 
   const handleSceneCompose = async () => {
     if (contextMenu.selectedObjects.length < 2) return
-    
+
     try {
       const imageUrls = contextMenu.selectedObjects
         .filter(obj => obj.type === 'image')
@@ -1058,18 +1068,44 @@ export const Canvas: React.FC = () => {
       if (imageUrls.length < 2) return
 
       setContextMenu(prev => ({ ...prev, visible: false }))
+
+      // Show loading indicator
+      setIsProcessing(true)
+      setLoadingStage('analyzing')
+
+      setTimeout(() => {
+        setLoadingStage('composing')
+      }, 1000)
+
+      setTimeout(() => {
+        setLoadingStage('rendering')
+      }, 2000)
+
       const result = await aiService.mergeImages(imageUrls, 'Create a realistic scene by placing subjects into backgrounds naturally. Match lighting, shadows, and perspective perfectly.')
-      await importImage(result)
-      alert('🏞️ Scene integration completed! Objects naturally placed in scene.')
+
+      setLoadingStage('finalizing')
+
+      setTimeout(async () => {
+        try {
+          await importImage(result)
+          alert('🏞️ Scene integration completed! Objects naturally placed in scene.')
+        } catch (error) {
+          console.error('Failed to import scene composition:', error)
+          alert('Scene composition completed but failed to display: ' + error)
+        } finally {
+          setIsProcessing(false)
+        }
+      }, 500)
     } catch (error) {
       console.error('Scene composition failed:', error)
+      setIsProcessing(false)
       alert('Scene composition failed: ' + error)
     }
   }
 
   const handleCreativeBlend = async () => {
     if (contextMenu.selectedObjects.length < 2) return
-    
+
     try {
       const imageUrls = contextMenu.selectedObjects
         .filter(obj => obj.type === 'image')
@@ -1079,11 +1115,37 @@ export const Canvas: React.FC = () => {
       if (imageUrls.length < 2) return
 
       setContextMenu(prev => ({ ...prev, visible: false }))
+
+      // Show loading indicator
+      setIsProcessing(true)
+      setLoadingStage('analyzing')
+
+      setTimeout(() => {
+        setLoadingStage('composing')
+      }, 1000)
+
+      setTimeout(() => {
+        setLoadingStage('rendering')
+      }, 2000)
+
       const result = await aiService.mergeImages(imageUrls, 'Create an artistic, creative blend that combines the best elements from all images in an innovative and visually stunning way.')
-      await importImage(result)
-      alert('✨ Creative blend completed! Innovative artistic fusion created.')
+
+      setLoadingStage('finalizing')
+
+      setTimeout(async () => {
+        try {
+          await importImage(result)
+          alert('✨ Creative blend completed! Innovative artistic fusion created.')
+        } catch (error) {
+          console.error('Failed to import creative blend:', error)
+          alert('Creative blend completed but failed to display: ' + error)
+        } finally {
+          setIsProcessing(false)
+        }
+      }, 500)
     } catch (error) {
       console.error('Creative blend failed:', error)
+      setIsProcessing(false)
       alert('Creative blend failed: ' + error)
     }
   }
@@ -1422,6 +1484,12 @@ export const Canvas: React.FC = () => {
         selectedCount={voicePromptModal.selectedObjects.length}
         onClose={handleCloseVoicePrompt}
         onSubmit={handleVoicePromptSubmit}
+      />
+
+      {/* Canvas Loading Indicator */}
+      <CanvasLoadingIndicator
+        isVisible={isProcessing}
+        stage={loadingStage}
       />
     </div>
   )
