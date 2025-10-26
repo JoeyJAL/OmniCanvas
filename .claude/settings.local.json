@@ -61,7 +61,9 @@
       "Bash(open https://omnicanvas-frontend-n5jel7yox-joeyjals-projects.vercel.app)",
       "Bash(open https://omnicanvas-frontend-18u0qvogz-joeyjals-projects.vercel.app)",
       "Bash(open https://omnicanvas-frontend-ax4lk8l7c-joeyjals-projects.vercel.app)",
-      "Bash(open https://omnicanvas-frontend-9gjwwcdvf-joeyjals-projects.vercel.app)"
+      "Bash(open https://omnicanvas-frontend-9gjwwcdvf-joeyjals-projects.vercel.app)",
+      "Bash(find:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

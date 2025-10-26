@@ -614,15 +614,16 @@ export const Canvas: React.FC = () => {
 
   const handleGenerateSimilar = async () => {
     if (contextMenu.selectedObjects.length === 0) return
-    
+
     console.log('🌟 Generating similar images from selected objects:', contextMenu.selectedObjects.length)
-    
+
     const prompt = 'Generate a very similar object or item with the same category, style, and visual characteristics. Keep the same type of object, similar colors, materials, and overall appearance. Maintain the same scene context and background style.'
 
     try {
-      // Create progress indicator
-      const progressImg = createProgressImage('🌟 Analyzing selected objects and generating similar content...', 1)
-      
+      // Show loading indicator
+      setIsProcessing(true)
+      setLoadingStage('analyzing')
+
       // Extract images from selected objects
       const imageUrls = []
       for (const obj of contextMenu.selectedObjects) {
@@ -647,12 +648,21 @@ export const Canvas: React.FC = () => {
       }
 
       if (imageUrls.length === 0) {
-        removeProgressImage()
+        setIsProcessing(false)
         alert('Please select at least one image to generate similar content')
         return
       }
 
       console.log('🎯 Using images for similarity generation:', imageUrls.length)
+
+      // Update progress stages
+      setTimeout(() => {
+        setLoadingStage('composing')
+      }, 1000)
+
+      setTimeout(() => {
+        setLoadingStage('rendering')
+      }, 2000)
 
       // Generate similar image using the backend API
       const result = await aiService.generateSimilar({
@@ -661,20 +671,29 @@ export const Canvas: React.FC = () => {
         aspectRatio: '1:1'
       })
 
-      // Remove progress and import generated image
-      removeProgressImage()
-      
-      if (result) {
-        await importImage(result)
-        console.log('✅ Similar image generated and added to canvas!')
-      } else {
-        console.error('❌ No image generated from similarity API')
-        alert('Failed to generate similar image - no result returned')
-      }
-      
+      setLoadingStage('finalizing')
+
+      // Import generated image
+      setTimeout(async () => {
+        try {
+          if (result) {
+            await importImage(result)
+            console.log('✅ Similar image generated and added to canvas!')
+          } else {
+            console.error('❌ No image generated from similarity API')
+            alert('Failed to generate similar image - no result returned')
+          }
+        } catch (error) {
+          console.error('Failed to import similar image:', error)
+          alert('Image generation succeeded but failed to display: ' + error)
+        } finally {
+          setIsProcessing(false)
+        }
+      }, 500)
+
     } catch (error) {
       console.error('❌ Generate similar error:', error)
-      removeProgressImage()
+      setIsProcessing(false)
       alert('Failed to generate similar image: ' + error)
     }
   }
@@ -1181,17 +1200,13 @@ export const Canvas: React.FC = () => {
   const handleVoicePromptSubmit = async (prompt: string, isVoice: boolean) => {
     if (!prompt.trim() || voicePromptModal.selectedObjects.length === 0) return
 
-    let progressImg: any = null
-
     try {
       console.log('🎤 Processing voice/text prompt:', prompt)
       console.log('🖼️ Selected objects:', voicePromptModal.selectedObjects.length)
 
-      // Create progress indicator
-      progressImg = await createProgressImage(
-        isVoice ? '🎤 Processing voice command...' : '📝 Processing text command...',
-        0.1
-      )
+      // Show loading indicator
+      setIsProcessing(true)
+      setLoadingStage('analyzing')
 
       // Extract image URLs from selected objects
       const imageUrls = voicePromptModal.selectedObjects
@@ -1234,15 +1249,15 @@ export const Canvas: React.FC = () => {
       console.log('🎤 提取的圖片URLs:', imageUrls)
 
       if (imageUrls.length === 0) {
-        removeProgressImage()
+        setIsProcessing(false)
         alert('請選擇至少一張圖片來執行語音指令')
         return
       }
 
-      // Update progress
-      if (progressImg) {
-        progressImg = await updateProgressImage(progressImg, 'AI 正在理解您的指令...', 0.4)
-      }
+      // Update progress to composing
+      setTimeout(() => {
+        setLoadingStage('composing')
+      }, 800)
 
       // Use imageToImage for single image with prompt, or mergeImages for multiple
       let result: string
@@ -1284,10 +1299,8 @@ export const Canvas: React.FC = () => {
         )
       }
 
-      // Update progress
-      if (progressImg) {
-        progressImg = await updateProgressImage(progressImg, '🎨 Finalizing your creation...', 0.9)
-      }
+      // Update progress to rendering
+      setLoadingStage('rendering')
 
       // Import the result - extract URL from object if needed
       const imageUrl = typeof result === 'string' ? result : result.url
@@ -1299,8 +1312,8 @@ export const Canvas: React.FC = () => {
 
       await importImage(imageUrl)
 
-      // Remove progress and show success
-      removeProgressImage()
+      // Update to finalizing stage
+      setLoadingStage('finalizing')
 
       console.log('✅ Voice/text command completed successfully!')
 
@@ -1308,8 +1321,9 @@ export const Canvas: React.FC = () => {
         ? `🎤 語音指令「${prompt}」執行完成！`
         : `📝 文字指令「${prompt}」執行完成！`
 
-      // Show brief success notification
+      // Show brief success notification and close loading
       setTimeout(() => {
+        setIsProcessing(false)
         alert(successMessage)
       }, 500)
 
@@ -1320,7 +1334,8 @@ export const Canvas: React.FC = () => {
         stack: error.stack,
         name: error.name
       })
-      removeProgressImage()
+
+      setIsProcessing(false)
 
       // More detailed error message
       let errorMessage = isVoice
